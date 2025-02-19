@@ -1,0 +1,26 @@
+{
+    "rules": {
+      ".read": "auth != null",  // Only authenticated users can read data
+      ".write": "auth != null",  // Only authenticated users can write data
+      
+      "users": {
+        "$uid": {
+          ".read": "$uid === auth.uid",  // Users can only read their own data
+          ".write": "$uid === auth.uid"  // Users can only write to their own data
+        }
+      },
+  
+      "products": {
+        ".read": "auth != null",  // Public read access, anyone can view products
+        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() === 'admin'"  // Only admins can write/update products
+      },
+  
+      "orders": {
+        "$orderId": {
+          ".read": "$orderId === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin'",  // User can read their own orders or admin can read all
+          ".write": "$orderId === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin'"  // User can write their own orders, or admin can write
+        }
+      }
+    }
+  }
+  

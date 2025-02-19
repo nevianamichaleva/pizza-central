@@ -1,0 +1,111 @@
+"use client"
+
+import { Button, Form, Input } from "antd";
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { registerUserWithAdditionalData } from '../../../lib/auth';
+
+const Register = () => {
+  const [form] = Form.useForm();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  const handleSubmit = async (values) => {
+    setError('');
+    let additionalData = {phone: values.phone, address: values.address};
+    try {
+      await registerUserWithAdditionalData(values.email, values.password, additionalData);
+      router.push('/');
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  return (
+    <section id="contact" className="contact section">
+      <div className="container" data-aos="fade-up" data-aos-delay="100">
+        <div className="container section-title" data-aos="fade-up">
+          <div className="container section-title" data-aos="fade-up">
+            <h2>Моля, въведете вашите данни</h2>
+            <p>
+              <span></span> <span className="description-title">Регистрация</span>
+            </p>
+          </div>
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleSubmit}
+            className="php-email-form"
+            data-aos="fade-up"
+            data-aos-delay="600"
+          >
+            <div className="row gy-4">
+              <div className="col-md-6">
+                <Form.Item
+                  name="email"
+                  label="Email"
+                  rules={[
+                    { required: true, message: "Моля, въведете вашия Email" },
+                    { type: "email", message: "Моля, въведете валиден Email адрес" },
+                  ]}
+                >
+                  <Input placeholder="Email" className="form-control"/>
+                </Form.Item>
+              </div>
+              <div className="col-md-6">
+                <Form.Item
+                  name="password"
+                  label="Парола"
+                  rules={[
+                    { required: true, message: "Моля, въведете вашата Парола" },
+                    { min: 6, message: "Паролата трябва да бъде поне 6 символа" },
+                  ]}
+                >
+                  <Input.Password placeholder="Парола" style={{height: "42px"}} />
+                </Form.Item>
+              </div>
+              <div className="col-md-6">
+                <Form.Item
+                  name="phone"
+                  label="Телефон"
+                  rules={[
+                    { required: true, message: "Моля, въведете вашия Телефон" },
+                    { pattern: /^[0-9]+$/, message: "Телефонът трябва да съдържа само цифри" },
+                  ]}
+                >
+                  <Input placeholder="Телефон" className="form-control"/>
+                </Form.Item>
+              </div>
+              <div className="col-md-6">
+                <Form.Item
+                  name="address"
+                  label="Адрес"
+                  rules={[{ required: true, message: "Моля, въведете вашия Адрес" }]}
+                >
+                  <Input placeholder="Адрес" className="form-control"/>
+                </Form.Item>
+              </div>
+              <div className="col-md-12 text-center">
+                <Form.Item>
+                  <Button type="primary" htmlType="submit">
+                    Регистрация
+                  </Button>
+                </Form.Item>
+              </div>
+            </div>
+          </Form>
+          <div className="container section-title" style={{ marginTop: "15px" }} data-aos="fade-up">
+            <h2>Вече имате акаунт?</h2> <a href='/login'>Вход</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Register;
