@@ -49,50 +49,66 @@ const MenuSection = () => {
       if (!orderKey) {
         const newOrderRef = push(ordersRef);
         orderKey = newOrderRef.key;
-        localStorage.setItem('cartId', orderKey);
-
+        localStorage.setItem("cartId", orderKey);
+      
         const newOrder = {
           items: {
             [product.id]: {
               name: product.name,
               quantity: 1,
-              value: product.price,
-              image: product.image
+              value: parseFloat(product.price), 
+              image: product.image,
             },
           },
           order_date: new Date().toLocaleString(),
           status: "pending",
-          total: product.price * 1,
+          total: parseFloat(product.price), 
           user_id: user ? user.uid : null,
           user_email: user ? user.email : null,
           user_phone: userDetails ? userDetails.phone : null,
           user_address: userDetails ? userDetails.address : null,
-          id: orderKey
+          id: orderKey,
         };
-console.log(newOrder)
+      
         await set(newOrderRef, newOrder);
-        console.log("New order created successfully!", );
+        console.log("New order created successfully!");
       } else {
         const orderRef = ref(rtdb, `orders/${orderKey}/items/${product.id}`);
+        const orderTotalRef = ref(rtdb, `orders/${orderKey}/total`); 
+      
         const itemSnapshot = await get(orderRef);
-
+        const orderTotalSnapshot = await get(orderTotalRef);
+      
+        let newTotal = orderTotalSnapshot.exists() ? parseFloat(orderTotalSnapshot.val()) : 0;
+      
         if (itemSnapshot.exists()) {
           const existingItem = itemSnapshot.val();
+          const updatedQuantity = existingItem.quantity + 1;
+          const updatedValue = existingItem.value + product.price;
+      
           await update(orderRef, {
-            quantity: existingItem.quantity + 1,
-            value: existingItem.value + product.price * 1,
+            quantity: updatedQuantity,
+            value: updatedValue,
           });
+      
           console.log("Product quantity updated in existing order.");
+          newTotal = parseFloat(newTotal) + parseFloat(product.price); 
         } else {
           await set(orderRef, {
             name: product.name,
             quantity: 1,
-            value: product.price * 1,
-            image: product.image
+            value: product.price,
+            image: product.image,
           });
+      
           showAToast("success", "Продуктът е добавен в количката");
           console.log("New product added to existing order.");
+          newTotal = parseFloat(newTotal) + parseFloat(product.price); 
         }
+      
+        // ✅ Update order total at `orders/${orderKey}/total`
+        await update(ref(rtdb, `orders/${orderKey}`), { total: newTotal });
+        console.log("Order total updated:", newTotal);
       }
     } catch (error) {
       showAToast("error", "Грешка, обадете се 0895 516401 или 0893 315201");
@@ -104,8 +120,8 @@ console.log(newOrder)
   return (
     <section id="menu" className="menu section">
       <div className="container section-title" data-aos="fade-up">
-        <h2>Нашето меню</h2>
-        <p><span>Ресторант-пицария</span> <span className="description-title">Централ</span></p>
+        <h2>Ресторант-пицария Централ град Добрич</h2>
+        <p><span>Нашето</span> <span className="description-title">меню</span></p>
       </div>
 
       <div className="container">

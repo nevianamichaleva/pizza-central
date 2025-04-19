@@ -15,13 +15,11 @@ const WhyUsSection = () => {
           <div className="col-lg-4" data-aos="fade-up" data-aos-delay="100">
             <div className="why-box">
               <h3>Защо да изберете вкуса на „Централ“?</h3>
-              <p>
-                🍕 <strong>Истински вкус</strong> – приготвяме пиците си по италиански рецепти, но с най-добрите български продукти.
-                <p> 🥗 <strong>Апетитни предложения</strong> – свежи салати, хрупкави предястия и вкусни основни ястия за всеки вкус.</p>
-              </p>
+              <p> 🍕 <strong>Истински вкус</strong> – приготвяме пиците си по италиански рецепти, но с най-добрите български продукти. </p>
+              <p>  🥗 <strong>Апетитни предложения</strong> – свежи салати, хрупкави предястия и вкусни основни ястия за всеки вкус. </p>
               <div className="text-center">
                 <Link className="more-btn" href="/about-us" passHref>
-                    <span>Научете повече</span> <i className="bi bi-chevron-right"></i>
+                  <span>Научете повече</span> <i className="bi bi-chevron-right"></i>
                 </Link>
               </div>
             </div>

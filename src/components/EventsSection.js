@@ -1,4 +1,4 @@
-import { Autoplay, Pagination } from "swiper"; // Import the required modules
+import { Autoplay, Pagination } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "../../node_modules/swiper/swiper-bundle.min.css";
 
