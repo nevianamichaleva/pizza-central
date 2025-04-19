@@ -20,49 +20,54 @@ const Header = () => {
   const { categories } = useCategories();
   const { user, setUser, isAdmin } = useUser();
   const pathname = usePathname();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const items = [
     {
       key: 'profile',
       label: 'Профил',
-      onClick: () => router.push('/profile'), 
+      onClick: () => router.push('/profile'),
     },
     {
       key: 'cart',
       label: 'Количка',
-      onClick: () => router.push('/order'), 
+      onClick: () => router.push('/order'),
     },
     isAdmin ? {
       key: 'admin',
       label: 'Административен панел',
-      onClick: () => router.push('/admin'), 
+      onClick: () => router.push('/admin'),
     } : '',
     {
       key: 'logout',
       label: 'Изход',
-      onClick: logoutUser, 
+      onClick: logoutUser,
     },
   ];
 
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen); 
+    setDropdownOpen(!dropdownOpen);
   };
 
   const toggleDeepDropdown = () => {
-    setDeepDropdownOpen(!deepDropdownOpen); 
+    setDeepDropdownOpen(!deepDropdownOpen);
   };
 
   const handleMouseEnter = () => {
-    setDropdownOpen(true); 
+    setDropdownOpen(true);
   };
 
   const handleMouseLeave = () => {
-    setDropdownOpen(false); 
+    setDropdownOpen(false);
   };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser); 
+      setUser(currentUser);
     });
 
     return () => unsubscribe();
@@ -79,13 +84,16 @@ const Header = () => {
         </Link>
 
         {/* Navigation Menu */}
-        <nav id="navmenu" className="navmenu">
+        <nav id="navmenu" className={`navmenu ${isMenuOpen ? 'open' : ''}`}>
           <ul>
             <li>
               <Link href="/" className={pathname === '/' ? 'active' : ''}> Начало </Link>
             </li>
             <li>
               <Link href="/our-menu" className={pathname == '/our-menu' ? 'active' : ''}>Меню</Link>
+            </li>
+            <li>
+              <Link href="/launch-menu" className={pathname == '/launch-menu' ? 'active' : ''}>Обедно меню</Link>
             </li>
             {/* <li
               className="dropdown"
@@ -137,36 +145,60 @@ const Header = () => {
             <li>
               <Link href="/reservation" className={pathname == '/reservation' ? 'active' : ''}>Резервации</Link>
             </li>
-            <li>
-              <Link href="/new-dishes" className={pathname == '/new-dishes' ? 'active' : ''}>Нови предложения</Link>
-            </li>
+
             <li>
               <Link href="/for-home" className={pathname == '/for-home' ? 'active' : ''}>Поръчай за вкъщи</Link>
             </li>
-            <li>
-              <Link href="/events" className={pathname == '/events' ? 'active' : ''}>Събития</Link>
-            </li>
-            <li>
-              <Link href="/gallery" className={pathname == '/gallery' ? 'active' : ''}>Галерия</Link>
+            <li
+              className="dropdown"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              <a
+                href="/for-us"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (typeof window !== "undefined") {
+                    window.location.href = "/for-us";
+                  }
+                }}
+                className={pathname == '/for-us' ? 'active dropdown-toggle' : 'dropdown-toggle'}
+              >
+                <span>За нас</span>
+              </a>
+              <ul key="cat1">
+                <li>
+                  <Link href="/new-dishes" className={pathname == '/new-dishes' ? 'active' : ''}>Нови предложения</Link>
+                </li>
+                <li>
+                  <Link href="/events" className={pathname == '/events' ? 'active' : ''}>Събития</Link>
+                </li>
+                <li>
+                  <Link href="/gallery" className={pathname == '/gallery' ? 'active' : ''}>Галерия</Link>
+                </li>
+              </ul>
             </li>
             <li>
               <Link href="/contact" className={pathname == '/contact' ? 'active' : ''}>Контакт</Link>
             </li>
           </ul>
-          <i className="mobile-nav-toggle d-xl-none bi bi-list" />
+          <i
+            className={`mobile-nav-toggle d-xl-none bi ${isMenuOpen ? 'bi-x' : 'bi-list'}`}
+            onClick={toggleMenu}
+          />
         </nav>
         {user ? (
           <Dropdown menu={{ items }} trigger={['click']}>
-          <a onClick={(e) => e.preventDefault()} className="ant-dropdown-link">
-            <Space>
-              <UserOutlined style={{ fontSize: '18px' }} />
-              {user.name}
-              <CaretDownOutlined style={{ fontSize: '10px', color: 'black' }} />
-            </Space>
-          </a>
-        </Dropdown>
+            <a onClick={(e) => e.preventDefault()} className="ant-dropdown-link">
+              <Space>
+                <UserOutlined style={{ fontSize: '18px' }} />
+                {user.name}
+                <CaretDownOutlined style={{ fontSize: '10px', color: 'black' }} />
+              </Space>
+            </a>
+          </Dropdown>
         ) : (
-          <LoginOutlined onClick={() => router.push('/login')} style={{ fontSize: '18px' }} title="Вход"/>
+          <LoginOutlined onClick={() => router.push('/login')} style={{ fontSize: '18px' }} title="Вход" />
         )}
 
         {user && <CartIcon userId={user.uid} />}

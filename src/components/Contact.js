@@ -78,7 +78,7 @@ const Contact = () => {
                 <i className="icon bi bi-telephone flex-shrink-0"></i>
                 <div>
                   <h3>Телефон</h3>
-                  <p>+359 895 516 401</p>
+                  <p>+359 895 516 401 | +359 893 315 201</p>
                 </div>
               </div>
           </div>

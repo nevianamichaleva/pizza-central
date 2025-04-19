@@ -29,6 +29,7 @@ const AdministrationPage = () => {
                     <div className="d-flex justify-content-center align-items-center mb-4" style={{ position: "relative", flexDirection: "column", gap: "10px" }}>
                         <Link href='/admin/products' className="btn btn-primary w-auto text-center py-1 px-3">Управление на продукти</Link>
                         <Link href='/admin/menu' className="btn btn-primary w-auto text-center py-1 px-3">Управление на меню</Link>
+                        <Link href='/admin/launch-menu' className="btn btn-primary w-auto text-center py-1 px-3">Управление на обедно меню</Link>
                         <Link href='/admin/bookings' className="btn btn-primary w-auto text-center py-1 px-3">Управление на резервации</Link>
                         <Link href='/admin/orders' className="btn btn-primary w-auto text-center py-1 px-3">Управление на поръчки</Link>
                     </div>
