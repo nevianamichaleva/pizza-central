@@ -26,9 +26,6 @@ const AddProduct = () => {
   const [products, setProducts] = useState([]);
   const [parent, setParent] = useState('');
   const [catName, setCatName] = useState('');
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [uploadStatus, setUploadStatus] = useState("");
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [menuDrawerVisible, setMenuDrawerVisible] = useState(false);
   const columns = [
