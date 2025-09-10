@@ -1,6 +1,5 @@
 'use client';
 
-import { useCategories } from '@/context/CategoriesContext';
 import { useUser } from '@/context/UserContext';
 import { CaretDownOutlined, LoginOutlined, UserOutlined } from '@ant-design/icons';
 import { Dropdown, Space } from 'antd';
@@ -16,8 +15,7 @@ const Header = () => {
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [deepDropdownOpen, setDeepDropdownOpen] = useState(false);
-  const [cartItemCount, setCartItemCount] = useState(3);
-  const { categories } = useCategories();
+  const [isMobile, setIsMobile] = useState(false);
   const { user, setUser, isAdmin } = useUser();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -49,10 +47,6 @@ const Header = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
-
   const toggleDeepDropdown = () => {
     setDeepDropdownOpen(!deepDropdownOpen);
   };
@@ -66,12 +60,36 @@ const Header = () => {
   };
 
   useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    handleResize(); // run on mount
+    window.addEventListener('resize', handleResize); // update on resize
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
 
     return () => unsubscribe();
   }, [setUser]);
+
+  const MenuLink = ({ href, children, className }) => {
+    return (
+      <Link
+        href={href}
+        className={className}
+        style={{fontSize: '18px'}}
+        onClick={() => setIsMenuOpen(false)} // close menu on click
+      >
+        {children}
+      </Link>
+    );
+  };
 
   return (
     <header id="header" className="header d-flex align-items-center sticky-top">
@@ -87,14 +105,14 @@ const Header = () => {
         <nav id="navmenu" className={`navmenu ${isMenuOpen ? 'open' : ''}`}>
           <ul>
             <li>
-              <Link href="/" className={pathname === '/' ? 'active' : ''}> Начало </Link>
+              <MenuLink href="/" className={pathname === '/' ? 'active' : ''}> Начало </MenuLink>
             </li>
             <li>
-              <Link href="/our-menu" className={pathname == '/our-menu' ? 'active' : ''}>Меню</Link>
+              <MenuLink href="/our-menu" className={pathname == '/our-menu' ? 'active' : ''}>Меню</MenuLink>
             </li>
-            <li>
+            {/* <li>
               <Link href="/launch-menu" className={pathname == '/launch-menu' ? 'active' : ''}>Обедно меню</Link>
-            </li>
+            </li> */}
             {/* <li
               className="dropdown"
               onMouseEnter={handleMouseEnter}
@@ -143,11 +161,11 @@ const Header = () => {
               )}
             </li> */}
             <li>
-              <Link href="/reservation" className={pathname == '/reservation' ? 'active' : ''}>Резервации</Link>
+              <MenuLink href="/reservation" className={pathname == '/reservation' ? 'active' : ''}>Резервации</MenuLink>
             </li>
 
             <li>
-              <Link href="/for-home" className={pathname == '/for-home' ? 'active' : ''}>Поръчай за вкъщи</Link>
+              <MenuLink href="/for-home" className={pathname == '/for-home' ? 'active' : ''}>Поръчай за вкъщи</MenuLink>
             </li>
             <li
               className="dropdown"
@@ -156,38 +174,65 @@ const Header = () => {
             >
               <a
                 href="/for-us"
+                style={{fontSize: '18px'}}
                 onClick={(e) => {
                   e.preventDefault();
-                  if (typeof window !== "undefined") {
-                    window.location.href = "/for-us";
-                  }
+                  toggleDeepDropdown();
+                  // if (typeof window !== "undefined") {
+                  //   window.location.href = "/for-us";
+                  // }
                 }}
                 className={pathname == '/for-us' ? 'active dropdown-toggle' : 'dropdown-toggle'}
               >
                 <span>За нас</span>
               </a>
-              <ul key="cat1">
-                <li>
-                  <Link href="/new-dishes" className={pathname == '/new-dishes' ? 'active' : ''}>Нови предложения</Link>
-                </li>
-                <li>
-                  <Link href="/events" className={pathname == '/events' ? 'active' : ''}>Събития</Link>
-                </li>
-                <li>
-                  <Link href="/gallery" className={pathname == '/gallery' ? 'active' : ''}>Галерия</Link>
-                </li>
-              </ul>
+              {deepDropdownOpen && (
+                <ul key="cat1">
+                  <li>
+                    <MenuLink href="/new-dishes" className={pathname == '/new-dishes' ? 'active' : ''}>Нови предложения</MenuLink>
+                  </li>
+                  <li>
+                    <MenuLink href="/events" className={pathname == '/events' ? 'active' : ''}>Събития</MenuLink>
+                  </li>
+                  <li>
+                    <MenuLink href="/gallery" className={pathname == '/gallery' ? 'active' : ''}>Галерия</MenuLink>
+                  </li>
+                </ul>
+              )}
             </li>
             <li>
-              <Link href="/contact" className={pathname == '/contact' ? 'active' : ''}>Контакт</Link>
+              <MenuLink href="/contact" className={pathname == '/contact' ? 'active' : ''}>Контакт</MenuLink>
             </li>
+            {isMobile && user && (
+              <>
+                <li>
+                  <MenuLink href="/profile" >Профил</MenuLink>
+                </li>
+                <li>
+                  <MenuLink href="/order" >Количка</MenuLink>
+                </li>
+                {isAdmin && (
+                  <li>
+                    <MenuLink href="/admin" >Административен панел</MenuLink>
+                  </li>
+                )}
+                <li onClick={() => { logoutUser(); }}>
+                  <MenuLink href="#"  >Изход</MenuLink>
+                </li>
+              </>
+            )}
+            {isMobile && !user && (
+              <li>
+                <MenuLink href="/login">Вход</MenuLink>
+              </li>
+            )}
           </ul>
           <i
             className={`mobile-nav-toggle d-xl-none bi ${isMenuOpen ? 'bi-x' : 'bi-list'}`}
             onClick={toggleMenu}
           />
         </nav>
-        {user ? (
+        {!isMobile && user ? (
           <Dropdown menu={{ items }} trigger={['click']}>
             <a onClick={(e) => e.preventDefault()} className="ant-dropdown-link">
               <Space>
@@ -197,9 +242,22 @@ const Header = () => {
               </Space>
             </a>
           </Dropdown>
-        ) : (
-          <LoginOutlined onClick={() => router.push('/login')} style={{ fontSize: '18px' }} title="Вход" />
-        )}
+        ) : !isMobile && !user ? (
+          <div
+            onClick={() => router.push('/login')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
+              color: 'red', 
+              gap: '6px',
+            }}
+            title="Вход"
+          >
+            <LoginOutlined style={{ fontSize: '18px' }} />
+            <span>Вход</span>
+          </div>
+        ) : null}
 
         {user && <CartIcon userId={user.uid} />}
 

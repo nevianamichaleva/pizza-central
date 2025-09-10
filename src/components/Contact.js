@@ -1,6 +1,7 @@
 import { push, ref, set } from 'firebase/database';
 import { useState } from 'react';
 import { rtdb } from '../../lib/firebase';
+import showAToast from './common/showAToast';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -26,7 +27,7 @@ const Contact = () => {
       phone: formData.phone
     })
       .then(() => {
-        console.log('Съобщението е изпратено успешно');
+        showAToast('success', 'Благодарим, че се свързахте с нас. Очаквайте нашето обаждане за да обсъдим подробностите!');
         setStatus('success');
         setFormData({ name: '', email: '', subject: '', message: '', phone: '' });
       })

@@ -186,10 +186,14 @@ const MenuSection = () => {
                           <img src={item.image} className="menu-img img-fluid" alt={item.name} />
                         </a>
                         <h4>{item.name}</h4>
-                        
+
                         <p className="ingredients">{item.ingredients}</p>
-                        <p className="price">{item.price} лв.</p>  
-                        <Button type="primary"
+                        <p className="price">
+                          {item.price} лв. / {(item.price / 1.95583).toFixed(2)} €
+                        </p>
+
+                        <Button
+                          type="primary"
                           onClick={() => handleAddProduct(item)}
                           shape="circle"
                           icon={<ShoppingCartOutlined />}
@@ -218,7 +222,8 @@ const MenuSection = () => {
                               icon.style.transform = 'translateX(0)';
                             }
                           }}
-                          size="large">
+                          size="large"
+                        >
                           Добави
                         </Button>
                       </div>
