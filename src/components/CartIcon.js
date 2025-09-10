@@ -1,12 +1,13 @@
 import { ShoppingCartOutlined } from "@ant-design/icons";
-import { Tooltip } from "antd";
 import { onValue, ref } from "firebase/database";
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from "react";
 import { rtdb } from "../../lib/firebase";
 
 const CartIcon = ({ userId }) => {
   const [cartItemCount, setCartItemCount] = useState(0);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!userId) return;
@@ -39,12 +40,14 @@ const CartIcon = ({ userId }) => {
   }, [userId]);
 
   return (
-    <Tooltip title={`Количка (${cartItemCount})`}>
-      <Link href="/order" className="cart-icon">
-        <ShoppingCartOutlined style={{ fontSize: "22px", marginLeft: "15px" }} />
-        {cartItemCount > 0 && <span className="cart-count">{cartItemCount}</span>}
-      </Link>
-    </Tooltip>
+    <>
+      {pathname !== '/order' &&
+        <Link href="/order" className="cart-fab">
+          <ShoppingCartOutlined style={{ fontSize: '24px' }} />
+          {cartItemCount > 0 && <span className="cart-count">{cartItemCount}</span>}
+        </Link>
+      }
+    </>
   );
 };
 
