@@ -194,9 +194,9 @@ const Header = () => {
                   <li>
                     <MenuLink href="/events" className={pathname == '/events' ? 'active' : ''}>Събития</MenuLink>
                   </li>
-                  <li>
+                  {/* <li>
                     <MenuLink href="/gallery" className={pathname == '/gallery' ? 'active' : ''}>Галерия</MenuLink>
-                  </li>
+                  </li> */}
                 </ul>
               )}
             </li>
