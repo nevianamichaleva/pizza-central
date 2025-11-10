@@ -1,6 +1,7 @@
-import AOS from "aos";
+'use client';
+
+import "aos/dist/aos.css";
 import { useEffect } from "react";
-import "../../node_modules/aos/dist/aos.css";
 
 const chefsData = [
   {
@@ -46,7 +47,16 @@ const chefsData = [
 
 const NewDishes = () => {
   useEffect(() => {
-    AOS.init(); // Initialize AOS animations
+    const initAOS = async () => {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      const { default: AOS } = await import("aos");
+      AOS.init();
+    };
+
+    initAOS();
   }, []);
 
   return (

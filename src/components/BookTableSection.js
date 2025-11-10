@@ -1,5 +1,6 @@
+'use client';
+
 import { Button, DatePicker, Form, Input, InputNumber, TimePicker } from "antd";
-import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { push, ref, set } from 'firebase/database';
 import moment from 'moment';
@@ -11,8 +12,17 @@ const BookTableSection = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    AOS.init();
-    AOS.refresh();
+    const initAOS = async () => {
+      if (typeof window === 'undefined') {
+        return;
+      }
+
+      const { default: AOS } = await import('aos');
+      AOS.init();
+      AOS.refresh();
+    };
+
+    initAOS();
   }, []);
 
   const handleSubmit = (values) => {

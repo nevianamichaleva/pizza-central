@@ -1,29 +1,41 @@
-// components/Testimonials.js
+'use client';
 
 import Image from 'next/image';
 import { useEffect } from 'react';
-import Swiper from 'swiper';
-import 'swiper/swiper-bundle.min.css'; // Import Swiper styles
+import 'swiper/swiper-bundle.min.css';
 
 const Testimonials = () => {
   useEffect(() => {
-    // Initialize Swiper after the component mounts
-    const swiper = new Swiper('.swiper-container', {
-      loop: true,
-      speed: 600,
-      autoplay: {
-        delay: 5000,
-      },
-      slidesPerView: 'auto',
-      pagination: {
-        el: '.swiper-pagination',
-        type: 'bullets',
-        clickable: true,
-      },
-    });
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    let swiperInstance;
+
+    const initSwiper = async () => {
+      const { default: Swiper } = await import('swiper');
+
+      swiperInstance = new Swiper('.swiper-container', {
+        loop: true,
+        speed: 600,
+        autoplay: {
+          delay: 5000,
+        },
+        slidesPerView: 'auto',
+        pagination: {
+          el: '.swiper-pagination',
+          type: 'bullets',
+          clickable: true,
+        },
+      });
+    };
+
+    initSwiper();
 
     return () => {
-      swiper.destroy();
+      if (swiperInstance?.destroy) {
+        swiperInstance.destroy(true, true);
+      }
     };
   }, []);
 

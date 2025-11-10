@@ -1,9 +1,37 @@
-import { Autoplay, Pagination } from "swiper";
-import { Swiper, SwiperSlide } from "swiper/react";
-import "../../node_modules/swiper/swiper-bundle.min.css";
+'use client';
+
+import dynamic from "next/dynamic";
+import { useEffect, useState } from "react";
+import "swiper/swiper-bundle.min.css";
+
+const Swiper = dynamic(
+  () => import("swiper/react").then((mod) => mod.Swiper),
+  { ssr: false }
+);
+
+const SwiperSlide = dynamic(
+  () => import("swiper/react").then((mod) => mod.SwiperSlide),
+  { ssr: false }
+);
 
 
 const EventsSection = () => {
+  const [modules, setModules] = useState([]);
+
+  useEffect(() => {
+    const loadModules = async () => {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      const swiperModule = await import("swiper");
+      const { Autoplay, Pagination } = swiperModule;
+      setModules([Autoplay, Pagination]);
+    };
+
+    loadModules();
+  }, []);
+
   const events = [
     {
       title: "Нощ на изкуството е кухнята на реасторант Централ",
@@ -32,6 +60,10 @@ const EventsSection = () => {
     },
   ];
 
+  if (!modules.length) {
+    return null;
+  }
+
   return (
     <section id="events" className="events section">
       <div className="container-fluid" data-aos="fade-up" data-aos-delay="100">
@@ -55,7 +87,7 @@ const EventsSection = () => {
               spaceBetween: 1,
             },
           }}
-          modules={[Autoplay, Pagination]} // Use Swiper modules here
+          modules={modules}
         >
           {events.map((event, index) => (
             <SwiperSlide key={event.title+index}>

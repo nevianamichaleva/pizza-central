@@ -1,48 +1,67 @@
-import GLightbox from 'glightbox';
-import 'glightbox/dist/css/glightbox.min.css'; // Import GLightbox styles
+'use client';
+
+import 'glightbox/dist/css/glightbox.min.css';
 import { useEffect } from 'react';
-import Swiper from 'swiper';
-import 'swiper/swiper-bundle.min.css'; // Import Swiper styles
+import 'swiper/swiper-bundle.min.css';
 
 const Gallery = () => {
   useEffect(() => {
-    // Initialize Swiper
-    new Swiper('.swiper', {
-      loop: true,
-      speed: 600,
-      autoplay: {
-        delay: 5000,
-      },
-      slidesPerView: 'auto',
-      centeredSlides: true,
-      pagination: {
-        el: '.swiper-pagination',
-        type: 'bullets',
-        clickable: true,
-      },
-      breakpoints: {
-        320: {
-          slidesPerView: 1,
-          spaceBetween: 0,
-        },
-        768: {
-          slidesPerView: 3,
-          spaceBetween: 20,
-        },
-        1200: {
-          slidesPerView: 5,
-          spaceBetween: 20,
-        },
-      },
-    });
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
 
-    // Initialize GLightbox
-    const lightbox = GLightbox({
-      selector: '.glightbox',
-    });
+    let swiperInstance;
+    let lightboxInstance;
+
+    const initInteractiveComponents = async () => {
+      const [{ default: Swiper }, { default: GLightbox }] = await Promise.all([
+        import('swiper'),
+        import('glightbox'),
+      ]);
+
+      swiperInstance = new Swiper('.swiper', {
+        loop: true,
+        speed: 600,
+        autoplay: {
+          delay: 5000,
+        },
+        slidesPerView: 'auto',
+        centeredSlides: true,
+        pagination: {
+          el: '.swiper-pagination',
+          type: 'bullets',
+          clickable: true,
+        },
+        breakpoints: {
+          320: {
+            slidesPerView: 1,
+            spaceBetween: 0,
+          },
+          768: {
+            slidesPerView: 3,
+            spaceBetween: 20,
+          },
+          1200: {
+            slidesPerView: 5,
+            spaceBetween: 20,
+          },
+        },
+      });
+
+      lightboxInstance = GLightbox({
+        selector: '.glightbox',
+      });
+    };
+
+    initInteractiveComponents();
 
     return () => {
-      lightbox.destroy(); // Cleanup GLightbox instance when component unmounts
+      if (swiperInstance?.destroy) {
+        swiperInstance.destroy(true, true);
+      }
+      if (lightboxInstance?.destroy) {
+        lightboxInstance.destroy();
+      }
     };
   }, []);
 

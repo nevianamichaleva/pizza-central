@@ -1,5 +1,6 @@
-import AOS from 'aos';
-import 'aos/dist/aos.css'; // Import AOS styles
+'use client';
+
+import 'aos/dist/aos.css';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
@@ -10,7 +11,18 @@ const StatsSection = () => {
   const [workers, setWorkers] = useState(0);
 
   useEffect(() => {
-    AOS.init(); // Initialize AOS
+    let isMounted = true;
+
+    const initAOS = async () => {
+      if (typeof window === 'undefined') {
+        return;
+      }
+
+      const { default: AOS } = await import('aos');
+      AOS.init();
+    };
+
+    initAOS();
 
     // Simulate counter animation
     const animateCounters = () => {
@@ -25,13 +37,19 @@ const StatsSection = () => {
         }, 100);
       };
 
+      if (!isMounted) return;
+
       incrementCounter(setClients, 15);
       incrementCounter(setProjects, 35);
       incrementCounter(setSupportHours, 12500);
       incrementCounter(setWorkers, 75);
     };
 
-    animateCounters(); 
+    animateCounters();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
