@@ -31,9 +31,9 @@ export default function RootLayout({ children }) {
           <CategoriesProvider>
             <ProductsProvider>
               <Header />
-              <ToastContainer />
               <main>{children}</main>
               <Footer />
+              <ToastContainer />
             </ProductsProvider>
           </CategoriesProvider>
         </UserProvider>
