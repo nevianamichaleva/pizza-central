@@ -52,7 +52,7 @@ const AddCategory = () => {
       image: image
     })
       .then(() => {
-        message.success('Добавен успешно продукт');
+        message.success('Добавен успешно продукт'); 
       })
       .catch((error) => {
         console.error('Error adding product: ', error);
