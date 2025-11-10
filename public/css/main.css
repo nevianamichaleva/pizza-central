@@ -154,6 +154,17 @@ h6 {
   transform: scale(20);
 }
 
+.cart-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #fff;
+  border-radius: 50%;
+  padding: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 9999;
+}
+
 @keyframes pulsate-play-btn {
   0% {
     transform: scale(0.6, 0.6);
@@ -434,26 +445,32 @@ h6 {
     transition: color 0.3s;
   }
 
-  .navmenu {
-    padding: 0;
-    z-index: 9997;
-  }
+ .navmenu {
+   position: relative;
+   z-index: 1000;
+ }
 
-  .navmenu ul {
-    display: none;
-    list-style: none;
-    position: absolute;
-    inset: 60px 20px 20px 20px;
-    padding: 10px 0;
-    margin: 0;
-    border-radius: 6px;
-    background-color: var(--nav-mobile-background-color);
-    border: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
-    box-shadow: none;
-    overflow-y: auto;
-    transition: 0.3s;
-    z-index: 9998;
-  }
+ .navmenu ul {
+   display: none;
+ }
+
+ .navmenu.open ul {
+  display: block;
+  position: fixed;
+  top: 60px; /* Adjust if your header is taller */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  padding: 20px;
+  margin: 0;
+  background-color: var(--nav-mobile-background-color, white);
+  list-style: none;
+  overflow-y: auto;
+  max-height: calc(100vh - 60px); /* Safe vertical area */
+  z-index: 9999;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
 
   .navmenu a,
   .navmenu a:focus {
@@ -505,10 +522,10 @@ h6 {
 
   .navmenu .dropdown ul {
     position: static;
-    display: none;
+    display: block;
     z-index: 99;
     padding: 10px 0;
-    margin: 10px 20px;
+    box-shadow: none;
     background-color: var(--nav-dropdown-background-color);
     transition: all 0.5s ease-in-out;
   }
@@ -1161,8 +1178,15 @@ section,
 }
 
 .menu .tab-content .menu-item .menu-img {
-  padding: 0 60px;
-  margin-bottom: 15px;
+  /* padding: 0 60px;
+  margin-bottom: 15px; */
+  width: 100%;
+  max-width: 400px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 8px; 
+  display: block;
+  margin: 0 auto; 
 }
 
 .menu .tab-content .menu-item h4 {
