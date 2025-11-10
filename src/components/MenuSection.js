@@ -168,9 +168,9 @@ const MenuSection = () => {
                 {subcategoryActiveTab ?
                   <>
                     {products.filter((item) => item?.subcategory == subcategory.id).map((item, index) => (
-                      <div key={index} className="col-lg-4 menu-item">{console.log(products, subcategory)}
-                        <a href={item.img} className="glightbox">
-                          <img src={item.image} className="menu-img img-fluid" alt={item.name} />
+                      <div key={index} className="col-lg-4 menu-item">
+                        <a href={item.img? item.img : '#'} className="glightbox">
+                          <img src={item.img ? item.img : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
                         </a>
                         <h4>{item.name}</h4>
                         <p className="ingredients">{item.description}</p>
@@ -182,8 +182,8 @@ const MenuSection = () => {
                   <>
                     {products.filter((item) => item.category == category.id).map((item, index) => (
                       <div key={index} className="col-lg-4 menu-item">
-                        <a href={item.url} className="glightbox">
-                          <img src={item.image} className="menu-img img-fluid" alt={item.name} />
+                        <a href={item.url || "#"} className="glightbox">
+                          <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
                         </a>
                         <h4>{item.name}</h4>
 
