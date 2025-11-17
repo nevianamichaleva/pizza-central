@@ -1,0 +1,53 @@
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  min-height: 320px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.heroImage {
+  object-fit: contain;
+}
+
+.heroContent h1 {
+  margin-bottom: 1rem;
+  font-size: clamp(2rem, 3vw, 2.75rem);
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+@media (min-width: 992px) {
+  .hero {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .imageWrapper {
+    flex: 1;
+    min-height: 500px;
+  }
+
+  .heroContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.75);
+    border-radius: 16px;
+  }
+}
+

@@ -32,6 +32,8 @@ const AdministrationPage = () => {
                         <Link href='/admin/launch-menu' className="btn btn-primary w-auto text-center py-1 px-3">Управление на обедно меню</Link>
                         <Link href='/admin/bookings' className="btn btn-primary w-auto text-center py-1 px-3">Управление на резервации</Link>
                         <Link href='/admin/orders' className="btn btn-primary w-auto text-center py-1 px-3">Управление на поръчки</Link>
+                        <Link href='/admin/events' className="btn btn-primary w-auto text-center py-1 px-3">Управление на събития</Link>
+                        <Link href='/admin/new-dishes' className="btn btn-primary w-auto text-center py-1 px-3">Управление на нови предложения</Link>
                     </div>
 
                 </div>

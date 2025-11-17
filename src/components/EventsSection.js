@@ -1,12 +1,14 @@
 'use client';
 
 import "aos/dist/aos.css";
+import { get, ref } from 'firebase/database';
 import Link from "next/link";
-import { useEffect } from "react";
-
-import eventsData from "@/data/events";
+import { useEffect, useState } from "react";
+import { rtdb } from '../../lib/firebase';
 
 const EventsSection = () => {
+  const [eventsData, setEventsData] = useState([]);
+
   useEffect(() => {
     const initAOS = async () => {
       if (typeof window === "undefined") {
@@ -18,6 +20,36 @@ const EventsSection = () => {
     };
 
     initAOS();
+  }, []);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const eventsRef = ref(rtdb, "events");
+        const snapshot = await get(eventsRef);
+
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const array = Object.entries(data)
+            .map(([key, value]) => ({
+              id: key,
+              ...value,
+            }))
+            .sort((a, b) => {
+              // Sort by creation order (newest first) - using Firebase key
+              return b.id.localeCompare(a.id);
+            });
+          setEventsData(array);
+        } else {
+          setEventsData([]);
+        }
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        setEventsData([]);
+      }
+    };
+
+    fetchEvents();
   }, []);
 
   return (
@@ -45,7 +77,11 @@ const EventsSection = () => {
                 </div>
                 <div className="member-info">
                   <h4>{event.title}</h4>
-                  <p>{event.description}</p>
+                  <p>
+                    {event.description && event.description.length > 100
+                      ? `${event.description.substring(0, 100)}...`
+                      : event.description}
+                  </p>
                 </div>
               </Link>
             </div>
