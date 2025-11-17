@@ -18,6 +18,39 @@ const MenuSection = () => {
   const { categories } = useCategories();
   const { user, userDetails } = useUser();
 
+  const normalizePrice = (rawPrice) => {
+    if (rawPrice === undefined || rawPrice === null) {
+      return null;
+    }
+
+    if (typeof rawPrice === "number") {
+      return Number.isFinite(rawPrice) ? rawPrice : null;
+    }
+
+    const cleaned = String(rawPrice)
+      .replace(/\s/g, "")
+      .replace(",", ".")
+      .replace(/[^0-9.-]/g, "");
+
+    if (!cleaned) {
+      return null;
+    }
+
+    const parsed = Number.parseFloat(cleaned);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
+  const formatPrice = (price) => {
+    const normalized = normalizePrice(price);
+    if (normalized === null) {
+      return null;
+    }
+
+    const priceInLv = normalized.toFixed(2);
+    const priceInEuro = (normalized / 1.95583).toFixed(2);
+    return `${priceInLv} лв. / ${priceInEuro} €`;
+  };
+
   const handleTabClick = (tab) => {
     setActiveTab(tab);
     setSubcategoryActiveTab(null);
@@ -30,6 +63,15 @@ const MenuSection = () => {
 
   async function handleAddProduct(product) {
     const ordersRef = ref(rtdb, 'orders');
+    const productPrice = normalizePrice(product.price ?? product.value ?? product.basePrice);
+
+    if (productPrice === null) {
+      showAToast("error", "Този продукт няма валидна цена и не може да бъде добавен.");
+      console.error("Invalid product price", product);
+      return;
+    }
+
+    const productImage = product.image ?? product.img ?? product.url ?? "/images/no-image.png";
 
     try {
       const snapshot = await get(ordersRef);
@@ -46,72 +88,83 @@ const MenuSection = () => {
         });
       }
 
+      const emitCartUpdate = (nextCartId) => {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("cart:update", {
+              detail: { cartId: nextCartId },
+            })
+          );
+        }
+      };
+
       if (!orderKey) {
         const newOrderRef = push(ordersRef);
         orderKey = newOrderRef.key;
         localStorage.setItem("cartId", orderKey);
-      
+        emitCartUpdate(orderKey);
+
         const newOrder = {
           items: {
             [product.id]: {
               name: product.name,
               quantity: 1,
-              value: parseFloat(product.price), 
-              image: product.image,
+              value: productPrice,
+              image: productImage,
             },
           },
           order_date: new Date().toLocaleString(),
           status: "pending",
-          total: parseFloat(product.price), 
+          total: productPrice,
           user_id: user ? user.uid : null,
           user_email: user ? user.email : null,
           user_phone: userDetails ? userDetails.phone : null,
           user_address: userDetails ? userDetails.address : null,
           id: orderKey,
         };
-      
+
         await set(newOrderRef, newOrder);
-        console.log("New order created successfully!");
+        showAToast("success", "Продуктът е добавен в количката");
       } else {
-        const orderRef = ref(rtdb, `orders/${orderKey}/items/${product.id}`);
-        const orderTotalRef = ref(rtdb, `orders/${orderKey}/total`); 
-      
-        const itemSnapshot = await get(orderRef);
-        const orderTotalSnapshot = await get(orderTotalRef);
-      
-        let newTotal = orderTotalSnapshot.exists() ? parseFloat(orderTotalSnapshot.val()) : 0;
-      
-        if (itemSnapshot.exists()) {
-          const existingItem = itemSnapshot.val();
-          const updatedQuantity = existingItem.quantity + 1;
-          const updatedValue = existingItem.value + product.price;
-      
-          await update(orderRef, {
-            quantity: updatedQuantity,
-            value: updatedValue,
-          });
-      
-          console.log("Product quantity updated in existing order.");
-          newTotal = parseFloat(newTotal) + parseFloat(product.price); 
-        } else {
-          await set(orderRef, {
+        const orderSnapshot = snapshot.child(orderKey);
+        const currentOrder = orderSnapshot.exists() ? orderSnapshot.val() : {};
+        const currentItems = currentOrder.items || {};
+
+        const existingItem = currentItems[product.id];
+        const currentQuantity = Number(existingItem?.quantity) || 0;
+        const updatedItems = {
+          ...currentItems,
+          [product.id]: {
             name: product.name,
-            quantity: 1,
-            value: product.price,
-            image: product.image,
-          });
-      
-          showAToast("success", "Продуктът е добавен в количката");
-          console.log("New product added to existing order.");
-          newTotal = parseFloat(newTotal) + parseFloat(product.price); 
-        }
-      
-        // ✅ Update order total at `orders/${orderKey}/total`
-        await update(ref(rtdb, `orders/${orderKey}`), { total: newTotal });
-        console.log("Order total updated:", newTotal);
+            quantity: currentQuantity + 1,
+            value: productPrice,
+            image: productImage,
+          },
+        };
+
+        const updatedTotal = Object.values(updatedItems).reduce((total, item) => {
+          const basePrice = normalizePrice(item.value);
+          const quantity = Number(item.quantity) || 0;
+          if (!Number.isFinite(basePrice)) {
+            return total;
+          }
+          return total + basePrice * quantity;
+        }, 0);
+
+        await update(ref(rtdb, `orders/${orderKey}`), {
+          items: updatedItems,
+          total: updatedTotal,
+          user_id: user ? user.uid : currentOrder.user_id ?? null,
+          user_email: user ? user.email : currentOrder.user_email ?? null,
+          user_phone: userDetails ? userDetails.phone : currentOrder.user_phone ?? null,
+          user_address: userDetails ? userDetails.address : currentOrder.user_address ?? null,
+        });
+
+        emitCartUpdate(orderKey);
+        showAToast("success", "Продуктът е добавен в количката");
       }
     } catch (error) {
-      showAToast("error", "Грешка, обадете се 0895 516401 или 0893 315201");
+      showAToast("error", "Грешка, обадете се на телефон 0895 516401 или 0893 315201");
       console.error("Error handling the order:", error);
     }
   }
@@ -169,12 +222,49 @@ const MenuSection = () => {
                   <>
                     {products.filter((item) => item?.subcategory == subcategory.id).map((item, index) => (
                       <div key={index} className="col-lg-4 menu-item">
-                        <a href={item.img? item.img : '#'} className="glightbox">
-                          <img src={item.img ? item.img : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
+                        <a href={item.image ? item.image : '#'} className="glightbox">
+                          <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
                         </a>
                         <h4>{item.name}</h4>
-                        <p className="ingredients">{item.description}</p>
-                        <p className="price">{item.price}</p>
+                        <p className="ingredients">{item.description || item.ingredients}</p>
+                        {formatPrice(item.price) && (
+                          <p className="price">{formatPrice(item.price)}</p>
+                        )}
+
+                        <Button
+                          type="primary"
+                          onClick={() => handleAddProduct(item)}
+                          shape="circle"
+                          icon={<ShoppingCartOutlined />}
+                          style={{
+                            backgroundColor: '#1890ff',
+                            borderRadius: '10px',
+                            padding: '10px 20px',
+                            fontSize: '16px',
+                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                            transition: 'background-color 0.3s, transform 0.2s',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.backgroundColor = '#40a9ff';
+                            e.target.style.transform = 'scale(1.05)';
+                            const icon = e.target.querySelector('svg');
+                            if (icon) {
+                              icon.style.transform = 'translateX(5px)';
+                              icon.style.transition = 'transform 0.2s';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.backgroundColor = '#1890ff';
+                            e.target.style.transform = 'scale(1)';
+                            const icon = e.target.querySelector('svg');
+                            if (icon) {
+                              icon.style.transform = 'translateX(0)';
+                            }
+                          }}
+                          size="large"
+                        >
+                          Добави
+                        </Button>
                       </div>
                     ))}
                   </>
@@ -188,9 +278,9 @@ const MenuSection = () => {
                         <h4>{item.name}</h4>
 
                         <p className="ingredients">{item.ingredients}</p>
-                        <p className="price">
-                          {item.price} лв. / {(item.price / 1.95583).toFixed(2)} €
-                        </p>
+                        {formatPrice(item.price) && (
+                          <p className="price">{formatPrice(item.price)}</p>
+                        )}
 
                         <Button
                           type="primary"

@@ -4,10 +4,12 @@ import { useUser } from '@/context/UserContext';
 import { CaretDownOutlined, LoginOutlined, UserOutlined } from '@ant-design/icons';
 import { Dropdown, Space } from 'antd';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { onValue, ref } from 'firebase/database';
 import Link from 'next/link';
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from 'react';
 import { logoutUser } from '../../lib/auth';
+import { rtdb } from '../../lib/firebase';
 import CartIcon from './CartIcon';
 
 const Header = () => {
@@ -19,6 +21,7 @@ const Header = () => {
   const { user, setUser, isAdmin } = useUser();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [hasLaunchMenuToday, setHasLaunchMenuToday] = useState(false);
 
   const items = [
     {
@@ -78,6 +81,40 @@ const Header = () => {
     return () => unsubscribe();
   }, [setUser]);
 
+  useEffect(() => {
+    const checkLaunchMenuToday = (data) => {
+      if (data) {
+        const today = new Date();
+        const todayStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+        
+        // Check if there's a menu for today
+        const hasMenu = Object.values(data).some((menu) => menu.date === todayStr);
+        setHasLaunchMenuToday(hasMenu);
+      } else {
+        setHasLaunchMenuToday(false);
+      }
+    };
+
+    const menuRef = ref(rtdb, "launch-menu");
+    
+    // Listen to real-time changes
+    const unsubscribe = onValue(menuRef, (snapshot) => {
+      try {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          checkLaunchMenuToday(data);
+        } else {
+          setHasLaunchMenuToday(false);
+        }
+      } catch (error) {
+        console.error("Error checking launch menu:", error);
+        setHasLaunchMenuToday(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const MenuLink = ({ href, children, className }) => {
     return (
       <Link
@@ -110,9 +147,11 @@ const Header = () => {
             <li>
               <MenuLink href="/our-menu" className={pathname == '/our-menu' ? 'active' : ''}>Меню</MenuLink>
             </li>
-            {/* <li>
-              <Link href="/launch-menu" className={pathname == '/launch-menu' ? 'active' : ''}>Обедно меню</Link>
-            </li> */}
+            {hasLaunchMenuToday && (
+              <li>
+                <MenuLink href="/launch-menu" className={pathname == '/launch-menu' ? 'active' : ''}>Обедно меню</MenuLink>
+              </li>
+            )}
             {/* <li
               className="dropdown"
               onMouseEnter={handleMouseEnter}
@@ -189,6 +228,9 @@ const Header = () => {
               {deepDropdownOpen && (
                 <ul key="cat1">
                   <li>
+                    <MenuLink href="/about-us" className={pathname == '/about-us' ? 'active' : ''}>За ресторанта</MenuLink>
+                  </li>
+                  <li>
                     <MenuLink href="/new-dishes" className={pathname == '/new-dishes' ? 'active' : ''}>Нови предложения</MenuLink>
                   </li>
                   <li>
@@ -259,7 +301,7 @@ const Header = () => {
           </div>
         ) : null}
 
-        {user && <CartIcon userId={user.uid} />}
+        <CartIcon userId={user?.uid} />
 
         <Link href="/reservation" className="btn-getstarted">
           Резервирай

@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import '../../public/css/main.css';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
+import './globals.css';
 
 import { CategoriesProvider } from '@/context/CategoriesContext';
 import { ProductsProvider } from '@/context/ProductsContext';
@@ -31,7 +32,7 @@ export default function RootLayout({ children }) {
           <CategoriesProvider>
             <ProductsProvider>
               <Header />
-              <main>{children}</main>
+              {children}
               <Footer />
               <ToastContainer />
             </ProductsProvider>

@@ -7,6 +7,11 @@ const nextConfig = {
         hostname: 'dostavka.pizza-central.bg',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
     ]
   }
 };

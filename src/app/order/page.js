@@ -2,8 +2,8 @@
 
 import { useUser } from "@/context/UserContext";
 import { CheckOutlined } from "@ant-design/icons";
-import { Button, Input, message } from "antd";
-import { get, ref, update } from "firebase/database";
+import { Button, Input, message, Tooltip } from "antd";
+import { get, onValue, ref, update } from "firebase/database";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -13,38 +13,100 @@ import showAToast from "../../components/common/showAToast";
 
 export default function Order() {
   const { user } = useUser();
+  const [cartId, setCartId] = useState(null);
   const [orderId, setOrderId] = useState(null);
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('');
-  const [address, setAddress] = useState(null);
-  const [phone, setPhone] = useState(null);
-  const [email, setEmail] = useState(null);
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [orderCompleted, setOrderCompleted] = useState(false);
+  const [workingHours, setWorkingHours] = useState({ startHour: 10, endHour: 22 });
 
-  const fetchOrder = async () => {
-    if (!user) return;
-    const orderRef = ref(rtdb, `orders`);
-    const snapshot = await get(orderRef);
-
-    if (snapshot.exists()) {
-      const orders = snapshot.val();
-      const userOrders = Object.values(orders)
-        .filter(order => order.user_id === user.uid && order.status === "pending");
-      if (userOrders.length > 0) {
-        const latestOrder = userOrders[userOrders.length - 1];
-        setOrderId(latestOrder.id)
-        setOrder(latestOrder);
-        setAddress(latestOrder.user_address);
-        setPhone(latestOrder.user_phone);
-        setEmail(latestOrder.user_email);
-        setStatus(latestOrder.status);
-      }
+  const resolveCartId = async () => {
+    if (typeof window === "undefined") {
+      return null;
     }
-    setLoading(false);
+
+    const storedCartId = window.localStorage.getItem("cartId");
+
+    if (storedCartId) {
+      return storedCartId;
+    }
+
+    if (!user) {
+      return null;
+    }
+
+    const ordersRef = ref(rtdb, "orders");
+    const snapshot = await get(ordersRef);
+
+    if (!snapshot.exists()) {
+      return null;
+    }
+
+    let foundCartId = null;
+
+    snapshot.forEach((childSnapshot) => {
+      const orderData = childSnapshot.val();
+      if (
+        orderData.user_id === user.uid &&
+        orderData.status === "pending" &&
+        !foundCartId
+      ) {
+        foundCartId = orderData.id || childSnapshot.key;
+      }
+    });
+
+    if (foundCartId) {
+      window.localStorage.setItem("cartId", foundCartId);
+    }
+
+    return foundCartId;
+  };
+
+  const subscribeToOrder = (currentCartId) => {
+    if (!currentCartId) {
+      setOrder(null);
+      setOrderId(null);
+      setStatus("");
+      setAddress("");
+      setPhone("");
+      setEmail("");
+      setLoading(false);
+      return () => {};
+    }
+
+    const orderRef = ref(rtdb, `orders/${currentCartId}`);
+
+    const unsubscribe = onValue(orderRef, (snapshot) => {
+      if (!snapshot.exists()) {
+        setOrder(null);
+        setOrderId(currentCartId);
+        setStatus("");
+        setAddress("");
+        setPhone("");
+        setEmail("");
+        setLoading(false);
+        return;
+      }
+
+      const orderData = snapshot.val();
+      setOrder(orderData);
+      setOrderId(orderData.id || currentCartId);
+      // Use delivery_address/phone/email if user_address/user_phone/user_email is not available (for completed orders)
+      setAddress(orderData.user_address || orderData.delivery_address || "");
+      setPhone(orderData.user_phone || orderData.phone || "");
+      setEmail(orderData.user_email || orderData.email || "");
+      setStatus(orderData.status || "");
+      setLoading(false);
+    });
+
+    return unsubscribe;
   };
 
   const calculateTotal = (items) => {
@@ -54,10 +116,33 @@ export default function Order() {
     }, 0);
   };
 
+  const isWithinWorkingHours = () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    return currentHour >= workingHours.startHour && currentHour < workingHours.endHour;
+  };
+
 
   const updateItemQuantity = async (itemId, quantity) => {
-    const updatedOrder = { ...order };
-    updatedOrder.items[itemId].quantity = quantity;
+    if (!orderId || !order || !order.items || !order.items[itemId]) {
+      return;
+    }
+
+    const parsedQuantity = Number(quantity);
+    if (!Number.isFinite(parsedQuantity) || parsedQuantity <= 0) {
+      return;
+    }
+
+    const updatedOrder = {
+      ...order,
+      items: {
+        ...order.items,
+        [itemId]: {
+          ...order.items[itemId],
+          quantity: parsedQuantity,
+        },
+      },
+    };
 
     const newTotal = calculateTotal(updatedOrder.items);
     updatedOrder.total = newTotal;
@@ -68,8 +153,17 @@ export default function Order() {
   };
 
   const deleteItem = async (itemId) => {
-    const updatedOrder = { ...order };
-    delete updatedOrder.items[itemId];
+    if (!orderId || !order || !order.items || !order.items[itemId]) {
+      return;
+    }
+
+    const updatedItems = { ...order.items };
+    delete updatedItems[itemId];
+
+    const updatedOrder = {
+      ...order,
+      items: updatedItems,
+    };
 
     const newTotal = calculateTotal(updatedOrder.items);
     updatedOrder.total = newTotal;
@@ -80,6 +174,20 @@ export default function Order() {
   };
 
   const changeOrderStatus = async () => {
+    if (!orderId || !order) {
+      return;
+    }
+
+    if (!address || !address.trim()) {
+      message.error("Моля, въведете адрес за доставка.");
+      return;
+    }
+
+    if (!phone || !phone.trim()) {
+      message.error("Моля, въведете телефон за връзка.");
+      return;
+    }
+
     await update(ref(rtdb, `orders/${orderId}`), {
       ...order,
       status: 'in progress',
@@ -90,17 +198,72 @@ export default function Order() {
     });
 
     setStatus('in progress');
-    localStorage.removeItem('cartId');
-    showAToast("success", "Поръчката е изпратена, очаквайте обаждане");
     setOrderCompleted(true);
+    // Keep orderId in localStorage so we can continue to show the order data
+    // Don't remove cartId immediately - keep it so data remains visible
+    if (typeof window !== "undefined") {
+      // Keep the cartId so we can continue to display order information
+      // Only remove it when user navigates away or starts a new order
+      window.dispatchEvent(
+        new CustomEvent("cart:update", {
+          detail: { cartId: null },
+        })
+      );
+    }
+    showAToast("success", "Поръчката е изпратена, очаквайте обаждане");
   };
 
   useEffect(() => {
-    fetchOrder();
+    let unsubscribe = () => {};
+    let unsubscribeWorkingHours = () => {};
+
+    const init = async () => {
+      setLoading(true);
+      const resolvedCartId = await resolveCartId();
+      setCartId(resolvedCartId);
+      unsubscribe = subscribeToOrder(resolvedCartId);
+      
+      // Subscribe to working hours changes
+      const settingsRef = ref(rtdb, 'settings/workingHours');
+      unsubscribeWorkingHours = onValue(settingsRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          setWorkingHours({
+            startHour: data.startHour || 10,
+            endHour: data.endHour || 22
+          });
+        }
+      });
+    };
+
+    init();
+
+    return () => {
+      unsubscribe();
+      unsubscribeWorkingHours();
+    };
   }, [user]);
 
   if (loading) {
     return <p>Зареждане...</p>;
+  }
+
+  if (!order || !order.items || Object.keys(order.items).length === 0) {
+    return (
+      <section id="contact" className="contact section shopping-cart dark">
+        <div className="container" data-aos="fade-up" data-aos-delay="100">
+          <div className="container section-title" data-aos="fade-up">
+            <h2>Ресторант-пицария Централ</h2>
+            <p>
+              <span className="description-title">Вашата количка е празна</span>
+            </p>
+            <Link href="/our-menu" className="btn btn-primary w-auto text-center py-1 px-3">
+              Към меню
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   const dataSource = order && order.items ? Object.keys(order.items).map((itemId) => ({
@@ -182,13 +345,28 @@ export default function Order() {
                   </div>
                   {!orderCompleted &&
                     <>
-                      <button
-                        className="btn btn-primary btn-lg btn-block"
-                        onClick={changeOrderStatus}
-                        disabled={order?.status === 'in progress' || (order?.total || 0) <= 25}
-                      >
-                        Поръчай
-                      </button>
+                      <Tooltip title={
+                        (!address || !address.trim() || !phone || !phone.trim()) 
+                          ? "Въведете адрес и телефон като натиснете бутона Добави" 
+                          : !isWithinWorkingHours() 
+                            ? `Поръчките се приемат от ${workingHours.startHour}:00 до ${workingHours.endHour}:00 часа` 
+                            : ""
+                      }>
+                        <span style={{ display: 'inline-block', width: '100%' }}>
+                          <button
+                            className="btn btn-primary btn-lg btn-block"
+                            onClick={changeOrderStatus}
+                            disabled={order?.status === 'in progress' || (order?.total || 0) <= 25 || !isWithinWorkingHours()}
+                          >
+                            Поръчай
+                          </button>
+                        </span>
+                      </Tooltip>
+                      {!isWithinWorkingHours() && (
+                        <p style={{ fontSize: '15px', textAlign: 'left', color: 'red', marginTop: '10px' }}>
+                          Поръчките се приемат от {workingHours.startHour}:00 до {workingHours.endHour}:00 часа
+                        </p>
+                      )}
                       {(order?.total || 0) < 25 && (
                         <>
                         <p style={{ fontSize: '15px', textAlign: 'left', coler: 'red' }}>
@@ -205,10 +383,10 @@ export default function Order() {
                       {isEditing ? (
                         <Input value={address} onChange={(e) => setAddress(e.target.value)} />
                       ) : (
-                        <span>{address}</span>
+                        <span>{address || ""}</span>
                       )}
                       {!orderCompleted &&
-                        <Button style={{ float: "right" }} onClick={() => setIsEditing(!isEditing)}>{isEditing ? <CheckOutlined /> : "Редактирай"}</Button>
+                        <Button style={{ float: "right" }} onClick={() => setIsEditing(!isEditing)}>{isEditing ? <CheckOutlined /> : (address && address.trim() ? "Редактирай" : "Добави")}</Button>
                       }
                     </div>
                     <div style={{ marginBottom: "20px" }}>
@@ -219,7 +397,7 @@ export default function Order() {
                         <span>{email}</span>
                       )}
                       {!orderCompleted &&
-                        <Button style={{ float: "right" }} onClick={() => setIsEditingEmail(!isEditingEmail)}>{isEditingEmail ? <CheckOutlined /> : "Редактирай"}</Button>
+                        <Button style={{ float: "right" }} onClick={() => setIsEditingEmail(!isEditingEmail)}>{isEditingEmail ? <CheckOutlined /> : (email && email.trim() ? "Редактирай" : "Добави")}</Button>
                       }
                     </div>
                     <div style={{ marginBottom: "20px" }}>
@@ -227,10 +405,10 @@ export default function Order() {
                       {isEditingPhone ? (
                         <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
                       ) : (
-                        <span>{phone}</span>
+                        <span>{phone || ""}</span>
                       )}
                       {!orderCompleted &&
-                        <Button style={{ float: "right" }} onClick={() => setIsEditingPhone(!isEditingPhone)}>{isEditingPhone ? <CheckOutlined /> : "Редактирай"}</Button>
+                        <Button style={{ float: "right" }} onClick={() => setIsEditingPhone(!isEditingPhone)}>{isEditingPhone ? <CheckOutlined /> : (phone && phone.trim() ? "Редактирай" : "Добави")}</Button>
                       }
                     </div>
                   </div>

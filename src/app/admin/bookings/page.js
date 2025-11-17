@@ -1,7 +1,7 @@
 'use client';
 
 import { useUser } from '@/context/UserContext';
-import { Table } from "antd";
+import { Table, message } from "antd";
 import { get, ref } from 'firebase/database';
 import { useEffect, useState } from "react";
 import { rtdb } from '../../../../lib/firebase';
@@ -67,7 +67,50 @@ const AdminBookingsPage = () => {
                     .map(([key, value]) => ({
                         id: key,
                         ...value,
-                    }));
+                    }))
+                    .sort((a, b) => {
+                        // Sort by date in descending order (newest first)
+                        // Date format is DD-MM-YYYY
+                        const parseDate = (dateStr, timeStr) => {
+                            if (!dateStr) return 0;
+                            
+                            // Parse DD-MM-YYYY format
+                            const parts = dateStr.split('-');
+                            if (parts.length !== 3) return 0;
+                            
+                            const day = parseInt(parts[0], 10);
+                            const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
+                            const year = parseInt(parts[2], 10);
+                            
+                            if (isNaN(day) || isNaN(month) || isNaN(year)) return 0;
+                            
+                            let date = new Date(year, month, day);
+                            
+                            // Add time if available (format HH:mm)
+                            if (timeStr) {
+                                const timeParts = timeStr.split(':');
+                                if (timeParts.length === 2) {
+                                    const hours = parseInt(timeParts[0], 10);
+                                    const minutes = parseInt(timeParts[1], 10);
+                                    if (!isNaN(hours) && !isNaN(minutes)) {
+                                        date.setHours(hours, minutes, 0, 0);
+                                    }
+                                }
+                            }
+                            
+                            return date.getTime();
+                        };
+                        
+                        const dateA = parseDate(a.date, a.time);
+                        const dateB = parseDate(b.date, b.time);
+                        
+                        // If dates are not valid, use Firebase key (which is chronologically sorted)
+                        if (!dateA && !dateB) {
+                            return b.id.localeCompare(a.id); // Descending order for keys
+                        }
+                        
+                        return dateB - dateA; // Descending order (newest first)
+                    });
                 setBookings(array);
             } else {
                 message.error("Няма резервации.");
