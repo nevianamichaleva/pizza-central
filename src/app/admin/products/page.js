@@ -289,12 +289,19 @@ const AddProduct = () => {
       <div className="container" data-aos="fade-up" data-aos-delay="100">
         <div className="container section-title" data-aos="fade-up">
           <h2>Административен панел</h2>
+          
           <p>
             <span></span> <span className="description-title">Продукти</span>
           </p>
-          <div className="d-flex justify-content-center align-items-center mb-4" style={{ position: "relative" }}>
-            <div>
-              <Button type="primary" onClick={openDrawer} style={{ marginRight: "10px" }}>
+          <div style={{ marginBottom: "15px" }}>
+            <Link href="/admin" style={{ textDecoration: "none", color: "#1890ff", fontWeight: 500 }}>
+              <i className="bi bi-arrow-left"></i> Върни се в Административния панел
+            </Link>
+          </div>
+          
+          <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4" style={{ gap: "15px" }}>
+            <div className="d-flex flex-wrap gap-2">
+              <Button type="primary" onClick={openDrawer}>
                 Добави продукт
               </Button>
               <Button type="primary" onClick={openMenuDrawer}>
@@ -302,13 +309,15 @@ const AddProduct = () => {
               </Button>
             </div>
 
-            <div style={{ position: "absolute", right: "0" }}>
-              <Link href="/admin/menu">
+            <div>
+              <Link href="/admin/menu" style={{ textDecoration: "none", color: "#1890ff", fontWeight: 500 }}>
                 Отиди в Меню <i className="bi bi-arrow-right"></i>
               </Link>
             </div>
           </div>
-          <Table style={{ marginTop: "20px" }} bordered dataSource={products} columns={columns} />
+          <div style={{ overflowX: 'auto', width: '100%', marginTop: "20px" }}>
+            <Table bordered dataSource={products} columns={columns} />
+          </div>
 
           <Drawer
             title={product ? `Редакция на ${name}` : "Добави продукт"}

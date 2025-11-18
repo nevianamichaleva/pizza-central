@@ -81,47 +81,47 @@ const Gallery = () => {
           <div className="swiper-wrapper align-items-center">
           <div className="swiper-slide">
               <a className="glightbox" data-gallery="images-gallery" href="/images/gallery/gallery-winter.jpg">
-                <img src="/images/gallery/gallery-winter.jpg" className="img-fluid" alt="" />
+                <img src="/images/gallery/gallery-winter.jpg" className="img-fluid" alt="Ресторант-пицария Централ Добрич - зимна атмосфера" />
               </a>
             </div>
             <div className="swiper-slide">
               <a className="glightbox" data-gallery="images-gallery" href="/images/gallery/gallery-1.jpg">
-                <img src="/images/gallery/gallery-1.jpg" className="img-fluid" alt="" />
+                <img src="/images/gallery/gallery-1.jpg" className="img-fluid" alt="Интериор на ресторант-пицария Централ Добрич" />
               </a>
             </div>
             <div className="swiper-slide">
               <a className="glightbox" data-gallery="images-gallery" href="/images/gallery/gallery-2.jpg">
-                <img src="/images/gallery/gallery-2.jpg" className="img-fluid" alt="" />
+                <img src="/images/gallery/gallery-2.jpg" className="img-fluid" alt="Ястия от ресторант-пицария Централ Добрич" />
               </a>
             </div>
             <div className="swiper-slide">
               <a className="glightbox" data-gallery="images-gallery" href="/images/gallery/gallery-3.jpg">
-                <img src="/images/gallery/gallery-3.jpg" className="img-fluid" alt="" />
+                <img src="/images/gallery/gallery-3.jpg" className="img-fluid" alt="Пица от ресторант-пицария Централ Добрич" />
               </a>
             </div>
             <div className="swiper-slide">
               <a className="glightbox" data-gallery="images-gallery" href="/images/gallery/gallery-4.jpg">
-                <img src="/images/gallery/gallery-4.jpg" className="img-fluid" alt="" />
+                <img src="/images/gallery/gallery-4.jpg" className="img-fluid" alt="Галерия снимки от ресторант-пицария Централ Добрич" />
               </a>
             </div>
             <div className="swiper-slide">
               <a className="glightbox" data-gallery="images-gallery" href="/images/gallery/gallery-5.jpg">
-                <img src="/images/gallery/gallery-5.jpg" className="img-fluid" alt="" />
+                <img src="/images/gallery/gallery-5.jpg" className="img-fluid" alt="Вкусни ястия от ресторант-пицария Централ Добрич" />
               </a>
             </div>
             <div className="swiper-slide">
               <a className="glightbox" data-gallery="images-gallery" href="/images/gallery/gallery-6.jpg">
-                <img src="/images/gallery/gallery-6.jpg" className="img-fluid" alt="" />
+                <img src="/images/gallery/gallery-6.jpg" className="img-fluid" alt="Ресторант-пицария Централ Добрич - галерия" />
               </a>
             </div>
             <div className="swiper-slide">
               <a className="glightbox" data-gallery="images-gallery" href="/images/gallery/gallery-7.jpg">
-                <img src="/images/gallery/gallery-7.jpg" className="img-fluid" alt="" />
+                <img src="/images/gallery/gallery-7.jpg" className="img-fluid" alt="Атмосфера в ресторант-пицария Централ Добрич" />
               </a>
             </div>
             <div className="swiper-slide">
               <a className="glightbox" data-gallery="images-gallery" href="/images/gallery/gallery-8.jpg">
-                <img src="/images/gallery/gallery-8.jpg" className="img-fluid" alt="" />
+                <img src="/images/gallery/gallery-8.jpg" className="img-fluid" alt="Ресторант-пицария Централ Добрич - снимки от галерията" />
               </a>
             </div>
           </div>

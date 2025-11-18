@@ -7,6 +7,7 @@ import { DeleteOutlined, EditOutlined, MinusCircleOutlined, PlusOutlined } from 
 import { Button, DatePicker, Drawer, Form, Image, Input, Select, Space, Table } from "antd";
 import dayjs from 'dayjs';
 import { get, push, ref, remove, set } from 'firebase/database';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { rtdb } from '../../../../lib/firebase';
 
@@ -251,10 +252,15 @@ const LaunchMenu = () => {
       <div className="container" data-aos="fade-up" data-aos-delay="100">
         <div className="container section-title" data-aos="fade-up">
           <h2>Административен панел</h2>
+          
           <p>
             <span></span> <span className="description-title">Меню</span>
           </p>
-
+          <div style={{ marginBottom: "15px" }}>
+            <Link href="/admin" style={{ textDecoration: "none", color: "#1890ff", fontWeight: 500 }}>
+              <i className="bi bi-arrow-left"></i> Върни се в Административния панел
+            </Link>
+          </div>
           <div className="d-flex justify-content-center align-items-center mb-4" style={{ position: "relative" }}>
             <div>
               <Button type="primary" onClick={addNewMenu} style={{ marginRight: "10px" }}>
@@ -264,7 +270,9 @@ const LaunchMenu = () => {
 
           </div>
 
-          <Table style={{ marginTop: "20px" }} bordered dataSource={launchMenus} columns={columns} rowKey="id" />
+          <div style={{ overflowX: 'auto', width: '100%', marginTop: "20px" }}>
+            <Table bordered dataSource={launchMenus} columns={columns} rowKey="id" />
+          </div>
           <Drawer
             title={launchMenu ? "Редакция меню" : "Добави обедно меню"}
             placement="right"

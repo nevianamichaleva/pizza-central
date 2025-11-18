@@ -99,7 +99,11 @@ const EditableTable = ({ data, categories, onSave, onDelete }) => {
     },
   ];
 
-  return <Table columns={columns} dataSource={data} rowKey="id" />;
+  return (
+    <div style={{ overflowX: 'auto', width: '100%' }}>
+      <Table columns={columns} dataSource={data} rowKey="id" />
+    </div>
+  );
 };
 
 export default EditableTable;

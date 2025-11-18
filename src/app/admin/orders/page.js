@@ -3,6 +3,7 @@
 import { useUser } from '@/context/UserContext';
 import { Button, Card, Drawer, Input, message, Space, Table } from "antd";
 import { get, ref, set } from 'firebase/database';
+import Link from 'next/link';
 import { useEffect, useState } from "react";
 import { rtdb } from '../../../../lib/firebase';
 
@@ -179,6 +180,11 @@ const AdminOrdersPage = () => {
                     <p>
                         <span></span> <span className="description-title">Направени поръчки</span>
                     </p>
+                    <div style={{ marginBottom: "15px" }}>
+                        <Link href="/admin" style={{ textDecoration: "none", color: "#1890ff", fontWeight: 500 }}>
+                            <i className="bi bi-arrow-left"></i> Върни се в Административния панел
+                        </Link>
+                    </div>
                     <Card 
                         title="Работни часове за доставки" 
                         style={{ marginBottom: "20px", marginTop: "20px" }}
@@ -236,13 +242,15 @@ const AdminOrdersPage = () => {
                             </Space>
                         )}
                     </Card>
-                    <Table style={{ marginTop: "20px" }}
-                        onRow={(record) => ({
-                            onClick: () => showDrawer(record),
-                        })}
-                        bordered
-                        dataSource={orders}
-                        columns={columns} />
+                    <div style={{ overflowX: 'auto', width: '100%', marginTop: "20px" }}>
+                        <Table
+                            onRow={(record) => ({
+                                onClick: () => showDrawer(record),
+                            })}
+                            bordered
+                            dataSource={orders}
+                            columns={columns} />
+                    </div>
                     <Drawer
                         title={`Детайли на поръчка ID: ${selectedOrder ? selectedOrder.key : ''}`}
                         visible={visible}

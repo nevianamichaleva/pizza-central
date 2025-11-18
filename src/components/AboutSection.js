@@ -18,7 +18,7 @@ const AboutSection = () => {
           <div className="col-lg-7" data-aos="fade-up" data-aos-delay="100">
             <Image 
               src="/images/terasa.jpg" 
-              alt="About Us" 
+              alt="Тераса на ресторант-пицария Централ Добрич" 
               width={600} 
               height={400} 
               className="img-fluid mb-4"

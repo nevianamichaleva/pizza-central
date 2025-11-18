@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Disallow admin pages
+Disallow: /admin/
+Disallow: /login
+Disallow: /signup
+Disallow: /profile
+
+# Sitemap
+Sitemap: https://pizza-central.bg/sitemap.xml
+
+

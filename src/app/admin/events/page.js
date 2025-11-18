@@ -6,6 +6,7 @@ import { useUser } from '@/context/UserContext';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, Drawer, Form, Image, Input, Space, Table } from "antd";
 import { get, push, ref, remove, set } from 'firebase/database';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { rtdb } from '../../../../lib/firebase';
 
@@ -200,19 +201,26 @@ const AdminEventsPage = () => {
       <div className="container" data-aos="fade-up" data-aos-delay="100">
         <div className="container section-title" data-aos="fade-up">
           <h2>Административен панел</h2>
+          
           <p>
             <span></span> <span className="description-title">Управление на събития</span>
           </p>
+          <div style={{ marginBottom: "15px" }}>
+            <Link href="/admin" style={{ textDecoration: "none", color: "#1890ff", fontWeight: 500 }}>
+              <i className="bi bi-arrow-left"></i> Върни се в Административния панел
+            </Link>
+          </div>
           <Button type="primary" onClick={addNewEvent} style={{ marginBottom: '20px' }}>
             Добави ново събитие
           </Button>
-          <Table
-            style={{ marginTop: "20px" }}
-            bordered
-            dataSource={events}
-            columns={columns}
-            rowKey="id"
-          />
+          <div style={{ overflowX: 'auto', width: '100%', marginTop: "20px" }}>
+            <Table
+              bordered
+              dataSource={events}
+              columns={columns}
+              rowKey="id"
+            />
+          </div>
           <Drawer
             title={selectedEvent ? "Редактиране на събитие" : "Добавяне на ново събитие"}
             visible={drawerVisible}

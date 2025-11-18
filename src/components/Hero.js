@@ -39,7 +39,7 @@ const Hero = () => {
           >
             <Image
               src="/images/salmon_dish_transparent.png"
-              alt="Hero"
+              alt="Вкусни ястия от ресторант-пицария Централ Добрич"
               width={500}
               height={500}
               className="img-fluid animated"

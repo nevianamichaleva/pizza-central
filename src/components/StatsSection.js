@@ -58,7 +58,7 @@ const StatsSection = () => {
       <div data-aos="fade-in">
         <Image 
           src="/images/stats-bg.jpg" 
-          alt="Stats Background"
+          alt="Ресторант-пицария Централ Добрич - статистика и постижения"
           layout="responsive"
           width={1920} 
           height={1080} 

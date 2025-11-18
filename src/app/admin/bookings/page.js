@@ -3,6 +3,7 @@
 import { useUser } from '@/context/UserContext';
 import { Table, message } from "antd";
 import { get, ref } from 'firebase/database';
+import Link from 'next/link';
 import { useEffect, useState } from "react";
 import { rtdb } from '../../../../lib/firebase';
 
@@ -138,13 +139,21 @@ const AdminBookingsPage = () => {
             <div className="container" data-aos="fade-up" data-aos-delay="100">
                 <div className="container section-title" data-aos="fade-up">
                     <h2>Административен панел</h2>
+                    
                     <p>
                         <span></span> <span className="description-title">Направени резервации</span>
                     </p>
+                    <div style={{ marginBottom: "15px" }}>
+                        <Link href="/admin" style={{ textDecoration: "none", color: "#1890ff", fontWeight: 500 }}>
+                            <i className="bi bi-arrow-left"></i> Върни се в Административния панел
+                        </Link>
+                    </div>
                     <div className="d-flex justify-content-center align-items-center mb-4" style={{ position: "relative" }}>
 
                     </div>
-                    <Table style={{ marginTop: "20px" }} bordered dataSource={bookings} columns={columns} />
+                    <div style={{ overflowX: 'auto', width: '100%', marginTop: "20px" }}>
+                        <Table bordered dataSource={bookings} columns={columns} />
+                    </div>
 
                 </div>
             </div>
