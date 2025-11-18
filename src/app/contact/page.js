@@ -2,8 +2,7 @@
 
 import Contact from "@/components/Contact";
 
-export default function Products() {
-
+export default function ContactPage() {
   return (
     <>
       <Contact />

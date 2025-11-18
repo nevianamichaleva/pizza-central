@@ -1,3 +1,5 @@
+'use client';
+
 import { push, ref, set } from 'firebase/database';
 import { useState } from 'react';
 import { rtdb } from '../../lib/firebase';

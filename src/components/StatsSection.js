@@ -55,13 +55,13 @@ const StatsSection = () => {
   return (
     <section id="stats" className="stats section dark-background">
       {/* Background Image */}
-      <div data-aos="fade-in">
+      <div data-aos="fade-in" style={{ position: 'relative', width: '100%', height: '100%', minHeight: '400px' }}>
         <Image 
           src="/images/stats-bg.jpg" 
           alt="Ресторант-пицария Централ Добрич - статистика и постижения"
-          layout="responsive"
-          width={1920} 
-          height={1080} 
+          fill
+          style={{ objectFit: 'cover' }}
+          sizes="100vw"
         />
       </div>
 

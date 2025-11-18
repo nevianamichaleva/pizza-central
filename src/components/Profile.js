@@ -1,10 +1,12 @@
+'use client';
+
 import { useUser } from "@/context/UserContext";
 import { get, push, ref, set } from 'firebase/database';
 import { useEffect, useState } from 'react';
 import { rtdb } from '../../lib/firebase';
 import showAToast from "./common/showAToast";
 
-const Contact = () => {
+const Profile = () => {
   const { user } = useUser();
   const [userProfile, setUserProfile] = useState(null);
   const [formData, setFormData] = useState({
@@ -202,4 +204,4 @@ const Contact = () => {
   );
 };
 
-export default Contact;
+export default Profile;

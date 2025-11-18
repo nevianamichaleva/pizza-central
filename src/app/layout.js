@@ -10,7 +10,6 @@ import './globals.css';
 import { CategoriesProvider } from '@/context/CategoriesContext';
 import { ProductsProvider } from '@/context/ProductsContext';
 import { UserProvider } from '@/context/UserContext';
-import StructuredData from '@/components/StructuredData';
 
 export const metadata = {
   title: {
@@ -76,63 +75,8 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const restaurantStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "Restaurant",
-    "name": "Ресторант-пицария Централ",
-    "image": process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/images/hero-img.png` : "https://pizza-central.bg/images/hero-img.png",
-    "@id": process.env.NEXT_PUBLIC_SITE_URL || "https://pizza-central.bg",
-    "url": process.env.NEXT_PUBLIC_SITE_URL || "https://pizza-central.bg",
-    "telephone": "+359-XXX-XXX-XXX", // Добавете вашия телефон
-    "priceRange": "$$",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "", // Добавете адреса
-      "addressLocality": "Добрич",
-      "addressCountry": "BG"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": "", // Добавете координати
-      "longitude": "" // Добавете координати
-    },
-    "openingHoursSpecification": [
-      {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-          "Sunday"
-        ],
-        "opens": "10:00",
-        "closes": "22:00"
-      }
-    ],
-    "servesCuisine": ["Italian", "Bulgarian", "Pizza"],
-    "menu": process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/our-menu` : "https://pizza-central.bg/our-menu",
-    "acceptsReservations": "True",
-    "hasMenu": {
-      "@type": "Menu",
-      "hasMenuSection": {
-        "@type": "MenuSection",
-        "name": "Меню",
-        "url": process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/our-menu` : "https://pizza-central.bg/our-menu"
-      }
-    }
-  };
-
   return (
     <html lang="bg">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <StructuredData data={restaurantStructuredData} />
-      </head>
-
       <body className="index-page">
         <UserProvider>
           <CategoriesProvider>
