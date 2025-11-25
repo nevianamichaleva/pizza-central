@@ -188,17 +188,74 @@ export default function Order() {
       return;
     }
 
-    await update(ref(rtdb, `orders/${orderId}`), {
+    const updatedOrder = {
       ...order,
       status: 'in progress',
       delivery_address: address,
       phone: phone,
       email: email,
       total: order.total + 3
-    });
+    };
+
+    await update(ref(rtdb, `orders/${orderId}`), updatedOrder);
 
     setStatus('in progress');
     setOrderCompleted(true);
+    
+    // Send email notification
+    try {
+      // Get admin email from Firebase settings
+      const emailRef = ref(rtdb, 'settings/email');
+      const emailSnapshot = await get(emailRef);
+      let adminEmail = null;
+      
+      if (emailSnapshot.exists()) {
+        const emailData = emailSnapshot.val();
+        adminEmail = emailData.adminEmail || emailData.email;
+      }
+
+      if (adminEmail) {
+        // Also get SMTP config to send to API
+        const smtpRef = ref(rtdb, 'settings/email');
+        const smtpSnapshot = await get(smtpRef);
+        let smtpConfig = null;
+        
+        if (smtpSnapshot.exists()) {
+          const smtpData = smtpSnapshot.val();
+          smtpConfig = {
+            smtpHost: smtpData.smtpHost,
+            smtpPort: smtpData.smtpPort,
+            smtpUser: smtpData.smtpUser,
+            smtpPassword: smtpData.smtpPassword,
+            smtpSecure: smtpData.smtpSecure,
+            fromEmail: smtpData.fromEmail
+          };
+        }
+
+        const response = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            orderData: updatedOrder,
+            adminEmail: adminEmail,
+            smtpConfig: smtpConfig,
+          }),
+        });
+
+        const result = await response.json();
+        if (!result.success && !result.logged) {
+          console.error('Failed to send email notification:', result);
+        }
+      } else {
+        console.log('No admin email configured, skipping email notification');
+      }
+    } catch (error) {
+      console.error('Error sending email notification:', error);
+      // Don't block the order process if email fails
+    }
+
     // Keep orderId in localStorage so we can continue to show the order data
     // Don't remove cartId immediately - keep it so data remains visible
     if (typeof window !== "undefined") {
@@ -210,7 +267,7 @@ export default function Order() {
         })
       );
     }
-    showAToast("success", "Поръчката е изпратена, очаквайте обаждане");
+    showAToast("success", "Поръчката е изпратена успешно! Очаквайте доставка на посочения адрес.");
   };
 
   useEffect(() => {
@@ -415,6 +472,114 @@ export default function Order() {
                 </div>
               </div>
             </div>
+            {orderCompleted &&
+              <div className="contact-info">
+                {/* Success Message Box */}
+                <div style={{
+                  backgroundColor: '#ffffff',
+                  border: '2px solid #52c41a',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  margin: '20px 0',
+                  boxShadow: '0 4px 12px rgba(82, 196, 26, 0.15)',
+                  textAlign: 'center',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}>
+                  {/* Main Success Message */}
+                  <h3 style={{
+                    color: '#52c41a',
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    margin: '0 0 12px 0',
+                    textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}>
+                    <span style={{ fontSize: '24px' }}>✅</span>
+                    Поръчката е изпратена успешно!
+                  </h3>
+                  
+                  {/* Secondary Message */}
+                  <p style={{
+                    color: '#666',
+                    fontSize: '16px',
+                    margin: '0 0 16px 0',
+                    lineHeight: '1.5'
+                  }}>
+                    Очаквайте доставка на посочения адрес
+                  </p>
+                  
+                  {/* Status Section */}
+                  <div style={{
+                    backgroundColor: '#f0f9ff',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    margin: '16px 0',
+                    border: '1px solid #bae7ff'
+                  }}>
+                    <h5 style={{
+                      color: '#1890ff',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      margin: '0 0 8px 0'
+                    }}>
+                      Статус на поръчката:
+                    </h5>
+                    <span style={{
+                      color: '#1890ff',
+                      fontSize: '16px',
+                      fontWeight: '600'
+                    }}>
+                      {status == "in progress" ? "🚚 Доставя се" : status == "completed" ? "✅ Поръчката е доставена" : status == "cancelled" ? "❌ Поръчката е отказана" : status}
+                    </span>
+                  </div>
+                  
+                  {/* Decorative Elements */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '-10px',
+                    right: '-10px',
+                    width: '40px',
+                    height: '40px',
+                    backgroundColor: '#52c41a',
+                    borderRadius: '50%',
+                    opacity: '0.1'
+                  }}></div>
+                  
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '-15px',
+                    left: '-15px',
+                    width: '60px',
+                    height: '60px',
+                    backgroundColor: '#52c41a',
+                    borderRadius: '50%',
+                    opacity: '0.05'
+                  }}></div>
+                  
+                  {/* Contact Info */}
+                  <div style={{
+                    backgroundColor: '#f6ffed',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    marginTop: '16px',
+                    border: '1px solid #d9f7be'
+                  }}>
+                    <p style={{
+                      color: '#389e0d',
+                      fontSize: '14px',
+                      margin: '0',
+                      fontWeight: '500'
+                    }}>
+                      📞 За въпроси: +359 895 516 401
+                    </p>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         </div>
         <style jsx>
