@@ -1,11 +1,12 @@
 'use client';
 
 import { useUser } from '@/context/UserContext';
-import { Button, Card, Drawer, Input, message, Space, Table, Switch } from "antd";
+import { Button, Card, Drawer, Input, message, Select, Space, Switch, Table, Tabs } from "antd";
 import { get, ref, set } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useState } from "react";
 import { rtdb } from '../../../../lib/firebase';
+import { generateOrderNumber } from '../../../utils/orderNumberUtils';
 
 const AdminOrdersPage = () => {
     const { isAdmin } = useUser();
@@ -28,9 +29,27 @@ const AdminOrdersPage = () => {
     const [isEditingSmtp, setIsEditingSmtp] = useState(false);
     const columns = [
         {
+            title: 'Номер на поръчка',
+            key: 'order_number',
+            width: 150,
+            render: (_, record) => (
+                <div>
+                    <strong style={{ color: '#1890ff' }}>
+                        {generateOrderNumber(record)}
+                    </strong>
+                    {!record.order_number && (
+                        <div style={{ fontSize: '10px', color: '#999' }}>
+                            Чака изпращане
+                        </div>
+                    )}
+                </div>
+            ),
+        },
+        {
             title: 'Дата на поръчката',
             dataIndex: 'order_date',
             key: 'order_date',
+            width: 150,
         },
         {
             title: 'Адрес за доставка',
@@ -41,6 +60,35 @@ const AdminOrdersPage = () => {
             title: 'Статус',
             dataIndex: 'status',
             key: 'status',
+            width: 150,
+            render: (status, record) => (
+                <Select
+                    value={status}
+                    style={{ 
+                        width: '100%',
+                        color: getStatusColor(status)
+                    }}
+                    onChange={(newStatus) => updateOrderStatus(record.id, newStatus)}
+                    options={[
+                        { 
+                            value: 'pending', 
+                            label: <span style={{ color: '#faad14' }}>🕐 Чакаща</span>
+                        },
+                        { 
+                            value: 'in progress', 
+                            label: <span style={{ color: '#1890ff' }}>🚚 В процес</span>
+                        },
+                        { 
+                            value: 'delivered', 
+                            label: <span style={{ color: '#52c41a' }}>✅ Доставена</span>
+                        },
+                        { 
+                            value: 'cancelled', 
+                            label: <span style={{ color: '#f5222d' }}>❌ Отказана</span>
+                        }
+                    ]}
+                />
+            ),
         },
         {
             title: 'Общо',
@@ -62,6 +110,21 @@ const AdminOrdersPage = () => {
             title: 'Адрес на потребителя',
             dataIndex: 'user_address',
             key: 'user_address',
+        },
+        {
+            title: 'Действия',
+            key: 'actions',
+            width: 120,
+            fixed: 'right',
+            render: (_, record) => (
+                <Button 
+                    type="primary" 
+                    size="small"
+                    onClick={() => showDrawer(record)}
+                >
+                    Детайли
+                </Button>
+            ),
         },
     ];
     const [visible, setVisible] = useState(false);
@@ -270,6 +333,50 @@ const AdminOrdersPage = () => {
         }
     };
 
+    const updateOrderStatus = async (orderId, newStatus) => {
+        try {
+            const orderRef = ref(rtdb, `orders/${orderId}`);
+            const snapshot = await get(orderRef);
+            
+            if (snapshot.exists()) {
+                const orderData = snapshot.val();
+                await set(orderRef, {
+                    ...orderData,
+                    status: newStatus
+                });
+                
+                message.success(`Статусът на поръчката е променен на "${getStatusLabel(newStatus)}"`);
+                fetchOrders(); // Refresh the orders list
+            }
+        } catch (error) {
+            console.error("Грешка при обновяване на статуса:", error);
+            message.error("Грешка при обновяване на статуса на поръчката");
+        }
+    };
+
+    const getStatusLabel = (status) => {
+        const statusMap = {
+            'pending': 'Чакаща',
+            'in progress': 'В процес',
+            'delivered': 'Доставена',
+            'cancelled': 'Отказана'
+        };
+        return statusMap[status] || status;
+    };
+
+    const getStatusColor = (status) => {
+        const colorMap = {
+            'pending': '#faad14',
+            'in progress': '#1890ff',
+            'delivered': '#52c41a',
+            'cancelled': '#f5222d'
+        };
+        return colorMap[status] || '#d9d9d9';
+    };
+
+
+
+
     const fetchOrders = async () => {
         try {
             const ordersRef = ref(rtdb, "orders");
@@ -311,22 +418,36 @@ const AdminOrdersPage = () => {
         </section>;
     }
 
-    return (
-        <section id="contact" className="contact section">
-            <div className="container" data-aos="fade-up" data-aos-delay="100">
-                <div className="container section-title" data-aos="fade-up">
-                    <h2>Административен панел</h2>
-                    <p>
-                        <span></span> <span className="description-title">Направени поръчки</span>
-                    </p>
-                    <div style={{ marginBottom: "15px" }}>
-                        <Link href="/admin" style={{ textDecoration: "none", color: "#1890ff", fontWeight: 500 }}>
-                            <i className="bi bi-arrow-left"></i> Върни се в Административния панел
-                        </Link>
-                    </div>
+    const tabItems = [
+        {
+            key: '1',
+            label: '📋 Поръчки',
+            children: (
+                <div style={{ overflowX: 'auto', width: '100%' }}>
+                    <Table
+                        bordered
+                        dataSource={orders}
+                        columns={columns}
+                        scroll={{ x: 1200 }}
+                        pagination={{
+                            pageSize: 10,
+                            showSizeChanger: true,
+                            showQuickJumper: true,
+                            showTotal: (total, range) =>
+                                `${range[0]}-${range[1]} от ${total} поръчки`,
+                        }}
+                    />
+                </div>
+            ),
+        },
+        {
+            key: '2',
+            label: '⚙️ Настройки',
+            children: (
+                <div>
                     <Card 
                         title="Работни часове за доставки" 
-                        style={{ marginBottom: "20px", marginTop: "20px" }}
+                        style={{ marginBottom: "20px" }}
                         extra={
                             !isEditingHours ? (
                                 <Button type="primary" onClick={() => setIsEditingHours(true)}>
@@ -381,6 +502,14 @@ const AdminOrdersPage = () => {
                             </Space>
                         )}
                     </Card>
+                </div>
+            ),
+        },
+        {
+            key: '3',
+            label: '📧 Email настройки',
+            children: (
+                <div>
                     <Card 
                         title="Email за известия за поръчки" 
                         style={{ marginBottom: "20px" }}
@@ -539,41 +668,163 @@ const AdminOrdersPage = () => {
                             </Space>
                         )}
                     </Card>
-                    <div style={{ overflowX: 'auto', width: '100%', marginTop: "20px" }}>
-                        <Table
-                            onRow={(record) => ({
-                                onClick: () => showDrawer(record),
-                            })}
-                            bordered
-                            dataSource={orders}
-                            columns={columns} />
+                </div>
+            ),
+        },
+    ];
+
+    return (
+        <section id="contact" className="contact section">
+            <div className="container" data-aos="fade-up" data-aos-delay="100">
+                <div className="container section-title" data-aos="fade-up">
+                    <h2>Административен панел</h2>
+                    <p>
+                        <span></span> <span className="description-title">Управление на поръчки</span>
+                    </p>
+                    <div style={{ marginBottom: "15px" }}>
+                        <Link href="/admin" style={{ textDecoration: "none", color: "#1890ff", fontWeight: 500 }}>
+                            <i className="bi bi-arrow-left"></i> Върни се в Административния панел
+                        </Link>
                     </div>
+                    
+                    <Tabs 
+                        defaultActiveKey="1" 
+                        items={tabItems}
+                        size="large"
+                        style={{ marginTop: "20px" }}
+                    />
+                    
                     <Drawer
-                        title={`Детайли на поръчка ID: ${selectedOrder ? selectedOrder.key : ''}`}
+                        title={`Детайли на поръчка: ${selectedOrder ? generateOrderNumber(selectedOrder) : 'N/A'}`}
                         visible={visible}
                         onClose={onClose}
-                        width={600}
+                        width={700}
                     >
                         {selectedOrder && (
-                            <>
-                                <p><strong>Дата на поръчката:</strong> {selectedOrder.order_date}</p>
-                                <p><strong>Адрес за доставка:</strong> {selectedOrder.delivery_address}</p>
-                                <p><strong>Статус:</strong> {selectedOrder.status}</p>
-                                <p><strong>Общо:</strong> {selectedOrder.total ? parseFloat(selectedOrder.total).toFixed(2) : '0.00'}</p>
-                                <p><strong>Продукти:</strong></p>
-                                <ul>
-                                    {Object.keys(selectedOrder.items).map(itemKey => {
-                                        const item = selectedOrder.items[itemKey];
-                                        return (
-                                            <li key={itemKey}>
-                                                <strong>{item.name}</strong> (x{item.quantity}) - {item.value}
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            </>
+                            <div style={{ padding: '10px 0' }}>
+                                <div style={{ marginBottom: '30px' }}>
+                                    <h3>Основна информация</h3>
+                                    <div style={{ 
+                                        backgroundColor: '#f0f9ff', 
+                                        padding: '12px', 
+                                        borderRadius: '6px',
+                                        marginBottom: '15px',
+                                        border: '1px solid #bae7ff'
+                                    }}>
+                                        <p style={{ margin: 0, fontSize: '16px' }}>
+                                            <strong>Номер на поръчка:</strong> 
+                                            <span style={{ 
+                                                color: '#1890ff',
+                                                marginLeft: '8px',
+                                                fontWeight: 'bold',
+                                                fontSize: '18px'
+                                            }}>
+                                                {generateOrderNumber(selectedOrder)}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <p><strong>Дата на поръчката:</strong> {selectedOrder.order_date || 'Не е посочена'}</p>
+                                    <p><strong>Статус:</strong> 
+                                        <span style={{ 
+                                            color: getStatusColor(selectedOrder.status),
+                                            marginLeft: '8px',
+                                            fontWeight: 'bold'
+                                        }}>
+                                            {getStatusLabel(selectedOrder.status)}
+                                        </span>
+                                    </p>
+                                </div>
+
+                                <div style={{ marginBottom: '30px' }}>
+                                    <h3>Информация за клиента</h3>
+                                    <p><strong>Email:</strong> {selectedOrder.user_email || selectedOrder.email || 'Не е посочен'}</p>
+                                    <p><strong>Телефон:</strong> {selectedOrder.user_phone || selectedOrder.phone || 'Не е посочен'}</p>
+                                    <p><strong>Адрес за доставка:</strong> {selectedOrder.user_address || selectedOrder.delivery_address || 'Не е посочен'}</p>
+                                </div>
+
+                                {(selectedOrder.special_notes || selectedOrder.delivery_time) && (
+                                    <div style={{ marginBottom: '30px' }}>
+                                        <h3>Специални изисквания</h3>
+                                        {selectedOrder.special_notes && (
+                                            <div style={{ marginBottom: '15px' }}>
+                                                <strong>Забележки:</strong>
+                                                <div style={{ 
+                                                    backgroundColor: '#f9f9f9', 
+                                                    padding: '10px', 
+                                                    borderRadius: '4px',
+                                                    marginTop: '5px'
+                                                }}>
+                                                    {selectedOrder.special_notes}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {selectedOrder.delivery_time && (
+                                            <p><strong>Желан час за доставка:</strong> {selectedOrder.delivery_time}</p>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div style={{ marginBottom: '30px' }}>
+                                    <h3>Поръчани продукти</h3>
+                                    {selectedOrder.items && Object.keys(selectedOrder.items).length > 0 ? (
+                                        <div>
+                                            {Object.keys(selectedOrder.items).map(itemKey => {
+                                                const item = selectedOrder.items[itemKey];
+                                                return (
+                                                    <div key={itemKey} style={{ 
+                                                        display: 'flex', 
+                                                        justifyContent: 'space-between',
+                                                        padding: '8px 0',
+                                                        borderBottom: '1px solid #f0f0f0'
+                                                    }}>
+                                                        <span><strong>{item.name}</strong> x{item.quantity}</span>
+                                                        <span>{parseFloat(item.value || 0).toFixed(2)} лв</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <p>Няма продукти в поръчката</p>
+                                    )}
+                                </div>
+
+                                <div style={{ marginBottom: '20px' }}>
+                                    <h3>Финансова информация</h3>
+                                    <div style={{ 
+                                        backgroundColor: '#f6ffed', 
+                                        padding: '15px', 
+                                        borderRadius: '4px',
+                                        border: '1px solid #d9f7be'
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                                            <span>Сума на продукти:</span>
+                                            <span>{selectedOrder.total ? parseFloat(selectedOrder.total).toFixed(2) : '0.00'} лв</span>
+                                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                                            <span>Доставка:</span>
+                                            <span>3.00 лв</span>
+                                        </div>
+                                        <div style={{ 
+                                            display: 'flex', 
+                                            justifyContent: 'space-between', 
+                                            fontWeight: 'bold',
+                                            fontSize: '16px',
+                                            borderTop: '1px solid #d9f7be',
+                                            paddingTop: '5px'
+                                        }}>
+                                            <span>Общо:</span>
+                                            <span>{selectedOrder.total ? (parseFloat(selectedOrder.total) + 3).toFixed(2) : '3.00'} лв</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style={{ textAlign: 'center', marginTop: '30px' }}>
+                                    <Button onClick={onClose} type="primary" size="large">
+                                        Затвори
+                                    </Button>
+                                </div>
+                            </div>
                         )}
-                        <Button onClick={onClose} type="primary">Затвори</Button>
                     </Drawer>
                 </div>
             </div>

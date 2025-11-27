@@ -33,11 +33,13 @@ export async function POST(request) {
     const deliveryFee = 3.00;
     const grandTotal = (parseFloat(orderData.total || 0) + deliveryFee).toFixed(2);
 
-    const emailSubject = `Нова поръчка #${orderData.id || 'N/A'}`;
+    const orderNumber = orderData.order_number ? `ORD-${String(orderData.order_number).padStart(4, '0')}` : (orderData.id || 'N/A');
+    const emailSubject = `Нова поръчка #${orderNumber}`;
     const emailBody = `
 Нова поръчка е получена!
 
 Детайли на поръчката:
+Номер на поръчка: ${orderNumber}
 ID: ${orderData.id || 'N/A'}
 Дата: ${orderData.order_date || new Date().toLocaleString()}
 Статус: ${orderData.status || 'pending'}
@@ -51,7 +53,12 @@ Email: ${orderData.user_email || orderData.email || 'Не е посочено'}
 Артикули:
 ${itemsList}
 
-Сума: ${total} лв
+${orderData.special_notes ? `Специални забележки:
+${orderData.special_notes}
+
+` : ''}${orderData.delivery_time ? `Желан час за доставка: ${orderData.delivery_time}
+
+` : ''}Сума: ${total} лв
 Доставка: ${deliveryFee.toFixed(2)} лв
 Общо: ${grandTotal} лв
     `.trim();

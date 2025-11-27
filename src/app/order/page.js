@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { rtdb } from "../../../lib/firebase";
 import showAToast from "../../components/common/showAToast";
+const { TextArea } = Input;
 
 export default function Order() {
   const { user } = useUser();
@@ -26,6 +27,10 @@ export default function Order() {
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [orderCompleted, setOrderCompleted] = useState(false);
   const [workingHours, setWorkingHours] = useState({ startHour: 10, endHour: 22 });
+  const [specialNotes, setSpecialNotes] = useState("");
+  const [deliveryTime, setDeliveryTime] = useState("");
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [isEditingDeliveryTime, setIsEditingDeliveryTime] = useState(false);
 
   const resolveCartId = async () => {
     if (typeof window === "undefined") {
@@ -77,6 +82,8 @@ export default function Order() {
       setAddress("");
       setPhone("");
       setEmail("");
+      setSpecialNotes("");
+      setDeliveryTime("");
       setLoading(false);
       return () => {};
     }
@@ -91,6 +98,8 @@ export default function Order() {
         setAddress("");
         setPhone("");
         setEmail("");
+        setSpecialNotes("");
+        setDeliveryTime("");
         setLoading(false);
         return;
       }
@@ -102,6 +111,8 @@ export default function Order() {
       setAddress(orderData.user_address || orderData.delivery_address || "");
       setPhone(orderData.user_phone || orderData.phone || "");
       setEmail(orderData.user_email || orderData.email || "");
+      setSpecialNotes(orderData.special_notes || "");
+      setDeliveryTime(orderData.delivery_time || "");
       setStatus(orderData.status || "");
       setLoading(false);
     });
@@ -120,6 +131,41 @@ export default function Order() {
     const now = new Date();
     const currentHour = now.getHours();
     return currentHour >= workingHours.startHour && currentHour < workingHours.endHour;
+  };
+
+  const getMinDeliveryTime = () => {
+    const oneHourFromNow = new Date(Date.now() + 60 * 60 * 1000);
+    return oneHourFromNow.toTimeString().slice(0, 5);
+  };
+
+  const validateDeliveryTime = (timeString) => {
+    if (!timeString) return true; // Optional field
+    
+    const now = new Date();
+    const [hours, minutes] = timeString.split(':').map(Number);
+    
+    // Create delivery time for today
+    const deliveryTime = new Date();
+    deliveryTime.setHours(hours, minutes, 0, 0);
+    
+    // Check if delivery time is at least 1 hour from now
+    const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
+    
+    // Check if delivery time is within working hours
+    const isWithinHours = hours >= workingHours.startHour && hours < workingHours.endHour;
+    
+    return deliveryTime >= oneHourFromNow && isWithinHours;
+  };
+
+  const handleDeliveryTimeChange = (e) => {
+    const selectedTime = e.target.value;
+    if (validateDeliveryTime(selectedTime)) {
+      setDeliveryTime(selectedTime);
+    } else {
+      message.warning("Моля, изберете час който е минимум 1 час от сега и в работното време.");
+      // Reset to minimum valid time
+      setDeliveryTime(getMinDeliveryTime());
+    }
   };
 
 
@@ -188,12 +234,32 @@ export default function Order() {
       return;
     }
 
+    if (deliveryTime && !validateDeliveryTime(deliveryTime)) {
+      message.error("Часът за доставка трябва да е минимум 1 час от сега и в рамките на работното време.");
+      return;
+    }
+
+    // Get order number if not already assigned
+    let orderNumber = order.order_number;
+    if (!orderNumber) {
+      try {
+        const { getNextOrderNumber } = await import('../../utils/orderNumberUtils');
+        orderNumber = await getNextOrderNumber();
+      } catch (error) {
+        console.error('Error getting order number:', error);
+        // Continue without order number - it can be assigned later by admin
+      }
+    }
+
     const updatedOrder = {
       ...order,
       status: 'in progress',
       delivery_address: address,
       phone: phone,
       email: email,
+      special_notes: specialNotes,
+      delivery_time: deliveryTime,
+      order_number: orderNumber,
       total: order.total + 3
     };
 
@@ -467,6 +533,52 @@ export default function Order() {
                       {!orderCompleted &&
                         <Button style={{ float: "right" }} onClick={() => setIsEditingPhone(!isEditingPhone)}>{isEditingPhone ? <CheckOutlined /> : (phone && phone.trim() ? "Редактирай" : "Добави")}</Button>
                       }
+                    </div>
+                    <div style={{ marginBottom: "20px" }}>
+                      <h5>Специални предпочитания/забележки:</h5>
+                      {isEditingNotes ? (
+                        <TextArea 
+                          value={specialNotes} 
+                          onChange={(e) => setSpecialNotes(e.target.value)}
+                          placeholder="Например: без гъби, добавете пипер, без лук..."
+                          rows={3}
+                        />
+                      ) : (
+                        <span>{specialNotes || "Няма специални забележки"}</span>
+                      )}
+                      {!orderCompleted &&
+                        <Button style={{ float: "right" }} onClick={() => setIsEditingNotes(!isEditingNotes)}>{isEditingNotes ? <CheckOutlined /> : (specialNotes && specialNotes.trim() ? "Редактирай" : "Добави")}</Button>
+                      }
+                    </div>
+                    <div style={{ marginBottom: "20px" }}>
+                      <h5>Час за доставка (по избор):</h5>
+                      {isEditingDeliveryTime ? (
+                        <Input 
+                          type="time"
+                          value={deliveryTime} 
+                          onChange={handleDeliveryTimeChange}
+                          min={getMinDeliveryTime()}
+                          max={`${workingHours.endHour - 1}:59`}
+                        />
+                      ) : (
+                        <span>{deliveryTime || "Възможно най-скоро"}</span>
+                      )}
+                      {!orderCompleted &&
+                        <Button style={{ float: "right" }} onClick={() => {
+                          if (!isEditingDeliveryTime) {
+                            // When opening for editing, ensure we have a valid time
+                            if (!deliveryTime || !validateDeliveryTime(deliveryTime)) {
+                              setDeliveryTime(getMinDeliveryTime());
+                            }
+                          }
+                          setIsEditingDeliveryTime(!isEditingDeliveryTime);
+                        }}>{isEditingDeliveryTime ? <CheckOutlined /> : (deliveryTime && deliveryTime.trim() ? "Редактирай" : "Добави")}</Button>
+                      }
+                      {isEditingDeliveryTime && (
+                        <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
+                          Доставката трябва да е минимум 1 час от сега и до {workingHours.endHour}:00 часа
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

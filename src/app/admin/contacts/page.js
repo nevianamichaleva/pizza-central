@@ -1,7 +1,7 @@
 'use client';
 
 import { useUser } from '@/context/UserContext';
-import { Table, message, Button, Modal, Input, Space, Tag, Drawer } from "antd";
+import { Button, Drawer, Input, Modal, Space, Table, Tag, message } from "antd";
 import { get, ref, set } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useState } from "react";
@@ -22,33 +22,46 @@ const AdminContactsPage = () => {
             title: "Име",
             dataIndex: "name",
             key: "name",
+            width: 120,
+            ellipsis: true,
         },
         {
             title: "Email",
             dataIndex: "email",
             key: "email",
+            width: 180,
+            ellipsis: true,
         },
         {
             title: "Телефон",
             dataIndex: "phone",
             key: "phone",
+            width: 120,
+            ellipsis: true,
+            responsive: ['md'],
         },
         {
             title: "Относно",
             dataIndex: "subject",
             key: "subject",
+            width: 150,
+            ellipsis: true,
+            responsive: ['lg'],
         },
         {
             title: "Съобщение",
             dataIndex: "message",
             key: "message",
-            render: (text) => text ? (text.length > 100 ? text.substring(0, 100) + '...' : text) : '',
+            width: 200,
+            render: (text) => text ? (text.length > 50 ? text.substring(0, 50) + '...' : text) : '',
             ellipsis: true,
+            responsive: ['lg'],
         },
         {
             title: "Статус",
             dataIndex: "replied",
             key: "replied",
+            width: 120,
             render: (replied, record) => (
                 <Tag color={replied ? 'green' : 'orange'}>
                     {replied ? 'Отговорено' : 'Чака отговор'}
@@ -58,8 +71,9 @@ const AdminContactsPage = () => {
         {
             title: "Действия",
             key: "actions",
+            width: 180,
             render: (_, record) => (
-                <Space>
+                <Space size="small">
                     <Button 
                         type="primary" 
                         size="small"
@@ -235,7 +249,20 @@ const AdminContactsPage = () => {
                         </Link>
                     </div>
                     <div style={{ overflowX: 'auto', width: '100%', marginTop: "20px" }}>
-                        <Table bordered dataSource={contacts} columns={columns} rowKey="id" />
+                        <Table 
+                            bordered 
+                            dataSource={contacts} 
+                            columns={columns} 
+                            rowKey="id"
+                            scroll={{ x: 800 }}
+                            pagination={{
+                                pageSize: 10,
+                                showSizeChanger: true,
+                                showQuickJumper: true,
+                                showTotal: (total, range) =>
+                                    `${range[0]}-${range[1]} от ${total} съобщения`,
+                            }}
+                        />
                     </div>
 
                     {/* Reply Modal */}
