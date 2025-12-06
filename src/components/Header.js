@@ -5,6 +5,7 @@ import { CaretDownOutlined, LoginOutlined, UserOutlined } from '@ant-design/icon
 import { Dropdown, Space } from 'antd';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { onValue, ref } from 'firebase/database';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from 'react';
@@ -134,6 +135,30 @@ const Header = () => {
 
         {/* Logo */}
         <Link href="/" className="logo d-flex align-items-center me-auto me-xl-0">
+          <div style={{ 
+            position: 'relative', 
+            width: '86px', 
+            height: '86px', 
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            padding: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            <Image
+              src="/images/logo.png"
+              alt="Централ лого"
+              width={58}
+              height={58}
+              style={{ 
+                objectFit: 'contain',
+                width: '100%',
+                height: '100%'
+              }}
+              priority
+            />
+          </div>
           <h1 className="sitename">Централ</h1>
           <span></span>
         </Link>

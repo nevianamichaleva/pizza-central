@@ -410,14 +410,14 @@ export default function Order() {
               <div className="row">
                 <div className="col-lg-8 items-section">
                   {dataSource.map((item, key) => (
-                    <div className="product row d-flex align-items-center flex-nowrap" key={key}>
+                    <div className="product row d-flex align-items-center flex-nowrap" key={key} style={{ marginBottom: "15px", paddingBottom: "15px", borderBottom: "1px solid #f0f0f0" }}>
                       <div className="col-md-5 product-name d-flex align-items-center">
                         <Image
                           src={item.image}
                           alt={item.name}
                           width={80}
                           height={80}
-                          style={{ marginRight: "10px" }}
+                          style={{ marginRight: "10px", borderRadius: "8px" }}
                         />
                         <a href="#">{item.name}</a>
                       </div>

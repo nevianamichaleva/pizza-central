@@ -3,8 +3,8 @@
 import { default as Message, default as showAToast } from '@/components/common/showAToast';
 import CloudinaryUpload from '@/components/uploadForm';
 import { useUser } from '@/context/UserContext';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Button, Drawer, Image, Input, Select, Space, Table, message } from "antd";
+import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Drawer, Image, Input, message, Select, Space, Table, Tabs } from "antd";
 import { get, push, ref, remove, set, update } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -28,6 +28,8 @@ const AddProduct = () => {
   const [catName, setCatName] = useState('');
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [menuDrawerVisible, setMenuDrawerVisible] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
   const columns = [
     {
       title: "Действия",
@@ -199,6 +201,34 @@ const AddProduct = () => {
     }
   };
 
+  // Get filtered products based on active tab and search
+  const getFilteredProducts = () => {
+    let filtered = products;
+
+    // Filter by category tab
+    if (activeTab !== 'all') {
+      filtered = filtered.filter(product => product.category === activeTab);
+    }
+
+    // Filter by search text
+    if (searchText) {
+      const searchLower = searchText.toLowerCase();
+      filtered = filtered.filter(product => 
+        product.name?.toLowerCase().includes(searchLower) ||
+        product.description?.toLowerCase().includes(searchLower) ||
+        product.ingredients?.toLowerCase().includes(searchLower) ||
+        product.price?.toString().includes(searchText)
+      );
+    }
+
+    return filtered;
+  };
+
+  // Get main categories (categories without parent)
+  const getMainCategories = () => {
+    return categories.filter(cat => !cat.parent || cat.parent === '');
+  };
+
   const getRecord = async (recordId) => {
     const recordRef = ref(rtdb, `products/${recordId}`);
     const snapshot = await get(recordRef);
@@ -315,8 +345,40 @@ const AddProduct = () => {
               </Link>
             </div>
           </div>
+
+          <div style={{ marginBottom: "20px" }}>
+            <Input
+              placeholder="Търси по име, описание, съставки или цена..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              allowClear
+              style={{ maxWidth: "500px" }}
+              prefix={<SearchOutlined />}
+            />
+          </div>
+
+          <Tabs
+            activeKey={activeTab}
+            onChange={setActiveTab}
+            items={[
+              {
+                key: 'all',
+                label: `Всички (${products.length})`,
+              },
+              ...getMainCategories().map(category => ({
+                key: category.id,
+                label: `${category.name} (${products.filter(p => p.category === category.id).length})`,
+              }))
+            ]}
+          />
+
           <div style={{ overflowX: 'auto', width: '100%', marginTop: "20px" }}>
-            <Table bordered dataSource={products} columns={columns} />
+            <Table 
+              bordered 
+              dataSource={getFilteredProducts()} 
+              columns={columns}
+              rowKey="id"
+            />
           </div>
 
           <Drawer

@@ -1,4 +1,5 @@
 'use client';
+import { Button } from 'antd';
 import { useState } from 'react';
 
 export default function CloudinaryUpload(props) {
@@ -50,9 +51,9 @@ export default function CloudinaryUpload(props) {
   return (
     <div>
       <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} />
-      <button onClick={handleUpload} disabled={uploading}>
+      <Button onClick ={handleUpload} disabled={uploading} type="primary">
         {uploading ? 'Качване...' : 'Прикачи'}
-      </button>
+      </Button>
     </div>
   );
 }

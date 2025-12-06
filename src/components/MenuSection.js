@@ -6,17 +6,51 @@ import { useUser } from '@/context/UserContext';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 import { Button } from "antd";
 import { get, push, ref, set, update } from "firebase/database";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { rtdb } from "../../lib/firebase";
 import showAToast from "../components/common/showAToast";
 
 const MenuSection = () => {
-  const [activeTab, setActiveTab] = useState("menu-Пици");
+  const STORAGE_KEY = 'menuActiveTab';
+  const DEFAULT_TAB = "menu-Пици";
+  
+  // Initialize activeTab from localStorage or use default
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedTab = localStorage.getItem(STORAGE_KEY);
+      return savedTab || DEFAULT_TAB;
+    }
+    return DEFAULT_TAB;
+  });
+  
   const [subcategoryActiveTab, setSubcategoryActiveTab] = useState(null);
   const [subcategory, setSubcategory] = useState(null);
   const { products } = useProducts();
   const { categories } = useCategories();
   const { user, userDetails } = useUser();
+
+  // Validate and set active tab when categories are loaded
+  useEffect(() => {
+    if (categories && categories.length > 0) {
+      const savedTab = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+      
+      if (savedTab) {
+        // Check if saved tab exists in categories
+        const categoryName = savedTab.replace('menu-', '');
+        const categoryExists = categories.some(cat => cat.name === categoryName);
+        
+        if (categoryExists && savedTab !== activeTab) {
+          setActiveTab(savedTab);
+        } else if (!categoryExists) {
+          // If saved category doesn't exist, use default
+          setActiveTab(DEFAULT_TAB);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(STORAGE_KEY, DEFAULT_TAB);
+          }
+        }
+      }
+    }
+  }, [categories]);
 
   const normalizePrice = (rawPrice) => {
     if (rawPrice === undefined || rawPrice === null) {
@@ -54,6 +88,10 @@ const MenuSection = () => {
   const handleTabClick = (tab) => {
     setActiveTab(tab);
     setSubcategoryActiveTab(null);
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, tab);
+    }
   };
 
   const handleSubcategoryClick = (tab) => {
