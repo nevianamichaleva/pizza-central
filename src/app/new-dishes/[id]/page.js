@@ -3,7 +3,8 @@
 import { default as showAToast } from '@/components/common/showAToast';
 import { useUser } from '@/context/UserContext';
 import { useProducts } from '@/context/ProductsContext';
-import { Button, Modal, Select } from 'antd';
+import { useCategories } from '@/context/CategoriesContext';
+import { Button, Modal, Radio, Select } from 'antd';
 import { get, push, ref, set, update } from 'firebase/database';
 import Image from "next/image";
 import Link from "next/link";
@@ -17,6 +18,7 @@ const NewDishDetailsPage = ({ params }) => {
   const router = useRouter();
   const { user, userDetails } = useUser();
   const { products } = useProducts();
+  const { categories } = useCategories();
   const [dish, setDish] = useState(null);
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
@@ -74,6 +76,30 @@ const NewDishDetailsPage = ({ params }) => {
     return products.filter(p => p.isSideDish === true);
   };
 
+  // Calculate packaging box price based on product type
+  const getPackagingPrice = (product) => {
+    if (!product) return 0.50;
+    
+    // Find the category of the product
+    const productCategory = categories.find(cat => cat.id === product.category);
+    const isPizza = productCategory && productCategory.name && 
+                    (productCategory.name.toLowerCase().includes('пиц') || 
+                     productCategory.name.toLowerCase() === 'пици');
+    
+    if (isPizza) {
+      // Check for size in product name
+      const productName = (product.name || '').toUpperCase();
+      if (productName.includes('XXL')) {
+        return 1.50;
+      } else if (productName.includes('XL')) {
+        return 1.00;
+      }
+    }
+    
+    // Default price for all other items
+    return 0.50;
+  };
+
   const handleAddToCartClick = () => {
     if (!dish || !dish.productId) {
       showAToast("error", "Продуктът не е свързан с това ястие");
@@ -113,6 +139,10 @@ const NewDishDetailsPage = ({ params }) => {
     
     // Create a unique key for this item (include side dish in key if present)
     const itemKey = sideDish ? `${product.id}_${sideDish.id}` : product.id;
+    
+    // Calculate packaging price
+    const packagingPrice = getPackagingPrice(product);
+    const packagingKey = `${itemKey}_packaging`;
 
     setAddingToCart(true);
     try {
@@ -142,21 +172,33 @@ const NewDishDetailsPage = ({ params }) => {
         }
         emitCartUpdate(orderKey);
 
-        const newOrder = {
-          items: {
-            [itemKey]: {
-              name: productName,
-              quantity: 1,
-              value: productPrice,
-              image: productImage,
-              productId: product.id,
-              sideDishId: sideDish ? sideDish.id : null,
-              sideDishName: sideDish ? sideDish.name : null,
-            },
+        const items = {
+          [itemKey]: {
+            name: productName,
+            quantity: 1,
+            value: productPrice,
+            image: productImage,
+            productId: product.id,
+            sideDishId: sideDish ? sideDish.id : null,
+            sideDishName: sideDish ? sideDish.name : null,
           },
+          [packagingKey]: {
+            name: 'Кутия',
+            quantity: 1,
+            value: packagingPrice,
+            image: "/images/no-image.png",
+            productId: null,
+            sideDishId: null,
+            sideDishName: null,
+            isPackaging: true,
+          },
+        };
+
+        const newOrder = {
+          items: items,
           order_date: new Date().toLocaleString(),
           status: "pending",
-          total: productPrice,
+          total: productPrice + packagingPrice,
           user_id: user ? user.uid : null,
           user_email: user ? user.email : null,
           user_phone: userDetails ? userDetails.phone : null,
@@ -178,21 +220,33 @@ const NewDishDetailsPage = ({ params }) => {
           }
           emitCartUpdate(orderKey);
 
-          const newOrder = {
-            items: {
-              [itemKey]: {
-                name: productName,
-                quantity: 1,
-                value: productPrice,
-                image: productImage,
-                productId: product.id,
-                sideDishId: sideDish ? sideDish.id : null,
-                sideDishName: sideDish ? sideDish.name : null,
-              },
+          const items = {
+            [itemKey]: {
+              name: productName,
+              quantity: 1,
+              value: productPrice,
+              image: productImage,
+              productId: product.id,
+              sideDishId: sideDish ? sideDish.id : null,
+              sideDishName: sideDish ? sideDish.name : null,
             },
+            [packagingKey]: {
+              name: 'Кутия',
+              quantity: 1,
+              value: packagingPrice,
+              image: "/images/no-image.png",
+              productId: null,
+              sideDishId: null,
+              sideDishName: null,
+              isPackaging: true,
+            },
+          };
+
+          const newOrder = {
+            items: items,
             order_date: new Date().toLocaleString(),
             status: "pending",
-            total: productPrice,
+            total: productPrice + packagingPrice,
             user_id: user ? user.uid : null,
             user_email: user ? user.email : null,
             user_phone: userDetails ? userDetails.phone : null,
@@ -219,6 +273,25 @@ const NewDishDetailsPage = ({ params }) => {
               productId: product.id,
               sideDishId: sideDish ? sideDish.id : null,
               sideDishName: sideDish ? sideDish.name : null,
+            };
+          }
+
+          // Add or update packaging item
+          if (existingItems[packagingKey]) {
+            existingItems[packagingKey] = {
+              ...existingItems[packagingKey],
+              quantity: (Number(existingItems[packagingKey].quantity) || 0) + 1,
+            };
+          } else {
+            existingItems[packagingKey] = {
+              name: 'Кутия',
+              quantity: 1,
+              value: packagingPrice,
+              image: "/images/no-image.png",
+              productId: null,
+              sideDishId: null,
+              sideDishName: null,
+              isPackaging: true,
             };
           }
 
@@ -351,26 +424,22 @@ const NewDishDetailsPage = ({ params }) => {
           <p><strong>{dish?.product?.name}</strong></p>
           <p style={{ color: '#666', fontSize: '14px' }}>Моля, изберете гарнитура:</p>
         </div>
-        <Select
-          placeholder="Изберете гарнитура"
+        <Radio.Group
           value={selectedSideDish?.id}
-          onChange={(value) => {
-            const sideDish = getSideDishes().find(sd => sd.id === value);
+          onChange={(e) => {
+            const sideDish = getSideDishes().find(sd => sd.id === e.target.value);
             setSelectedSideDish(sideDish);
           }}
           style={{ width: '100%' }}
-          showSearch
-          optionFilterProp="children"
-          filterOption={(input, option) =>
-            (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
-          }
         >
-          {getSideDishes().map((sideDish) => (
-            <Select.Option key={sideDish.id} value={sideDish.id}>
-              {sideDish.name}
-            </Select.Option>
-          ))}
-        </Select>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {getSideDishes().map((sideDish) => (
+              <Radio key={sideDish.id} value={sideDish.id} style={{ fontSize: '15px' }}>
+                {sideDish.name}
+              </Radio>
+            ))}
+          </div>
+        </Radio.Group>
         <p style={{ marginTop: '12px', fontSize: '12px', color: '#999' }}>
           * Гарнитурата е включена в цената на ястието
         </p>

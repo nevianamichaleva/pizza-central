@@ -1225,7 +1225,7 @@ section,
 .menu .tab-content .menu-item .price {
   font-size: 24px;
   font-weight: 700;
-  color: var(--accent-color);
+  color: rgb(206, 18, 18);
 }
 
 /* Mobile Menu Styles */

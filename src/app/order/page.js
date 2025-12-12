@@ -179,15 +179,26 @@ export default function Order() {
       return;
     }
 
+    const updatedItems = {
+      ...order.items,
+      [itemId]: {
+        ...order.items[itemId],
+        quantity: parsedQuantity,
+      },
+    };
+
+    // Also update packaging item quantity if it exists
+    const packagingKey = `${itemId}_packaging`;
+    if (updatedItems[packagingKey] && !updatedItems[itemId].isPackaging) {
+      updatedItems[packagingKey] = {
+        ...updatedItems[packagingKey],
+        quantity: parsedQuantity,
+      };
+    }
+
     const updatedOrder = {
       ...order,
-      items: {
-        ...order.items,
-        [itemId]: {
-          ...order.items[itemId],
-          quantity: parsedQuantity,
-        },
-      },
+      items: updatedItems,
     };
 
     const newTotal = calculateTotal(updatedOrder.items);
@@ -205,6 +216,12 @@ export default function Order() {
 
     const updatedItems = { ...order.items };
     delete updatedItems[itemId];
+    
+    // Also delete packaging item if it exists (packaging items have keys like ${itemId}_packaging)
+    const packagingKey = `${itemId}_packaging`;
+    if (updatedItems[packagingKey]) {
+      delete updatedItems[packagingKey];
+    }
 
     const updatedOrder = {
       ...order,
@@ -389,14 +406,71 @@ export default function Order() {
     );
   }
 
-  const dataSource = order && order.items ? Object.keys(order.items).map((itemId) => ({
-    id: itemId,
-    name: order.items[itemId].name,
-    quantity: order.items[itemId].quantity,
-    image: order.items[itemId].image,
-    value: order.items[itemId].value,
-    sideDishName: order.items[itemId].sideDishName || null,
-  })) : [];
+  // Separate regular items from packaging items
+  const regularItems = order && order.items ? Object.keys(order.items)
+    .filter(itemId => !order.items[itemId].isPackaging)
+    .map((itemId) => ({
+      id: itemId,
+      name: order.items[itemId].name,
+      quantity: order.items[itemId].quantity,
+      image: order.items[itemId].image,
+      value: order.items[itemId].value,
+      sideDishName: order.items[itemId].sideDishName || null,
+      isPackaging: false,
+    })) : [];
+
+  // Group packaging items by price
+  const packagingGroups = order && order.items ? Object.keys(order.items)
+    .filter(itemId => order.items[itemId].isPackaging)
+    .reduce((groups, itemId) => {
+      const item = order.items[itemId];
+      const price = parseFloat(item.value);
+      const quantity = parseInt(item.quantity) || 0;
+      
+      if (!groups[price]) {
+        groups[price] = {
+          price: price,
+          totalQuantity: 0,
+          itemIds: [],
+        };
+      }
+      groups[price].totalQuantity += quantity;
+      groups[price].itemIds.push(itemId);
+      
+      return groups;
+    }, {}) : {};
+
+  // Convert packaging groups to display items
+  const packagingItems = Object.keys(packagingGroups)
+    .sort((a, b) => parseFloat(b) - parseFloat(a)) // Sort by price descending
+    .map((price) => {
+      const group = packagingGroups[price];
+      const priceFloat = parseFloat(price);
+      // Format price: 1.50 -> "1,50", 1.00 -> "1", 0.50 -> "0,50"
+      let priceLabel;
+      if (priceFloat % 1 === 0) {
+        priceLabel = priceFloat.toString();
+      } else {
+        priceLabel = priceFloat.toFixed(2).replace('.', ',');
+      }
+      
+      return {
+        id: `packaging_${price}`,
+        name: `Кутия ${group.totalQuantity}*${priceLabel}`,
+        quantity: group.totalQuantity,
+        image: null, // No image for packaging
+        value: priceFloat,
+        sideDishName: null,
+        isPackaging: true,
+        itemIds: group.itemIds, // Keep track of original item IDs for deletion
+      };
+    });
+
+  // Combine regular items and grouped packaging items
+  const dataSource = [...regularItems, ...packagingItems];
+
+  // Calculate total from actual items (more reliable than order.total)
+  const calculatedTotal = order && order.items ? calculateTotal(order.items) : 0;
 
   return (
     <>
@@ -413,13 +487,15 @@ export default function Order() {
                   {dataSource.map((item, key) => (
                     <div className="product row d-flex align-items-center flex-nowrap" key={key} style={{ marginBottom: "15px", paddingBottom: "15px", borderBottom: "1px solid #f0f0f0" }}>
                       <div className="col-md-5 product-name d-flex align-items-center">
-                        <Image
-                          src={item.image || "/images/no-image.png"}
-                          alt={item.name}
-                          width={80}
-                          height={80}
-                          style={{ marginRight: "10px", borderRadius: "8px" }}
-                        />
+                        {!item.isPackaging && (
+                          <Image
+                            src={item.image || "/images/no-image.png"}
+                            alt={item.name}
+                            width={80}
+                            height={80}
+                            style={{ marginRight: "10px", borderRadius: "8px" }}
+                          />
+                        )}
                         <div>
                           <a href="#">{item.name}</a>
                           {item.sideDishName && (
@@ -431,13 +507,17 @@ export default function Order() {
                       </div>
 
                       <div className="col-md-3 quantity d-flex align-items-center">
-                        <input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) => updateItemQuantity(item.id, e.target.value)}
-                          className="form-control quantity-input"
-                          style={{ width: "60px" }}
-                        />
+                        {!item.isPackaging ? (
+                          <input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => updateItemQuantity(item.id, e.target.value)}
+                            className="form-control quantity-input"
+                            style={{ width: "60px" }}
+                          />
+                        ) : (
+                          <span>{item.quantity}</span>
+                        )}
                       </div>
 
                       <div className="col-md-2 price d-flex align-items-center justify-content-center">
@@ -448,7 +528,7 @@ export default function Order() {
                         <span>
                           {Number.isFinite(item.value * item.quantity) ? (item.value * item.quantity).toFixed(2) : "0.00"} лева
                         </span>
-                        {!orderCompleted &&
+                        {!orderCompleted && !item.isPackaging &&
                           <FaTimes
                             onClick={() => deleteItem(item.id)}
                             style={{ color: "red", cursor: "pointer", marginLeft: "10px" }}
@@ -464,15 +544,15 @@ export default function Order() {
                   <h3>Обобщение</h3>
                   <div className="summary-item">
                     <span>Сума:</span>
-                    <span>{Number(order?.total || 0).toFixed(2)} лева</span>
+                    <span>{calculatedTotal.toFixed(2)} лева</span>
                   </div>
                   <div className="summary-item">
                     <span>Доставка:</span>
-                    <span>{order?.total > 0 ? "3.00 лева" : "0.00 лева"}</span>
+                    <span>{calculatedTotal > 0 ? "3.00 лева" : "0.00 лева"}</span>
                   </div>
                   <div className="summary-item">
                     <span>Общо:</span>
-                    <span>{Number(order?.total > 0 ? order.total + 3 : order?.total || 0).toFixed(2)} лева</span>
+                    <span>{(calculatedTotal > 0 ? calculatedTotal + 3 : calculatedTotal).toFixed(2)} лева</span>
                   </div>
                   {!orderCompleted &&
                     <>
@@ -487,7 +567,7 @@ export default function Order() {
                           <button
                             className="btn btn-primary btn-lg btn-block"
                             onClick={changeOrderStatus}
-                            disabled={order?.status === 'in progress' || (order?.total || 0) <= 25 || !isWithinWorkingHours()}
+                            disabled={order?.status === 'in progress' || calculatedTotal <= 25 || !isWithinWorkingHours()}
                           >
                             Поръчай
                           </button>
@@ -498,10 +578,10 @@ export default function Order() {
                           Поръчките се приемат от {workingHours.startHour}:00 до {workingHours.endHour}:00 часа
                         </p>
                       )}
-                      {(order?.total || 0) < 25 && (
+                      {calculatedTotal < 25 && (
                         <>
                         <p style={{ fontSize: '15px', textAlign: 'left', coler: 'red' }}>
-                          Минимална сума за поръчка 25 лв, добавете продукти за още {(25 - (order?.total || 0)).toFixed(2)} лева.
+                          Минимална сума за поръчка 25 лв, добавете продукти за още {(25 - calculatedTotal).toFixed(2)} лева.
                         </p>
                         <Link href='/our-menu' className="btn btn-primary w-auto text-center py-1 px-3">Към меню</Link>
                         </>

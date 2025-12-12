@@ -4,7 +4,7 @@ import { useCategories } from '@/context/CategoriesContext';
 import { useProducts } from '@/context/ProductsContext';
 import { useUser } from '@/context/UserContext';
 import { ShoppingCartOutlined } from '@ant-design/icons';
-import { Button, Modal, Select } from "antd";
+import { Button, Modal, Radio } from "antd";
 import { get, push, ref, set, update } from "firebase/database";
 import { useEffect, useState } from 'react';
 import { rtdb } from "../../lib/firebase";
@@ -107,6 +107,28 @@ const MenuSection = () => {
     return products.filter(p => p.isSideDish === true);
   };
 
+  // Calculate packaging box price based on product type
+  const getPackagingPrice = (product) => {
+    // Find the category of the product
+    const productCategory = categories.find(cat => cat.id === product.category);
+    const isPizza = productCategory && productCategory.name && 
+                    (productCategory.name.toLowerCase().includes('пиц') || 
+                     productCategory.name.toLowerCase() === 'пици');
+    
+    if (isPizza) {
+      // Check for size in product name
+      const productName = (product.name || '').toUpperCase();
+      if (productName.includes('XXL')) {
+        return 1.50;
+      } else if (productName.includes('XL')) {
+        return 1.00;
+      }
+    }
+    
+    // Default price for all other items
+    return 0.50;
+  };
+
   const handleProductClick = (product) => {
     if (product.requiresSideDish) {
       setSelectedProduct(product);
@@ -145,6 +167,10 @@ const MenuSection = () => {
     
     // Create a unique key for this item (include side dish in key if present)
     const itemKey = sideDish ? `${product.id}_${sideDish.id}` : product.id;
+    
+    // Calculate packaging price
+    const packagingPrice = getPackagingPrice(product);
+    const packagingKey = `${itemKey}_packaging`;
 
     try {
       const snapshot = await get(ordersRef);
@@ -181,21 +207,33 @@ const MenuSection = () => {
           ? `${product.name} (с ${sideDish.name})`
           : product.name;
 
-        const newOrder = {
-          items: {
-            [itemKey]: {
-              name: itemName,
-              quantity: 1,
-              value: productPrice,
-              image: productImage,
-              productId: product.id,
-              sideDishId: sideDish ? sideDish.id : null,
-              sideDishName: sideDish ? sideDish.name : null,
-            },
+        const items = {
+          [itemKey]: {
+            name: itemName,
+            quantity: 1,
+            value: productPrice,
+            image: productImage,
+            productId: product.id,
+            sideDishId: sideDish ? sideDish.id : null,
+            sideDishName: sideDish ? sideDish.name : null,
           },
+          [packagingKey]: {
+            name: 'Кутия',
+            quantity: 1,
+            value: packagingPrice,
+            image: "/images/no-image.png",
+            productId: null,
+            sideDishId: null,
+            sideDishName: null,
+            isPackaging: true,
+          },
+        };
+
+        const newOrder = {
+          items: items,
           order_date: new Date().toLocaleString(),
           status: "pending",
-          total: productPrice,
+          total: productPrice + packagingPrice,
           user_id: user ? user.uid : null,
           user_email: user ? user.email : null,
           user_phone: userDetails ? userDetails.phone : null,
@@ -215,7 +253,9 @@ const MenuSection = () => {
           : product.name;
 
         const existingItem = currentItems[itemKey];
+        const existingPackaging = currentItems[packagingKey];
         const currentQuantity = Number(existingItem?.quantity) || 0;
+        
         const updatedItems = {
           ...currentItems,
           [itemKey]: {
@@ -228,6 +268,25 @@ const MenuSection = () => {
             sideDishName: sideDish ? sideDish.name : null,
           },
         };
+
+        // Add or update packaging item
+        if (existingPackaging) {
+          updatedItems[packagingKey] = {
+            ...existingPackaging,
+            quantity: (Number(existingPackaging.quantity) || 0) + 1,
+          };
+        } else {
+          updatedItems[packagingKey] = {
+            name: 'Кутия',
+            quantity: 1,
+            value: packagingPrice,
+            image: "/images/no-image.png",
+            productId: null,
+            sideDishId: null,
+            sideDishName: null,
+            isPackaging: true,
+          };
+        }
 
         const updatedTotal = Object.values(updatedItems).reduce((total, item) => {
           const basePrice = normalizePrice(item.value);
@@ -257,51 +316,48 @@ const MenuSection = () => {
   }
 
 
-  // Render product card
+  // Render product card - Enhanced desktop version
   const renderProductCard = (item, index) => (
-    <div key={index} className="col-lg-4 menu-item">
-      <a href={item.url || item.image || "#"} className="glightbox">
-        <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
-      </a>
-      <h4>{item.name}</h4>
-      <p className="ingredients">{item.description || item.ingredients}</p>
-      {formatPrice(item.price) && (
-        <p className="price">{formatPrice(item.price)}</p>
-      )}
-      <Button
-        type="primary"
-        onClick={() => handleProductClick(item)}
-        shape="circle"
-        icon={<ShoppingCartOutlined />}
-        style={{
-          backgroundColor: '#1890ff',
-          borderRadius: '10px',
-          padding: '10px 20px',
-          fontSize: '16px',
-          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-          transition: 'background-color 0.3s, transform 0.2s',
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.backgroundColor = '#40a9ff';
-          e.target.style.transform = 'scale(1.05)';
-          const icon = e.target.querySelector('svg');
-          if (icon) {
-            icon.style.transform = 'translateX(5px)';
-            icon.style.transition = 'transform 0.2s';
-          }
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.backgroundColor = '#1890ff';
-          e.target.style.transform = 'scale(1)';
-          const icon = e.target.querySelector('svg');
-          if (icon) {
-            icon.style.transform = 'translateX(0)';
-          }
-        }}
-        size="large"
-      >
-        Добави
-      </Button>
+    <div key={index} className="col-lg-4 menu-item menu-item-desktop">
+      <div className="menu-card-wrapper">
+        <div className="menu-card-image-container">
+          <a href={item.url || item.image || "#"} className="glightbox">
+            <img 
+              src={item.image ? item.image : '/images/no-image.png'} 
+              className="menu-img img-fluid" 
+              alt={item.name} 
+            />
+          </a>
+          <div className="menu-card-overlay">
+            <Button
+              type="primary"
+              onClick={() => handleProductClick(item)}
+              icon={<ShoppingCartOutlined />}
+              className="menu-card-overlay-btn"
+            >
+              Добави в количката
+            </Button>
+          </div>
+        </div>
+        <div className="menu-card-content">
+          <h4 className="menu-card-title">{item.name}</h4>
+          <p className="menu-card-description">{item.description || item.ingredients}</p>
+          <div className="menu-card-footer">
+            {formatPrice(item.price) && (
+              <p className="menu-card-price">{formatPrice(item.price)}</p>
+            )}
+            <Button
+              type="primary"
+              onClick={() => handleProductClick(item)}
+              icon={<ShoppingCartOutlined />}
+              className="menu-card-mobile-btn"
+              size="large"
+            >
+              Добави
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 
@@ -402,7 +458,7 @@ const MenuSection = () => {
                           shape="circle"
                           icon={<ShoppingCartOutlined />}
                           style={{
-                            backgroundColor: '#1890ff',
+                            backgroundColor: '#FFA500',
                             borderRadius: '10px',
                             padding: '10px 20px',
                             fontSize: '16px',
@@ -439,26 +495,22 @@ const MenuSection = () => {
           <p><strong>{selectedProduct?.name}</strong></p>
           <p style={{ color: '#666', fontSize: '14px' }}>Моля, изберете гарнитура:</p>
         </div>
-        <Select
-          placeholder="Изберете гарнитура"
+        <Radio.Group
           value={selectedSideDish?.id}
-          onChange={(value) => {
-            const sideDish = getSideDishes().find(sd => sd.id === value);
+          onChange={(e) => {
+            const sideDish = getSideDishes().find(sd => sd.id === e.target.value);
             setSelectedSideDish(sideDish);
           }}
           style={{ width: '100%' }}
-          showSearch
-          optionFilterProp="children"
-          filterOption={(input, option) =>
-            (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
-          }
         >
-          {getSideDishes().map((sideDish) => (
-            <Select.Option key={sideDish.id} value={sideDish.id}>
-              {sideDish.name}
-            </Select.Option>
-          ))}
-        </Select>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {getSideDishes().map((sideDish) => (
+              <Radio key={sideDish.id} value={sideDish.id} style={{ fontSize: '15px' }}>
+                {sideDish.name}
+              </Radio>
+            ))}
+          </div>
+        </Radio.Group>
         <p style={{ marginTop: '12px', fontSize: '12px', color: '#999' }}>
           * Гарнитурата е включена в цената на ястието
         </p>
