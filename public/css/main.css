@@ -1228,6 +1228,111 @@ section,
   color: var(--accent-color);
 }
 
+/* Mobile Menu Styles */
+@media (max-width: 768px) {
+  /* Hide desktop tabs and content on mobile */
+  .menu-desktop-tabs,
+  .menu-desktop-content {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Show mobile category list */
+  .menu-mobile-categories {
+    display: block;
+  }
+
+  /* Category section styling */
+  .menu-mobile-category-section {
+    margin-bottom: 40px;
+  }
+
+  /* Category title */
+  .menu-mobile-category-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin-bottom: 20px;
+    text-align: center;
+    font-family: var(--heading-font);
+  }
+
+  /* Products slider container */
+  .menu-mobile-products-slider {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 20px;
+    padding: 10px 0;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-color) transparent;
+  }
+
+  .menu-mobile-products-slider::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .menu-mobile-products-slider::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .menu-mobile-products-slider::-webkit-scrollbar-thumb {
+    background-color: var(--accent-color);
+    border-radius: 3px;
+  }
+
+  /* Individual product item in slider */
+  .menu-mobile-product-item {
+    flex: 0 0 auto;
+    width: 280px;
+    text-align: center;
+    padding: 15px;
+    background-color: var(--surface-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .menu-mobile-product-item .menu-img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+  }
+
+  .menu-mobile-product-item h4 {
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 8px;
+    font-family: var(--default-font);
+  }
+
+  .menu-mobile-product-item .ingredients {
+    font-family: var(--nav-font);
+    color: color-mix(in srgb, var(--default-color), transparent 50%);
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .menu-mobile-product-item .price {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin-bottom: 15px;
+  }
+}
+
+/* Desktop: Hide mobile categories */
+@media (min-width: 769px) {
+  .menu-mobile-categories {
+    display: none;
+  }
+}
+
 /*--------------------------------------------------------------
 # Testimonials Section
 --------------------------------------------------------------*/

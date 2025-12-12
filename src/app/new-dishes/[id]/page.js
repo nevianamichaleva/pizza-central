@@ -2,8 +2,9 @@
 
 import { default as showAToast } from '@/components/common/showAToast';
 import { useUser } from '@/context/UserContext';
-import { Button } from 'antd';
-import { get, push, ref, set } from 'firebase/database';
+import { useProducts } from '@/context/ProductsContext';
+import { Button, Modal, Select } from 'antd';
+import { get, push, ref, set, update } from 'firebase/database';
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,9 +16,12 @@ import styles from "./page.module.css";
 const NewDishDetailsPage = ({ params }) => {
   const router = useRouter();
   const { user, userDetails } = useUser();
+  const { products } = useProducts();
   const [dish, setDish] = useState(null);
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [sideDishModalVisible, setSideDishModalVisible] = useState(false);
+  const [selectedSideDish, setSelectedSideDish] = useState(null);
   const dishId = params?.id || (typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : '');
 
   useEffect(() => {
@@ -66,7 +70,30 @@ const NewDishDetailsPage = ({ params }) => {
     fetchDish();
   }, [dishId, router]);
 
-  const handleAddToCart = async () => {
+  const getSideDishes = () => {
+    return products.filter(p => p.isSideDish === true);
+  };
+
+  const handleAddToCartClick = () => {
+    if (!dish || !dish.productId) {
+      showAToast("error", "Продуктът не е свързан с това ястие");
+      return;
+    }
+
+    const product = dish.product;
+    if (!product || !product.price) {
+      showAToast("error", "Цената не е зададена за продукта");
+      return;
+    }
+
+    if (product.requiresSideDish) {
+      setSideDishModalVisible(true);
+    } else {
+      handleAddToCart(null);
+    }
+  };
+
+  const handleAddToCart = async (sideDish) => {
     if (!dish || !dish.productId) {
       showAToast("error", "Продуктът не е свързан с това ястие");
       return;
@@ -79,8 +106,13 @@ const NewDishDetailsPage = ({ params }) => {
     }
 
     const productPrice = parseFloat(product.price);
-    const productName = product.name;
+    const productName = sideDish 
+      ? `${product.name} (с ${sideDish.name})`
+      : product.name;
     const productImage = product.image || dish.img || "/images/no-image.png";
+    
+    // Create a unique key for this item (include side dish in key if present)
+    const itemKey = sideDish ? `${product.id}_${sideDish.id}` : product.id;
 
     setAddingToCart(true);
     try {
@@ -112,11 +144,14 @@ const NewDishDetailsPage = ({ params }) => {
 
         const newOrder = {
           items: {
-            [product.id]: {
+            [itemKey]: {
               name: productName,
               quantity: 1,
               value: productPrice,
               image: productImage,
+              productId: product.id,
+              sideDishId: sideDish ? sideDish.id : null,
+              sideDishName: sideDish ? sideDish.name : null,
             },
           },
           order_date: new Date().toLocaleString(),
@@ -145,11 +180,14 @@ const NewDishDetailsPage = ({ params }) => {
 
           const newOrder = {
             items: {
-              [product.id]: {
+              [itemKey]: {
                 name: productName,
                 quantity: 1,
                 value: productPrice,
                 image: productImage,
+                productId: product.id,
+                sideDishId: sideDish ? sideDish.id : null,
+                sideDishName: sideDish ? sideDish.name : null,
               },
             },
             order_date: new Date().toLocaleString(),
@@ -168,16 +206,19 @@ const NewDishDetailsPage = ({ params }) => {
           const orderData = orderSnapshot.val();
           const existingItems = orderData.items || {};
           
-          if (existingItems[product.id]) {
+          if (existingItems[itemKey]) {
             // Item already exists, increase quantity
-            existingItems[product.id].quantity += 1;
+            existingItems[itemKey].quantity += 1;
           } else {
             // New item
-            existingItems[product.id] = {
+            existingItems[itemKey] = {
               name: productName,
               quantity: 1,
               value: productPrice,
               image: productImage,
+              productId: product.id,
+              sideDishId: sideDish ? sideDish.id : null,
+              sideDishName: sideDish ? sideDish.name : null,
             };
           }
 
@@ -200,6 +241,8 @@ const NewDishDetailsPage = ({ params }) => {
       showAToast("error", "Грешка при добавяне в количката");
     } finally {
       setAddingToCart(false);
+      setSideDishModalVisible(false);
+      setSelectedSideDish(null);
     }
   };
 
@@ -280,7 +323,7 @@ const NewDishDetailsPage = ({ params }) => {
               <Button
                 type="primary"
                 size="large"
-                onClick={handleAddToCart}
+                onClick={handleAddToCartClick}
                 loading={addingToCart}
                 style={{ marginTop: '20px', width: '100%' }}
               >
@@ -290,6 +333,48 @@ const NewDishDetailsPage = ({ params }) => {
           </div>
         </div>
       </div>
+
+      <Modal
+        title="Изберете гарнитура"
+        open={sideDishModalVisible}
+        onOk={() => {
+          handleAddToCart(selectedSideDish);
+        }}
+        onCancel={() => {
+          setSideDishModalVisible(false);
+          setSelectedSideDish(null);
+        }}
+        okText="Добави"
+        cancelText="Отказ"
+      >
+        <div style={{ marginBottom: '16px' }}>
+          <p><strong>{dish?.product?.name}</strong></p>
+          <p style={{ color: '#666', fontSize: '14px' }}>Моля, изберете гарнитура:</p>
+        </div>
+        <Select
+          placeholder="Изберете гарнитура"
+          value={selectedSideDish?.id}
+          onChange={(value) => {
+            const sideDish = getSideDishes().find(sd => sd.id === value);
+            setSelectedSideDish(sideDish);
+          }}
+          style={{ width: '100%' }}
+          showSearch
+          optionFilterProp="children"
+          filterOption={(input, option) =>
+            (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+          }
+        >
+          {getSideDishes().map((sideDish) => (
+            <Select.Option key={sideDish.id} value={sideDish.id}>
+              {sideDish.name}
+            </Select.Option>
+          ))}
+        </Select>
+        <p style={{ marginTop: '12px', fontSize: '12px', color: '#999' }}>
+          * Гарнитурата е включена в цената на ястието
+        </p>
+      </Modal>
     </section>
   );
 };

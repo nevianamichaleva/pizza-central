@@ -395,6 +395,7 @@ export default function Order() {
     quantity: order.items[itemId].quantity,
     image: order.items[itemId].image,
     value: order.items[itemId].value,
+    sideDishName: order.items[itemId].sideDishName || null,
   })) : [];
 
   return (
@@ -413,13 +414,20 @@ export default function Order() {
                     <div className="product row d-flex align-items-center flex-nowrap" key={key} style={{ marginBottom: "15px", paddingBottom: "15px", borderBottom: "1px solid #f0f0f0" }}>
                       <div className="col-md-5 product-name d-flex align-items-center">
                         <Image
-                          src={item.image}
+                          src={item.image || "/images/no-image.png"}
                           alt={item.name}
                           width={80}
                           height={80}
                           style={{ marginRight: "10px", borderRadius: "8px" }}
                         />
-                        <a href="#">{item.name}</a>
+                        <div>
+                          <a href="#">{item.name}</a>
+                          {item.sideDishName && (
+                            <div style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
+                              Гарнитура: {item.sideDishName}
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       <div className="col-md-3 quantity d-flex align-items-center">

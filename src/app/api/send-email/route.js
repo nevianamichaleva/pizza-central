@@ -24,9 +24,14 @@ export async function POST(request) {
 
     // Format order details
     const itemsList = orderData.items 
-      ? Object.values(orderData.items).map(item => 
-          `- ${item.name} x${item.quantity} - ${parseFloat(item.value || 0).toFixed(2)} лв`
-        ).join('\n')
+      ? Object.values(orderData.items).map(item => {
+          let itemLine = `- ${item.name} x${item.quantity} - ${parseFloat(item.value || 0).toFixed(2)} лв`;
+          // If side dish is stored separately, show it explicitly
+          if (item.sideDishName && !item.name.includes(item.sideDishName)) {
+            itemLine += `\n  Гарнитура: ${item.sideDishName}`;
+          }
+          return itemLine;
+        }).join('\n')
       : 'Няма артикули';
 
     const total = parseFloat(orderData.total || 0).toFixed(2);

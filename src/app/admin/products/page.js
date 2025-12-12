@@ -4,7 +4,7 @@ import { default as Message, default as showAToast } from '@/components/common/s
 import CloudinaryUpload from '@/components/uploadForm';
 import { useUser } from '@/context/UserContext';
 import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Drawer, Image, Input, message, Select, Space, Table, Tabs } from "antd";
+import { Button, Drawer, Image, Input, message, Select, Space, Switch, Table, Tabs } from "antd";
 import { get, push, ref, remove, set, update } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -21,6 +21,8 @@ const AddProduct = () => {
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
   const [image, setImage] = useState('');
+  const [requiresSideDish, setRequiresSideDish] = useState(false);
+  const [isSideDish, setIsSideDish] = useState(false);
   const [categories, setCategories] = useState([]);
   const [product, setProduct] = useState(false);
   const [products, setProducts] = useState([]);
@@ -110,6 +112,8 @@ const AddProduct = () => {
   const openDrawer = () => setDrawerVisible(true);
   const closeDrawer = () => {
     handleViewProduct(null, null);
+    setRequiresSideDish(false);
+    setIsSideDish(false);
     setDrawerVisible(false);
   }
   const openMenuDrawer = () => setMenuDrawerVisible(true);
@@ -127,7 +131,9 @@ const AddProduct = () => {
       ingredients: ingredients,
       category: category,
       subcategory: subcategory,
-      image: image
+      image: image,
+      requiresSideDish: requiresSideDish || false,
+      isSideDish: isSideDish || false
     })
       .then(() => {
         closeDrawer();
@@ -252,6 +258,8 @@ const AddProduct = () => {
       category: category,
       subcategory: subcategory,
       image: image,
+      requiresSideDish: requiresSideDish || false,
+      isSideDish: isSideDish || false
     };
 
     try {
@@ -275,7 +283,9 @@ const AddProduct = () => {
       ingredients = null,
       category = null,
       subcategory = null,
-      image = null
+      image = null,
+      requiresSideDish = false,
+      isSideDish = false
     } = values || {};
 
     setName(name);
@@ -285,6 +295,8 @@ const AddProduct = () => {
     setCategory(category);
     setSubcategory(subcategory);
     setImage(image);
+    setRequiresSideDish(requiresSideDish);
+    setIsSideDish(isSideDish);
 
     setProduct(id);
   };
@@ -494,6 +506,26 @@ const AddProduct = () => {
                     onChange={(e) => setPrice(e.target.value)}
                     style={{ marginBottom: "16px" }}
                   />
+                </div>
+              </div>
+              <div className="row gy-4">
+                <div className="col-md-6">
+                  <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <Switch
+                      checked={requiresSideDish}
+                      onChange={setRequiresSideDish}
+                    />
+                    <span>Изисква избор на гарнитура</span>
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <Switch
+                      checked={isSideDish}
+                      onChange={setIsSideDish}
+                    />
+                    <span>Това е гарнитура (няма да се показва в менюто)</span>
+                  </div>
                 </div>
               </div>
               <div className="col-md-5 text-center">

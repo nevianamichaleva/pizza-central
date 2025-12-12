@@ -4,9 +4,9 @@ import { useCategories } from '@/context/CategoriesContext';
 import { useProducts } from '@/context/ProductsContext';
 import { useUser } from '@/context/UserContext';
 import { ShoppingCartOutlined } from '@ant-design/icons';
-import { Button } from "antd";
+import { Button, Modal, Select } from "antd";
 import { get, push, ref, set, update } from "firebase/database";
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { rtdb } from "../../lib/firebase";
 import showAToast from "../components/common/showAToast";
 
@@ -25,6 +25,9 @@ const MenuSection = () => {
   
   const [subcategoryActiveTab, setSubcategoryActiveTab] = useState(null);
   const [subcategory, setSubcategory] = useState(null);
+  const [sideDishModalVisible, setSideDishModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedSideDish, setSelectedSideDish] = useState(null);
   const { products } = useProducts();
   const { categories } = useCategories();
   const { user, userDetails } = useUser();
@@ -99,7 +102,36 @@ const MenuSection = () => {
     setSubcategoryActiveTab(`menu-${tab.name}`)
   }
 
-  async function handleAddProduct(product) {
+  // Get side dishes (products with isSideDish: true)
+  const getSideDishes = () => {
+    return products.filter(p => p.isSideDish === true);
+  };
+
+  const handleProductClick = (product) => {
+    if (product.requiresSideDish) {
+      setSelectedProduct(product);
+      setSideDishModalVisible(true);
+    } else {
+      handleAddProduct(product, null);
+    }
+  };
+
+  const handleSideDishConfirm = () => {
+    if (selectedProduct && selectedSideDish) {
+      handleAddProduct(selectedProduct, selectedSideDish);
+      setSideDishModalVisible(false);
+      setSelectedProduct(null);
+      setSelectedSideDish(null);
+    } else if (selectedProduct) {
+      // Allow adding without side dish if user doesn't select one
+      handleAddProduct(selectedProduct, null);
+      setSideDishModalVisible(false);
+      setSelectedProduct(null);
+      setSelectedSideDish(null);
+    }
+  };
+
+  async function handleAddProduct(product, sideDish) {
     const ordersRef = ref(rtdb, 'orders');
     const productPrice = normalizePrice(product.price ?? product.value ?? product.basePrice);
 
@@ -110,6 +142,9 @@ const MenuSection = () => {
     }
 
     const productImage = product.image ?? product.img ?? product.url ?? "/images/no-image.png";
+    
+    // Create a unique key for this item (include side dish in key if present)
+    const itemKey = sideDish ? `${product.id}_${sideDish.id}` : product.id;
 
     try {
       const snapshot = await get(ordersRef);
@@ -142,13 +177,20 @@ const MenuSection = () => {
         localStorage.setItem("cartId", orderKey);
         emitCartUpdate(orderKey);
 
+        const itemName = sideDish 
+          ? `${product.name} (с ${sideDish.name})`
+          : product.name;
+
         const newOrder = {
           items: {
-            [product.id]: {
-              name: product.name,
+            [itemKey]: {
+              name: itemName,
               quantity: 1,
               value: productPrice,
               image: productImage,
+              productId: product.id,
+              sideDishId: sideDish ? sideDish.id : null,
+              sideDishName: sideDish ? sideDish.name : null,
             },
           },
           order_date: new Date().toLocaleString(),
@@ -168,15 +210,22 @@ const MenuSection = () => {
         const currentOrder = orderSnapshot.exists() ? orderSnapshot.val() : {};
         const currentItems = currentOrder.items || {};
 
-        const existingItem = currentItems[product.id];
+        const itemName = sideDish 
+          ? `${product.name} (с ${sideDish.name})`
+          : product.name;
+
+        const existingItem = currentItems[itemKey];
         const currentQuantity = Number(existingItem?.quantity) || 0;
         const updatedItems = {
           ...currentItems,
-          [product.id]: {
-            name: product.name,
+          [itemKey]: {
+            name: itemName,
             quantity: currentQuantity + 1,
             value: productPrice,
             image: productImage,
+            productId: product.id,
+            sideDishId: sideDish ? sideDish.id : null,
+            sideDishName: sideDish ? sideDish.name : null,
           },
         };
 
@@ -208,6 +257,54 @@ const MenuSection = () => {
   }
 
 
+  // Render product card
+  const renderProductCard = (item, index) => (
+    <div key={index} className="col-lg-4 menu-item">
+      <a href={item.url || item.image || "#"} className="glightbox">
+        <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
+      </a>
+      <h4>{item.name}</h4>
+      <p className="ingredients">{item.description || item.ingredients}</p>
+      {formatPrice(item.price) && (
+        <p className="price">{formatPrice(item.price)}</p>
+      )}
+      <Button
+        type="primary"
+        onClick={() => handleProductClick(item)}
+        shape="circle"
+        icon={<ShoppingCartOutlined />}
+        style={{
+          backgroundColor: '#1890ff',
+          borderRadius: '10px',
+          padding: '10px 20px',
+          fontSize: '16px',
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+          transition: 'background-color 0.3s, transform 0.2s',
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = '#40a9ff';
+          e.target.style.transform = 'scale(1.05)';
+          const icon = e.target.querySelector('svg');
+          if (icon) {
+            icon.style.transform = 'translateX(5px)';
+            icon.style.transition = 'transform 0.2s';
+          }
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = '#1890ff';
+          e.target.style.transform = 'scale(1)';
+          const icon = e.target.querySelector('svg');
+          if (icon) {
+            icon.style.transform = 'translateX(0)';
+          }
+        }}
+        size="large"
+      >
+        Добави
+      </Button>
+    </div>
+  );
+
   return (
     <section id="menu" className="menu section">
       <div className="container section-title" data-aos="fade-up">
@@ -216,21 +313,27 @@ const MenuSection = () => {
       </div>
 
       <div className="container">
-        <ul className="nav nav-tabs d-flex justify-content-center" data-aos="fade-up" data-aos-delay="100">
-          {categories.map((category) => (
-            <li key={category.id} className="nav-item">
-              <a
-                className={`nav-link ${activeTab === `menu-${category.name}` ? 'active show' : ''}`}
-                onClick={() => handleTabClick(`menu-${category.name}`)}
-              >
-                <h4>{category.name.charAt(0).toUpperCase() + category.name.slice(1)}</h4>
-              </a>
-            </li>
-          ))}
+        {/* Desktop Tab Navigation */}
+        <ul className="nav nav-tabs d-flex justify-content-center menu-desktop-tabs" data-aos="fade-up" data-aos-delay="100">
+          {categories
+            .filter((category) => category.name !== "Гарнитури")
+            .map((category) => (
+              <li key={category.id} className="nav-item">
+                <a
+                  className={`nav-link ${activeTab === `menu-${category.name}` ? 'active show' : ''}`}
+                  onClick={() => handleTabClick(`menu-${category.name}`)}
+                >
+                  <h4>{category.name.charAt(0).toUpperCase() + category.name.slice(1)}</h4>
+                </a>
+              </li>
+            ))}
         </ul>
 
-        <div className="tab-content" data-aos="fade-up" data-aos-delay="200">
-          {categories.map((category) => (
+        {/* Desktop Tab Content */}
+        <div className="tab-content menu-desktop-content" data-aos="fade-up" data-aos-delay="200">
+          {categories
+            .filter((category) => category.name !== "Гарнитури")
+            .map((category) => (
             <div
               key={category.id}
               className={`tab-pane fade ${activeTab === `menu-${category.name}` ? 'active show' : ''}`}
@@ -258,9 +361,34 @@ const MenuSection = () => {
               <div className="row gy-5">
                 {subcategoryActiveTab ?
                   <>
-                    {products.filter((item) => item?.subcategory == subcategory.id).map((item, index) => (
-                      <div key={index} className="col-lg-4 menu-item">
-                        <a href={item.image ? item.image : '#'} className="glightbox">
+                    {products.filter((item) => item?.subcategory == subcategory.id && !item.isSideDish).map((item, index) => renderProductCard(item, index))}
+                  </>
+                  :
+                  <>
+                    {products.filter((item) => item.category == category.id && !item.isSideDish).map((item, index) => renderProductCard(item, index))}
+                  </>
+                }
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Mobile Category List with Sliders */}
+        <div className="menu-mobile-categories">
+          {categories
+            .filter((category) => category.name !== "Гарнитури")
+            .map((category) => {
+              const categoryProducts = products.filter((item) => item.category == category.id && !item.isSideDish);
+              
+              return (
+                <div key={category.id} className="menu-mobile-category-section">
+                  <h3 className="menu-mobile-category-title">
+                    {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+                  </h3>
+                  <div className="menu-mobile-products-slider">
+                    {categoryProducts.map((item, index) => (
+                      <div key={index} className="menu-mobile-product-item">
+                        <a href={item.url || item.image || "#"} className="glightbox">
                           <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
                         </a>
                         <h4>{item.name}</h4>
@@ -268,10 +396,9 @@ const MenuSection = () => {
                         {formatPrice(item.price) && (
                           <p className="price">{formatPrice(item.price)}</p>
                         )}
-
                         <Button
                           type="primary"
-                          onClick={() => handleAddProduct(item)}
+                          onClick={() => handleProductClick(item)}
                           shape="circle"
                           icon={<ShoppingCartOutlined />}
                           style={{
@@ -281,23 +408,7 @@ const MenuSection = () => {
                             fontSize: '16px',
                             boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
                             transition: 'background-color 0.3s, transform 0.2s',
-                          }}
-                          onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = '#40a9ff';
-                            e.target.style.transform = 'scale(1.05)';
-                            const icon = e.target.querySelector('svg');
-                            if (icon) {
-                              icon.style.transform = 'translateX(5px)';
-                              icon.style.transition = 'transform 0.2s';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            e.target.style.backgroundColor = '#1890ff';
-                            e.target.style.transform = 'scale(1)';
-                            const icon = e.target.querySelector('svg');
-                            if (icon) {
-                              icon.style.transform = 'translateX(0)';
-                            }
+                            width: '100%',
                           }}
                           size="large"
                         >
@@ -305,64 +416,53 @@ const MenuSection = () => {
                         </Button>
                       </div>
                     ))}
-                  </>
-                  :
-                  <>
-                    {products.filter((item) => item.category == category.id).map((item, index) => (
-                      <div key={index} className="col-lg-4 menu-item">
-                        <a href={item.url || "#"} className="glightbox">
-                          <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
-                        </a>
-                        <h4>{item.name}</h4>
-
-                        <p className="ingredients">{item.ingredients}</p>
-                        {formatPrice(item.price) && (
-                          <p className="price">{formatPrice(item.price)}</p>
-                        )}
-
-                        <Button
-                          type="primary"
-                          onClick={() => handleAddProduct(item)}
-                          shape="circle"
-                          icon={<ShoppingCartOutlined />}
-                          style={{
-                            backgroundColor: '#1890ff',
-                            borderRadius: '10px',
-                            padding: '10px 20px',
-                            fontSize: '16px',
-                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                            transition: 'background-color 0.3s, transform 0.2s',
-                          }}
-                          onMouseEnter={(e) => {
-                            e.target.style.backgroundColor = '#40a9ff';
-                            e.target.style.transform = 'scale(1.05)';
-                            const icon = e.target.querySelector('svg');
-                            if (icon) {
-                              icon.style.transform = 'translateX(5px)';
-                              icon.style.transition = 'transform 0.2s';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            e.target.style.backgroundColor = '#1890ff';
-                            e.target.style.transform = 'scale(1)';
-                            const icon = e.target.querySelector('svg');
-                            if (icon) {
-                              icon.style.transform = 'translateX(0)';
-                            }
-                          }}
-                          size="large"
-                        >
-                          Добави
-                        </Button>
-                      </div>
-                    ))}
-                  </>
-                }
-              </div>
-            </div>
-          ))}
+                  </div>
+                </div>
+              );
+            })}
         </div>
       </div>
+
+      <Modal
+        title="Изберете гарнитура"
+        open={sideDishModalVisible}
+        onOk={handleSideDishConfirm}
+        onCancel={() => {
+          setSideDishModalVisible(false);
+          setSelectedProduct(null);
+          setSelectedSideDish(null);
+        }}
+        okText="Добави"
+        cancelText="Отказ"
+      >
+        <div style={{ marginBottom: '16px' }}>
+          <p><strong>{selectedProduct?.name}</strong></p>
+          <p style={{ color: '#666', fontSize: '14px' }}>Моля, изберете гарнитура:</p>
+        </div>
+        <Select
+          placeholder="Изберете гарнитура"
+          value={selectedSideDish?.id}
+          onChange={(value) => {
+            const sideDish = getSideDishes().find(sd => sd.id === value);
+            setSelectedSideDish(sideDish);
+          }}
+          style={{ width: '100%' }}
+          showSearch
+          optionFilterProp="children"
+          filterOption={(input, option) =>
+            (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+          }
+        >
+          {getSideDishes().map((sideDish) => (
+            <Select.Option key={sideDish.id} value={sideDish.id}>
+              {sideDish.name}
+            </Select.Option>
+          ))}
+        </Select>
+        <p style={{ marginTop: '12px', fontSize: '12px', color: '#999' }}>
+          * Гарнитурата е включена в цената на ястието
+        </p>
+      </Modal>
     </section>
   );
 };
