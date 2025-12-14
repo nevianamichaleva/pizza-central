@@ -372,7 +372,16 @@ const MenuSection = () => {
         {/* Desktop Tab Navigation */}
         <ul className="nav nav-tabs d-flex justify-content-center menu-desktop-tabs" data-aos="fade-up" data-aos-delay="100">
           {categories
-            .filter((category) => category.name !== "Гарнитури")
+            .filter((category) => {
+              // If both fields are missing, show the category in both menus
+              const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
+              const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
+              if (!hasDeliveryField && !hasRestaurantField) {
+                return true;
+              }
+              // Show if forDelivery is true
+              return category.forDelivery === true;
+            })
             .map((category) => (
               <li key={category.id} className="nav-item">
                 <a
@@ -388,7 +397,16 @@ const MenuSection = () => {
         {/* Desktop Tab Content */}
         <div className="tab-content menu-desktop-content" data-aos="fade-up" data-aos-delay="200">
           {categories
-            .filter((category) => category.name !== "Гарнитури")
+            .filter((category) => {
+              // If both fields are missing, show the category in both menus
+              const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
+              const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
+              if (!hasDeliveryField && !hasRestaurantField) {
+                return true;
+              }
+              // Show if forDelivery is true
+              return category.forDelivery === true;
+            })
             .map((category) => (
             <div
               key={category.id}
@@ -417,11 +435,31 @@ const MenuSection = () => {
               <div className="row gy-5">
                 {subcategoryActiveTab ?
                   <>
-                    {products.filter((item) => item?.subcategory == subcategory.id && !item.isSideDish).map((item, index) => renderProductCard(item, index))}
+                    {products.filter((item) => {
+                      if (item?.subcategory != subcategory.id || item.isSideDish) return false;
+                      // If both fields are missing, show the product in both menus
+                      const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
+                      const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
+                      if (!hasDeliveryField && !hasRestaurantField) {
+                        return true;
+                      }
+                      // Show if forDelivery is true
+                      return item.forDelivery === true;
+                    }).map((item, index) => renderProductCard(item, index))}
                   </>
                   :
                   <>
-                    {products.filter((item) => item.category == category.id && !item.isSideDish).map((item, index) => renderProductCard(item, index))}
+                    {products.filter((item) => {
+                      if (item.category != category.id || item.isSideDish) return false;
+                      // If both fields are missing, show the product in both menus
+                      const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
+                      const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
+                      if (!hasDeliveryField && !hasRestaurantField) {
+                        return true;
+                      }
+                      // Show if forDelivery is true
+                      return item.forDelivery === true;
+                    }).map((item, index) => renderProductCard(item, index))}
                   </>
                 }
               </div>
@@ -432,9 +470,28 @@ const MenuSection = () => {
         {/* Mobile Category List with Sliders */}
         <div className="menu-mobile-categories">
           {categories
-            .filter((category) => category.name !== "Гарнитури")
+            .filter((category) => {
+              // If both fields are missing, show the category in both menus
+              const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
+              const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
+              if (!hasDeliveryField && !hasRestaurantField) {
+                return true;
+              }
+              // Show if forDelivery is true
+              return category.forDelivery === true;
+            })
             .map((category) => {
-              const categoryProducts = products.filter((item) => item.category == category.id && !item.isSideDish);
+              const categoryProducts = products.filter((item) => {
+                if (item.category != category.id || item.isSideDish) return false;
+                // If both fields are missing, show the product in both menus
+                const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
+                const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
+                if (!hasDeliveryField && !hasRestaurantField) {
+                  return true;
+                }
+                // Show if forDelivery is true
+                return item.forDelivery === true;
+              });
               
               return (
                 <div key={category.id} className="menu-mobile-category-section">

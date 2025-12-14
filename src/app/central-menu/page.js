@@ -47,8 +47,22 @@ export default function CentralMenuPage() {
   };
 
 
-  // Filter out side dishes and get main categories
-  const mainCategories = categories.filter((category) => category.name !== "Гарнитури");
+  // Filter categories by forRestaurant field
+  // If both fields are missing, show the category (backward compatibility)
+  const mainCategories = categories.filter((category) => {
+    // If both fields are missing, show the category in both menus
+    const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
+    const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
+    if (!hasDeliveryField && !hasRestaurantField) {
+      return true;
+    }
+    // If forRestaurant field exists, use it
+    if (hasRestaurantField) {
+      return category.forRestaurant === true;
+    }
+    // If only forDelivery exists, show if not explicitly marked as delivery-only
+    return category.forDelivery !== true;
+  });
 
   // Set first category as selected by default
   useEffect(() => {
@@ -61,9 +75,31 @@ export default function CentralMenuPage() {
   const selectedCategory = mainCategories.find(cat => cat.id === selectedCategoryId) || mainCategories[0];
   
   // Get products for selected category
+  // Show products that are for restaurant (forRestaurant === true)
+  // If both fields are missing, show all products (backward compatibility)
+  // For "Гарнитури" category, show side dishes, otherwise filter them out
   const getCategoryProducts = (categoryId) => {
+    const selectedCategory = categories.find(cat => cat.id === categoryId);
+    const isGarnituriCategory = selectedCategory?.name === "Гарнитури";
+    
     return products.filter(
-      (item) => item.category == categoryId && !item.isSideDish
+      (item) => {
+        if (item.category != categoryId) return false;
+        // For "Гарнитури" category, show side dishes. For other categories, filter them out
+        if (!isGarnituriCategory && item.isSideDish) return false;
+        // If both fields are missing, show the product in both menus
+        const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
+        const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
+        if (!hasDeliveryField && !hasRestaurantField) {
+          return true;
+        }
+        // If forRestaurant field exists, use it
+        if (hasRestaurantField) {
+          return item.forRestaurant === true;
+        }
+        // If only forDelivery exists, show if not explicitly marked as delivery-only
+        return item.forDelivery !== true;
+      }
     );
   };
 
@@ -102,13 +138,13 @@ export default function CentralMenuPage() {
                 className="order-home-btn"
                 style={{
                   backgroundColor: '#FFA500',
-                  borderColor: '#FFA500',
+                  borderColor: '#ce1212',
                   height: '50px',
                   fontSize: '18px',
                   fontWeight: 600,
                   padding: '0 40px',
                   borderRadius: '8px',
-                  boxShadow: '0 4px 15px rgba(255, 165, 0, 0.3)',
+                  boxShadow: '0 4px 15px #ce1212',
                 }}
               >
                 Поръчай за вкъщи
@@ -135,6 +171,7 @@ export default function CentralMenuPage() {
             >
               {mainCategories.map((category) => {
                 const categoryProducts = getCategoryProducts(category.id);
+                // Hide empty categories
                 if (categoryProducts.length === 0) return null;
                 
                 return (
@@ -185,7 +222,26 @@ export default function CentralMenuPage() {
                 {selectedCategory?.children && selectedCategory.children?.length > 0 ? (
                   selectedCategory.children.map((subcategory) => {
                     const subcategoryProducts = products.filter(
-                      (item) => item?.subcategory == subcategory.id && !item.isSideDish
+                      (item) => {
+                        if (item?.subcategory != subcategory.id) return false;
+                        // Check if this subcategory belongs to "Гарнитури" category
+                        const parentCategory = categories.find(cat => cat.id === selectedCategory.id);
+                        const isGarnituriCategory = parentCategory?.name === "Гарнитури";
+                        // For "Гарнитури" category, show side dishes. For other categories, filter them out
+                        if (!isGarnituriCategory && item.isSideDish) return false;
+                        // If both fields are missing, show the product in both menus
+                        const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
+                        const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
+                        if (!hasDeliveryField && !hasRestaurantField) {
+                          return true;
+                        }
+                        // If forRestaurant field exists, use it
+                        if (hasRestaurantField) {
+                          return item.forRestaurant === true;
+                        }
+                        // If only forDelivery exists, show if not explicitly marked as delivery-only
+                        return item.forDelivery !== true;
+                      }
                     );
 
                     if (subcategoryProducts.length === 0) return null;

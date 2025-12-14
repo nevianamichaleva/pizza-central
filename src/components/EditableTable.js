@@ -1,5 +1,5 @@
 import { CloseOutlined, DeleteOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
-import { Input, Select, Space, Table } from "antd";
+import { Input, Select, Space, Switch, Table } from "antd";
 import { useState } from "react";
 
 const { Option } = Select;
@@ -94,6 +94,38 @@ const EditableTable = ({ data, categories, onSave, onDelete }) => {
           </Select>
         ) : (
           categories.find((cat) => cat.id === record.parent)?.name || ""
+        );
+      },
+    },
+    {
+      title: "Доставка",
+      dataIndex: "forDelivery",
+      key: "forDelivery",
+      render: (_, record) => {
+        const isEditing = editingId === record.id;
+        return isEditing ? (
+          <Switch
+            checked={editingRecord.forDelivery !== false}
+            onChange={(checked) => handleChange("forDelivery", checked)}
+          />
+        ) : (
+          record.forDelivery !== false ? "Да" : "Не"
+        );
+      },
+    },
+    {
+      title: "Ресторант",
+      dataIndex: "forRestaurant",
+      key: "forRestaurant",
+      render: (_, record) => {
+        const isEditing = editingId === record.id;
+        return isEditing ? (
+          <Switch
+            checked={editingRecord.forRestaurant !== false}
+            onChange={(checked) => handleChange("forRestaurant", checked)}
+          />
+        ) : (
+          record.forRestaurant !== false ? "Да" : "Не"
         );
       },
     },

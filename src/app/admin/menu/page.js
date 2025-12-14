@@ -2,7 +2,7 @@
 
 import EditableTable from '@/components/EditableTable';
 import { useUser } from '@/context/UserContext';
-import { Button, Drawer, Image, Input, Select, message } from "antd";
+import { Button, Drawer, Image, Input, Select, Switch, message } from "antd";
 import { get, push, ref, remove, set, update } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -22,6 +22,8 @@ const AddCategory = () => {
   const [categories, setCategories] = useState([]);
   const [parent, setParent] = useState('');
   const [catName, setCatName] = useState('');
+  const [forDelivery, setForDelivery] = useState(true);
+  const [forRestaurant, setForRestaurant] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [uploadStatus, setUploadStatus] = useState("");
@@ -34,8 +36,18 @@ const AddCategory = () => {
 
   const openDrawer = () => setDrawerVisible(true);
   const closeDrawer = () => setDrawerVisible(false);
-  const openMenuDrawer = () => setMenuDrawerVisible(true);
-  const closeMenuDrawer = () => setMenuDrawerVisible(false);
+  const openMenuDrawer = () => {
+    setForDelivery(true);
+    setForRestaurant(true);
+    setMenuDrawerVisible(true);
+  };
+  const closeMenuDrawer = () => {
+    setCatName('');
+    setParent('');
+    setForDelivery(true);
+    setForRestaurant(true);
+    setMenuDrawerVisible(false);
+  };
 
   const handleAddRecord = async (e) => {
     e.preventDefault();
@@ -77,7 +89,9 @@ const AddCategory = () => {
     const newCatRef = push(catRef);
     set(newCatRef, {
       name: catName,
-      parent: parent
+      parent: parent,
+      forDelivery: forDelivery !== false,
+      forRestaurant: forRestaurant !== false
     })
       .then(() => {
         fetchCategories();
@@ -155,7 +169,9 @@ const AddCategory = () => {
   const handleSave = async (updatedRecord) => {
     const updatedData = {
       name: updatedRecord.name,
-      parent: updatedRecord.parent
+      parent: updatedRecord.parent,
+      forDelivery: updatedRecord.forDelivery !== false,
+      forRestaurant: updatedRecord.forRestaurant !== false
     };
     try {
       const recordRef = ref(rtdb, `category/${updatedRecord.id}`);
@@ -364,6 +380,24 @@ const AddCategory = () => {
                     value={catName}
                     onChange={(e) => setCatName(e.target.value)}
                   />
+                </div>
+                <div className="col-md-12">
+                  <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <Switch
+                      checked={forDelivery}
+                      onChange={setForDelivery}
+                    />
+                    <span>Доставка (ще се показва в our-menu)</span>
+                  </div>
+                </div>
+                <div className="col-md-12">
+                  <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <Switch
+                      checked={forRestaurant}
+                      onChange={setForRestaurant}
+                    />
+                    <span>Ресторант (ще се показва в central-menu)</span>
+                  </div>
                 </div>
                 <div className="col-md-5 text-center">
                   <Button type="primary" htmlType="submit" block>

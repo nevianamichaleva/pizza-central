@@ -23,6 +23,8 @@ const AddProduct = () => {
   const [image, setImage] = useState('');
   const [requiresSideDish, setRequiresSideDish] = useState(false);
   const [isSideDish, setIsSideDish] = useState(false);
+  const [forDelivery, setForDelivery] = useState(true);
+  const [forRestaurant, setForRestaurant] = useState(true);
   const [categories, setCategories] = useState([]);
   const [product, setProduct] = useState(false);
   const [products, setProducts] = useState([]);
@@ -114,6 +116,8 @@ const AddProduct = () => {
     handleViewProduct(null, null);
     setRequiresSideDish(false);
     setIsSideDish(false);
+    setForDelivery(true);
+    setForRestaurant(true);
     setDrawerVisible(false);
   }
   const openMenuDrawer = () => setMenuDrawerVisible(true);
@@ -133,7 +137,9 @@ const AddProduct = () => {
       subcategory: subcategory,
       image: image,
       requiresSideDish: requiresSideDish || false,
-      isSideDish: isSideDish || false
+      isSideDish: isSideDish || false,
+      forDelivery: forDelivery !== false,
+      forRestaurant: forRestaurant !== false
     })
       .then(() => {
         closeDrawer();
@@ -259,7 +265,9 @@ const AddProduct = () => {
       subcategory: subcategory,
       image: image,
       requiresSideDish: requiresSideDish || false,
-      isSideDish: isSideDish || false
+      isSideDish: isSideDish || false,
+      forDelivery: forDelivery !== false,
+      forRestaurant: forRestaurant !== false
     };
 
     try {
@@ -285,7 +293,9 @@ const AddProduct = () => {
       subcategory = null,
       image = null,
       requiresSideDish = false,
-      isSideDish = false
+      isSideDish = false,
+      forDelivery = true,
+      forRestaurant = true
     } = values || {};
 
     setName(name);
@@ -297,6 +307,8 @@ const AddProduct = () => {
     setImage(image);
     setRequiresSideDish(requiresSideDish);
     setIsSideDish(isSideDish);
+    setForDelivery(forDelivery !== false);
+    setForRestaurant(forRestaurant !== false);
 
     setProduct(id);
   };
@@ -525,6 +537,26 @@ const AddProduct = () => {
                       onChange={setIsSideDish}
                     />
                     <span>Това е гарнитура (няма да се показва в менюто)</span>
+                  </div>
+                </div>
+              </div>
+              <div className="row gy-4">
+                <div className="col-md-6">
+                  <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <Switch
+                      checked={forDelivery}
+                      onChange={setForDelivery}
+                    />
+                    <span>Доставка (ще се показва в our-menu)</span>
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <Switch
+                      checked={forRestaurant}
+                      onChange={setForRestaurant}
+                    />
+                    <span>Ресторант (ще се показва в central-menu)</span>
                   </div>
                 </div>
               </div>
