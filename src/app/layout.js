@@ -68,8 +68,7 @@ export const metadata = {
     apple: '/images/apple-touch-icon.png',
   },
   verification: {
-    // Добавете вашите verification кодове тук, ако имате
-    // google: 'your-google-verification-code',
+    google: 'vnY1LkfeFWmqka-8vSVYvovLtVjN30rrzLRFiz0qMbA',
     // yandex: 'your-yandex-verification-code',
   },
 };
