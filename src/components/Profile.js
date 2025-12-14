@@ -50,25 +50,80 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const contactsRef = ref(rtdb, 'contacts');
-
-    const newContactRef = push(contactsRef);
-    set(newContactRef, {
+    const contactData = {
       name: formData.name,
       email: formData.email,
       subject: formData.subject,
       message: formData.message,
       phone: formData.phone
-    })
-      .then(() => {
-        showAToast('success', 'Благодарим, че се свързахте с нас. Очаквайте нашето обаждане за да обсъдим подробностите!');
-        setStatus('success');
-        setFormData({ name: '', email: '', subject: '', message: '', phone: '' });
-      })
-      .catch((error) => {
-        console.error('Грешка при изпращане на съобщение: ', error);
-        setStatus('error');
-      });
+    };
+
+    try {
+      const contactsRef = ref(rtdb, 'contacts');
+      const newContactRef = push(contactsRef);
+      await set(newContactRef, contactData);
+
+      // Send email notification
+      try {
+        // Get admin email from Firebase settings
+        const emailRef = ref(rtdb, 'settings/email');
+        const emailSnapshot = await get(emailRef);
+        let adminEmail = null;
+        
+        if (emailSnapshot.exists()) {
+          const emailData = emailSnapshot.val();
+          adminEmail = emailData.adminEmail || emailData.email;
+        }
+
+        if (adminEmail) {
+          // Also get SMTP config to send to API
+          const smtpRef = ref(rtdb, 'settings/email');
+          const smtpSnapshot = await get(smtpRef);
+          let smtpConfig = null;
+          
+          if (smtpSnapshot.exists()) {
+            const smtpData = smtpSnapshot.val();
+            smtpConfig = {
+              smtpHost: smtpData.smtpHost,
+              smtpPort: smtpData.smtpPort,
+              smtpUser: smtpData.smtpUser,
+              smtpPassword: smtpData.smtpPassword,
+              smtpSecure: smtpData.smtpSecure,
+              fromEmail: smtpData.fromEmail
+            };
+          }
+
+          const response = await fetch('/api/send-contact-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              contactData: contactData,
+              adminEmail: adminEmail,
+              smtpConfig: smtpConfig,
+            }),
+          });
+
+          const result = await response.json();
+          if (!result.success && !result.logged) {
+            console.error('Failed to send email notification:', result);
+          }
+        } else {
+          console.log('No admin email configured, skipping email notification');
+        }
+      } catch (error) {
+        console.error('Error sending email notification:', error);
+        // Don't block the contact process if email fails
+      }
+
+      showAToast('success', 'Благодарим, че се свързахте с нас. Очаквайте нашето обаждане за да обсъдим подробностите!');
+      setStatus('success');
+      setFormData({ name: '', email: '', subject: '', message: '', phone: '' });
+    } catch (error) {
+      console.error('Грешка при изпращане на съобщение: ', error);
+      setStatus('error');
+    }
   }
 
   const handleChange = (e) => {

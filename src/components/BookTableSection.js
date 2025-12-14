@@ -2,7 +2,7 @@
 
 import { Button, DatePicker, Form, Input, InputNumber, TimePicker } from "antd";
 import 'aos/dist/aos.css';
-import { push, ref, set } from 'firebase/database';
+import { get, push, ref, set } from 'firebase/database';
 import moment from 'moment';
 import { useEffect } from 'react';
 import { rtdb } from '../../lib/firebase';
@@ -25,7 +25,7 @@ const BookTableSection = () => {
     initAOS();
   }, []);
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     const bookingData = {
       name: values.name || '',
       email: values.email || '',
@@ -36,20 +36,73 @@ const BookTableSection = () => {
       time: values.time ? values.time.format('HH:mm') : '',
     };
 
-    const bookingRef = ref(rtdb, 'booking');
-    const newBookingRef = push(bookingRef);
+    try {
+      const bookingRef = ref(rtdb, 'booking');
+      const newBookingRef = push(bookingRef);
 
-    set(newBookingRef, bookingData)
-      .then(() => {
-        setTimeout(() => {
-          showAToast('success', 'Вашата резервация е успешна. Очаквайте нашето обаждане за да обсъдим подробностите!');
-          form.resetFields();
-        }, 1000);
+      await set(newBookingRef, bookingData);
 
-      })
-      .catch((error) => {
-        showAToast('error', 'Неуспешна резервация, моля опитайте отново или се обадете на телефон +359 895 516 401');
-      });
+      // Send email notification
+      try {
+        // Get admin email from Firebase settings
+        const emailRef = ref(rtdb, 'settings/email');
+        const emailSnapshot = await get(emailRef);
+        let adminEmail = null;
+        
+        if (emailSnapshot.exists()) {
+          const emailData = emailSnapshot.val();
+          adminEmail = emailData.adminEmail || emailData.email;
+        }
+
+        if (adminEmail) {
+          // Also get SMTP config to send to API
+          const smtpRef = ref(rtdb, 'settings/email');
+          const smtpSnapshot = await get(smtpRef);
+          let smtpConfig = null;
+          
+          if (smtpSnapshot.exists()) {
+            const smtpData = smtpSnapshot.val();
+            smtpConfig = {
+              smtpHost: smtpData.smtpHost,
+              smtpPort: smtpData.smtpPort,
+              smtpUser: smtpData.smtpUser,
+              smtpPassword: smtpData.smtpPassword,
+              smtpSecure: smtpData.smtpSecure,
+              fromEmail: smtpData.fromEmail
+            };
+          }
+
+          const response = await fetch('/api/send-booking-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              bookingData: bookingData,
+              adminEmail: adminEmail,
+              smtpConfig: smtpConfig,
+            }),
+          });
+
+          const result = await response.json();
+          if (!result.success && !result.logged) {
+            console.error('Failed to send email notification:', result);
+          }
+        } else {
+          console.log('No admin email configured, skipping email notification');
+        }
+      } catch (error) {
+        console.error('Error sending email notification:', error);
+        // Don't block the booking process if email fails
+      }
+
+      setTimeout(() => {
+        showAToast('success', 'Вашата резервация е успешна. Очаквайте нашето обаждане за да обсъдим подробностите!');
+        form.resetFields();
+      }, 1000);
+    } catch (error) {
+      showAToast('error', 'Неуспешна резервация, моля опитайте отново или се обадете на телефон +359 895 516 401');
+    }
   };
 
   const disableOldDates = (current) => {
