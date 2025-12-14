@@ -1,0 +1,271 @@
+'use client';
+
+import { useCategories } from '@/context/CategoriesContext';
+import { useProducts } from '@/context/ProductsContext';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { Button, Image } from "antd";
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
+
+export default function CentralMenuPage() {
+  const { products } = useProducts();
+  const { categories } = useCategories();
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const categoriesSliderRef = useRef(null);
+
+  const normalizePrice = (rawPrice) => {
+    if (rawPrice === undefined || rawPrice === null) {
+      return null;
+    }
+
+    if (typeof rawPrice === "number") {
+      return Number.isFinite(rawPrice) ? rawPrice : null;
+    }
+
+    const cleaned = String(rawPrice)
+      .replace(/\s/g, "")
+      .replace(",", ".")
+      .replace(/[^0-9.-]/g, "");
+
+    if (!cleaned) {
+      return null;
+    }
+
+    const parsed = Number.parseFloat(cleaned);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
+  const formatPrice = (price) => {
+    const normalized = normalizePrice(price);
+    if (normalized === null) {
+      return null;
+    }
+
+    const priceInLv = normalized.toFixed(2);
+    const priceInEuro = (normalized / 1.95583).toFixed(2);
+    return `${priceInLv} лв. / ${priceInEuro} €`;
+  };
+
+
+  // Filter out side dishes and get main categories
+  const mainCategories = categories.filter((category) => category.name !== "Гарнитури");
+
+  // Set first category as selected by default
+  useEffect(() => {
+    if (mainCategories.length > 0 && selectedCategoryId === null) {
+      setSelectedCategoryId(mainCategories[0].id);
+    }
+  }, [mainCategories, selectedCategoryId]);
+
+  // Get selected category
+  const selectedCategory = mainCategories.find(cat => cat.id === selectedCategoryId) || mainCategories[0];
+  
+  // Get products for selected category
+  const getCategoryProducts = (categoryId) => {
+    return products.filter(
+      (item) => item.category == categoryId && !item.isSideDish
+    );
+  };
+
+  // Scroll categories functions
+  const scrollCategories = (direction) => {
+    if (categoriesSliderRef.current) {
+      const scrollAmount = 200;
+      const currentScroll = categoriesSliderRef.current.scrollLeft;
+      const newScroll = direction === 'left' 
+        ? currentScroll - scrollAmount 
+        : currentScroll + scrollAmount;
+      
+      categoriesSliderRef.current.scrollTo({
+        left: newScroll,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  return (
+    <div className="central-menu-page">
+      {/* Order Button Section */}
+      <div className="central-menu-header">
+        <div className="container">
+          <div className="central-menu-header-content">
+            <h1 className="central-menu-title desktop-title">Меню на Ресторант-пицария Централ град Добрич</h1>
+            {selectedCategory && (
+              <h1 className="central-menu-title mobile-title">
+                {selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1)}
+              </h1>
+            )}
+            <Link href="/for-home">
+              <Button 
+                type="primary" 
+                size="large"
+                className="order-home-btn"
+                style={{
+                  backgroundColor: '#FFA500',
+                  borderColor: '#FFA500',
+                  height: '50px',
+                  fontSize: '18px',
+                  fontWeight: 600,
+                  padding: '0 40px',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 15px rgba(255, 165, 0, 0.3)',
+                }}
+              >
+                Поръчай за вкъщи
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Categories Slider */}
+      <div className="central-menu-categories-container">
+        <div className="container">
+          <div className="central-menu-categories-wrapper">
+            <button 
+              className="central-menu-category-arrow central-menu-category-arrow-left"
+              onClick={() => scrollCategories('left')}
+              aria-label="Предишни категории"
+            >
+              <LeftOutlined />
+            </button>
+            <div 
+              className="central-menu-categories-slider"
+              ref={categoriesSliderRef}
+            >
+              {mainCategories.map((category) => {
+                const categoryProducts = getCategoryProducts(category.id);
+                if (categoryProducts.length === 0) return null;
+                
+                return (
+                  <button
+                    key={category.id}
+                    className={`central-menu-category-btn ${selectedCategoryId === category.id ? 'active' : ''}`}
+                    onClick={() => setSelectedCategoryId(category.id)}
+                  >
+                    {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+                  </button>
+                );
+              })}
+            </div>
+            <button 
+              className="central-menu-category-arrow central-menu-category-arrow-right"
+              onClick={() => scrollCategories('right')}
+              aria-label="Следващи категории"
+            >
+              <RightOutlined />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Menu Content */}
+      <div className="central-menu-content">
+        <div className="container">
+          {selectedCategory && (() => {
+            const categoryProducts = getCategoryProducts(selectedCategory.id);
+            
+            if (categoryProducts.length === 0) {
+              return (
+                <div className="central-menu-category">
+                  <p style={{ textAlign: 'center', padding: '40px', color: '#6c757d' }}>
+                    Няма продукти в тази категория.
+                  </p>
+                </div>
+              );
+            }
+
+            return (
+              <div key={selectedCategory.id} className="central-menu-category">
+                <h2 className="central-menu-category-title">
+                  {selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1)}
+                </h2>
+                
+                {/* Subcategories if they exist */}
+                {selectedCategory?.children && selectedCategory.children?.length > 0 ? (
+                  selectedCategory.children.map((subcategory) => {
+                    const subcategoryProducts = products.filter(
+                      (item) => item?.subcategory == subcategory.id && !item.isSideDish
+                    );
+
+                    if (subcategoryProducts.length === 0) return null;
+
+                    return (
+                      <div key={subcategory.id} className="central-menu-subcategory">
+                        <h3 className="central-menu-subcategory-title">
+                          {subcategory.name.charAt(0).toUpperCase() + subcategory.name.slice(1)}
+                        </h3>
+                        <div className="central-menu-items">
+                          {subcategoryProducts.map((item, index) => (
+                            <div key={index} className="central-menu-item">
+                              <div className="central-menu-item-image">
+                                <Image
+                                  src={item.image ? item.image : '/images/no-image.png'}
+                                  alt={item.name}
+                                  className="menu-item-img"
+                                  preview={{
+                                    mask: 'Преглед',
+                                    maskClassName: 'central-menu-image-preview-mask'
+                                  }}
+                                />
+                              </div>
+                              <div className="central-menu-item-content">
+                                <div className="central-menu-item-header">
+                                  <h4 className="central-menu-item-name">{item.name}</h4>
+                                  {formatPrice(item.price) && (
+                                    <p className="central-menu-item-price">{formatPrice(item.price)}</p>
+                                  )}
+                                </div>
+                                {(item.description || item.ingredients) && (
+                                  <p className="central-menu-item-description">
+                                    {item.description || item.ingredients}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="central-menu-items">
+                    {categoryProducts.map((item, index) => (
+                      <div key={index} className="central-menu-item">
+                        <div className="central-menu-item-image">
+                          <Image
+                            src={item.image ? item.image : '/images/no-image.png'}
+                            alt={item.name}
+                            className="menu-item-img"
+                            preview={{
+                              mask: 'Преглед',
+                              maskClassName: 'central-menu-image-preview-mask'
+                            }}
+                          />
+                        </div>
+                        <div className="central-menu-item-content">
+                          <div className="central-menu-item-header">
+                            <h4 className="central-menu-item-name">{item.name}</h4>
+                            {formatPrice(item.price) && (
+                              <p className="central-menu-item-price">{formatPrice(item.price)}</p>
+                            )}
+                          </div>
+                          {(item.description || item.ingredients) && (
+                            <p className="central-menu-item-description">
+                              {item.description || item.ingredients}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
