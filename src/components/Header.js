@@ -131,10 +131,15 @@ const Header = () => {
 
   return (
     <header id="header" className="header d-flex align-items-center sticky-top">
-      <div className="container position-relative d-flex align-items-center justify-content-between">
+      <div className="container position-relative d-flex align-items-center" style={{
+        justifyContent: isMobile ? 'space-between' : 'space-between',
+        flexWrap: isMobile ? 'nowrap' : 'nowrap'
+      }}>
 
         {/* Logo */}
-        <Link href="/" className="logo d-flex align-items-center me-auto me-xl-0">
+        <Link href="/" className="logo d-flex align-items-center me-auto me-xl-0" style={{
+          order: isMobile ? 1 : 'unset'
+        }}>
           <div style={{ 
             position: 'relative', 
             width: '86px', 
@@ -163,8 +168,28 @@ const Header = () => {
           <span></span>
         </Link>
 
+        {/* Buttons - shown before menu icon on mobile */}
+        {isMobile && (
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            alignItems: 'flex-end',
+            order: 2
+          }}>
+            <Link href="/our-menu" className="btn-getstarted">
+              Поръчай
+            </Link>
+            <Link href="/reservation" className="btn-getstarted">
+              Резервирай
+            </Link>
+          </div>
+        )}
+
         {/* Navigation Menu */}
-        <nav id="navmenu" className={`navmenu ${isMenuOpen ? 'open' : ''}`}>
+        <nav id="navmenu" className={`navmenu ${isMenuOpen ? 'open' : ''}`} style={{
+          order: isMobile ? 3 : 'unset'
+        }}>
           <ul>
             <li>
               <MenuLink href="/" className={pathname === '/' ? 'active' : ''}> Начало </MenuLink>
@@ -326,11 +351,28 @@ const Header = () => {
           </div>
         ) : null}
 
-        <CartIcon userId={user?.uid} />
+        {!isMobile && (
+          <div>
+            <CartIcon userId={user?.uid} />
+          </div>
+        )}
 
-        <Link href="/reservation" className="btn-getstarted">
-          Резервирай
-        </Link>
+        {/* Buttons - shown on desktop */}
+        {!isMobile && (
+          <div style={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '10px',
+            alignItems: 'flex-end'
+          }}>
+            <Link href="/our-menu" className="btn-getstarted">
+              Поръчай
+            </Link>
+            <Link href="/reservation" className="btn-getstarted">
+              Резервирай
+            </Link>
+          </div>
+        )}
       </div>
     </header>
   );

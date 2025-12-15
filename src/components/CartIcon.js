@@ -99,6 +99,10 @@ const CartIcon = ({ userId }) => {
 
       const items = order.items || {};
       const itemCount = Object.values(items).reduce((total, item) => {
+        // Exclude packaging items from count
+        if (item.isPackaging) {
+          return total;
+        }
         const quantity = Number(item.quantity);
         if (!Number.isFinite(quantity)) {
           return total;

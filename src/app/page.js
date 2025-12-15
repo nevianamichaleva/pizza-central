@@ -15,14 +15,15 @@ export default function Home() {
   return (
     <div>
       <Hero />
+      <MenuSection />
+      <BookTableSection />
       <AboutSection />
       <WhyUsSection />
       <StatsSection />
-      <MenuSection />
+      
       {/* <Testimonials /> */}
       <EventsSection />
       <Chefs />
-      <BookTableSection />
       {/* <Gallery /> */}
       <Contact />
     </div>

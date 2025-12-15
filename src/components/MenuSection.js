@@ -109,6 +109,14 @@ const MenuSection = () => {
 
   // Calculate packaging box price based on product type
   const getPackagingPrice = (product) => {
+    // Check if product is a sauce (by ID or name)
+    const isSauce = (product.id && product.id.startsWith('sauce_')) || 
+                    (product.name && product.name.toLowerCase().includes('сос'));
+    
+    if (isSauce) {
+      return 0.10;
+    }
+    
     // Find the category of the product
     const productCategory = categories.find(cat => cat.id === product.category);
     const isPizza = productCategory && productCategory.name && 
