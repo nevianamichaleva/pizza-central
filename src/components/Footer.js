@@ -47,12 +47,12 @@ const Footer = () => {
           <div className="col-lg-3 col-md-6">
             <h4>Последвайте ни</h4>
             <div className="social-links d-flex">
-              <Link href="https://www.facebook.com/mozzarella1dobrich/?locale=bg_BG" className="facebook">
+              <Link href="https://www.facebook.com/CentralDobrich?locale=bg_BG" className="facebook">
                 <i className="bi bi-facebook"></i>
               </Link>
-              <Link href="#" className="instagram">
+              {/* <Link href="#" className="instagram">
                 <i className="bi bi-instagram"></i>
-              </Link>
+              </Link> */}
             </div>
           </div>
         </div>
