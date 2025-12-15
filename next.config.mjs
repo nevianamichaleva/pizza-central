@@ -13,7 +13,68 @@ const nextConfig = {
         pathname: '/**',
       },
     ]
-  }
+  },
+  async redirects() {
+    return [
+      // Стари URL-и пренасочени към нови
+      {
+        source: '/reservations',
+        destination: '/reservation',
+        permanent: true,
+      },
+      {
+        source: '/delivery',
+        destination: '/for-home',
+        permanent: true,
+      },
+      {
+        source: '/about',
+        destination: '/about-us',
+        permanent: true,
+      },
+      {
+        source: '/locations',
+        destination: '/contact',
+        permanent: true,
+      },
+      {
+        source: '/checkout',
+        destination: '/order',
+        permanent: true,
+      },
+      {
+        source: '/cart',
+        destination: '/order',
+        permanent: true,
+      },
+      {
+        source: '/menu-2',
+        destination: '/our-menu',
+        permanent: true,
+      },
+      {
+        source: '/my-account',
+        destination: '/profile',
+        permanent: true,
+      },
+      // Блог и категории - пренасочени към начална страница или меню
+      {
+        source: '/blog',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/blog/:path*',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/category/:path*',
+        destination: '/our-menu',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
