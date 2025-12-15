@@ -131,6 +131,7 @@ const BookTableSection = () => {
         <p>
           <span>Резервирайте</span> <span className="description-title">престоя си при нас</span>
         </p>
+        <h2 style={{color: 'red'}}><span style={{fontWeight: '900'}}>10% отстъпка</span> за резервации от неделя до четвъртък</h2>
       </div>
 
       <div className="container">
