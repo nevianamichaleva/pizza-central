@@ -24,6 +24,7 @@ const AddCategory = () => {
   const [catName, setCatName] = useState('');
   const [forDelivery, setForDelivery] = useState(true);
   const [forRestaurant, setForRestaurant] = useState(true);
+  const [order, setOrder] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [uploadStatus, setUploadStatus] = useState("");
@@ -39,6 +40,7 @@ const AddCategory = () => {
   const openMenuDrawer = () => {
     setForDelivery(true);
     setForRestaurant(true);
+    setOrder(0);
     setMenuDrawerVisible(true);
   };
   const closeMenuDrawer = () => {
@@ -46,6 +48,7 @@ const AddCategory = () => {
     setParent('');
     setForDelivery(true);
     setForRestaurant(true);
+    setOrder(0);
     setMenuDrawerVisible(false);
   };
 
@@ -91,7 +94,8 @@ const AddCategory = () => {
       name: catName,
       parent: parent,
       forDelivery: forDelivery !== false,
-      forRestaurant: forRestaurant !== false
+      forRestaurant: forRestaurant !== false,
+      order: order || 0
     })
       .then(() => {
         fetchCategories();
@@ -113,7 +117,12 @@ const AddCategory = () => {
           .map(([key, value]) => ({
             id: key,
             ...value,
-          }));
+          }))
+          .sort((a, b) => {
+            const orderA = a.order !== undefined ? a.order : 0;
+            const orderB = b.order !== undefined ? b.order : 0;
+            return orderA - orderB;
+          });
 
         setCategories(categoryArray);
       } else {
@@ -165,11 +174,16 @@ const AddCategory = () => {
   };
 
   const handleSave = async (updatedRecord) => {
+    const orderValue = updatedRecord.order !== undefined && updatedRecord.order !== null 
+      ? (typeof updatedRecord.order === 'string' ? parseInt(updatedRecord.order) || 0 : updatedRecord.order)
+      : 0;
+    
     const updatedData = {
       name: updatedRecord.name,
       parent: updatedRecord.parent,
       forDelivery: updatedRecord.forDelivery !== false,
-      forRestaurant: updatedRecord.forRestaurant !== false
+      forRestaurant: updatedRecord.forRestaurant !== false,
+      order: orderValue
     };
     try {
       const recordRef = ref(rtdb, `category/${updatedRecord.id}`);
@@ -377,6 +391,14 @@ const AddCategory = () => {
                     placeholder="Име на категория"
                     value={catName}
                     onChange={(e) => setCatName(e.target.value)}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <Input
+                    type="number"
+                    placeholder="Номер по ред"
+                    value={order}
+                    onChange={(e) => setOrder(parseInt(e.target.value) || 0)}
                   />
                 </div>
                 <div className="col-md-12">

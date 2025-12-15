@@ -23,7 +23,15 @@ const EditableTable = ({ data, categories, onSave, onDelete }) => {
   };
 
   const handleChange = (key, value) => {
-    setEditingRecord((prev) => ({ ...prev, [key]: value }));
+    if (key === 'order') {
+      // Ensure order is always a number
+      const numValue = value === '' || value === null || value === undefined 
+        ? 0 
+        : (typeof value === 'string' ? parseInt(value) || 0 : value);
+      setEditingRecord((prev) => ({ ...prev, [key]: numValue }));
+    } else {
+      setEditingRecord((prev) => ({ ...prev, [key]: value }));
+    }
   };
 
   const columns = [
@@ -126,6 +134,23 @@ const EditableTable = ({ data, categories, onSave, onDelete }) => {
           />
         ) : (
           record.forRestaurant !== false ? "Да" : "Не"
+        );
+      },
+    },
+    {
+      title: "Номер по ред",
+      dataIndex: "order",
+      key: "order",
+      render: (_, record) => {
+        const isEditing = editingId === record.id;
+        return isEditing ? (
+          <Input
+            type="number"
+            value={editingRecord.order !== undefined && editingRecord.order !== null ? editingRecord.order : 0}
+            onChange={(e) => handleChange("order", e.target.value)}
+          />
+        ) : (
+          record.order !== undefined ? record.order : 0
         );
       },
     },

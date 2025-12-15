@@ -403,6 +403,11 @@ const MenuSection = () => {
               // Show if forDelivery is true
               return category.forDelivery === true;
             })
+            .sort((a, b) => {
+              const orderA = a.order !== undefined ? a.order : 0;
+              const orderB = b.order !== undefined ? b.order : 0;
+              return orderA - orderB;
+            })
             .map((category) => (
               <li key={category.id} className="nav-item">
                 <a
@@ -427,6 +432,11 @@ const MenuSection = () => {
               }
               // Show if forDelivery is true
               return category.forDelivery === true;
+            })
+            .sort((a, b) => {
+              const orderA = a.order !== undefined ? a.order : 0;
+              const orderB = b.order !== undefined ? b.order : 0;
+              return orderA - orderB;
             })
             .map((category) => (
             <div
@@ -500,6 +510,11 @@ const MenuSection = () => {
               }
               // Show if forDelivery is true
               return category.forDelivery === true;
+            })
+            .sort((a, b) => {
+              const orderA = a.order !== undefined ? a.order : 0;
+              const orderB = b.order !== undefined ? b.order : 0;
+              return orderA - orderB;
             })
             .map((category) => {
               const categoryProducts = products.filter((item) => {

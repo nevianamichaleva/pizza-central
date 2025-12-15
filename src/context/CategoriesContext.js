@@ -30,6 +30,17 @@ export function CategoriesProvider({ children }) {
       }
     }
 
+    // Sort children by order
+    for (let key in result) {
+      if (result[key].children && result[key].children.length > 0) {
+        result[key].children.sort((a, b) => {
+          const orderA = a.order !== undefined ? a.order : 0;
+          const orderB = b.order !== undefined ? b.order : 0;
+          return orderA - orderB;
+        });
+      }
+    }
+
     for (let key in result) {
       if (result[key].parent && result[key].parent !== '') {
         delete result[key];
@@ -48,6 +59,13 @@ export function CategoriesProvider({ children }) {
       
       datas.push(transformedItem);
     }
+
+    // Sort main categories by order
+    datas.sort((a, b) => {
+      const orderA = a.order !== undefined ? a.order : 0;
+      const orderB = b.order !== undefined ? b.order : 0;
+      return orderA - orderB;
+    });
 
     return datas;
   }

@@ -62,6 +62,10 @@ export default function CentralMenuPage() {
     }
     // If only forDelivery exists, show if not explicitly marked as delivery-only
     return category.forDelivery !== true;
+  }).sort((a, b) => {
+    const orderA = a.order !== undefined ? a.order : 0;
+    const orderB = b.order !== undefined ? b.order : 0;
+    return orderA - orderB;
   });
 
   // Set first category as selected by default
