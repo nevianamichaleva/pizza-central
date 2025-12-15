@@ -351,11 +351,9 @@ const Header = () => {
           </div>
         ) : null}
 
-        {!isMobile && (
-          <div>
-            <CartIcon userId={user?.uid} />
-          </div>
-        )}
+        <div>
+          <CartIcon userId={user?.uid} />
+        </div>
 
         {/* Buttons - shown on desktop */}
         {!isMobile && (
