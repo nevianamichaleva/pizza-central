@@ -34,9 +34,10 @@ export async function POST(request) {
         }).join('\n')
       : 'Няма артикули';
 
-    const total = parseFloat(orderData.total || 0).toFixed(2);
+    // orderData.total already includes delivery fee (added in order/page.js)
     const deliveryFee = 3.00;
-    const grandTotal = (parseFloat(orderData.total || 0) + deliveryFee).toFixed(2);
+    const total = (parseFloat(orderData.total || 0) - deliveryFee).toFixed(2);
+    const grandTotal = parseFloat(orderData.total || 0).toFixed(2);
 
     const orderNumber = orderData.order_number ? `ORD-${String(orderData.order_number).padStart(4, '0')}` : (orderData.id || 'N/A');
     const emailSubject = `Нова поръчка #${orderNumber}`;

@@ -39,7 +39,7 @@ export const metadata = {
     description: 'Ресторант-пицария Централ в Добрич предлага вкусна и здравословна храна, пица, основни ястия, обедни менюта и доставка до дома. Разполагаме с детски кът за вашите деца.',
     images: [
       {
-        url: '/images/hero-img.png',
+        url: '/images/pizza-central-delivery.png',
         width: 1200,
         height: 630,
         alt: 'Ресторант-пицария Централ Добрич',
@@ -50,7 +50,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Ресторант-пицария Централ Добрич',
     description: 'Ресторант-пицария Централ в Добрич предлага вкусна и здравословна храна, пица, основни ястия, обедни менюта и доставка до дома. Разполагаме с детски кът за вашите деца.',
-    images: ['/images/hero-img.png'],
+    images: ['/images/pizza-central-delivery.png'],
   },
   robots: {
     index: true,
