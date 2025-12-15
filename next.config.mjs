@@ -16,6 +16,18 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Пренасочване на всичко от dostavka.pizza-central.bg към начална страница
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'dostavka.pizza-central.bg',
+          },
+        ],
+        destination: '/',
+        permanent: true,
+      },
       // Стари URL-и пренасочени към нови
       {
         source: '/reservations',
