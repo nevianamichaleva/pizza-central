@@ -187,14 +187,17 @@ export default function Order() {
       },
     };
 
-    // Also update packaging item quantity if it exists
-    const packagingKey = `${itemId}_packaging`;
-    if (updatedItems[packagingKey] && !updatedItems[itemId].isPackaging) {
-      updatedItems[packagingKey] = {
-        ...updatedItems[packagingKey],
-        quantity: parsedQuantity,
-      };
-    }
+    // Also update packaging items quantity if they are linked to this item
+    Object.keys(updatedItems).forEach(key => {
+      const item = updatedItems[key];
+      if (item.isPackaging && item.linkedToItemId === itemId) {
+        updatedItems[key] = {
+          ...item,
+          quantity: parsedQuantity,
+        };
+      }
+    });
+
 
     const updatedOrder = {
       ...order,
@@ -217,11 +220,13 @@ export default function Order() {
     const updatedItems = { ...order.items };
     delete updatedItems[itemId];
     
-    // Also delete packaging item if it exists (packaging items have keys like ${itemId}_packaging)
-    const packagingKey = `${itemId}_packaging`;
-    if (updatedItems[packagingKey]) {
-      delete updatedItems[packagingKey];
-    }
+    // Also delete packaging items linked to this item
+    Object.keys(updatedItems).forEach(key => {
+      const item = updatedItems[key];
+      if (item.isPackaging && item.linkedToItemId === itemId) {
+        delete updatedItems[key];
+      }
+    });
 
     const updatedOrder = {
       ...order,
@@ -409,65 +414,54 @@ export default function Order() {
   // Separate regular items from packaging items
   const regularItems = order && order.items ? Object.keys(order.items)
     .filter(itemId => !order.items[itemId].isPackaging)
-    .map((itemId) => ({
-      id: itemId,
-      name: order.items[itemId].name,
-      quantity: order.items[itemId].quantity,
-      image: order.items[itemId].image,
-      value: order.items[itemId].value,
-      sideDishName: order.items[itemId].sideDishName || null,
-      isPackaging: false,
-    })) : [];
-
-  // Group packaging items by price
-  const packagingGroups = order && order.items ? Object.keys(order.items)
-    .filter(itemId => order.items[itemId].isPackaging)
-    .reduce((groups, itemId) => {
+    .map((itemId) => {
       const item = order.items[itemId];
-      const price = parseFloat(item.value);
-      const quantity = parseInt(item.quantity) || 0;
-      
-      if (!groups[price]) {
-        groups[price] = {
-          price: price,
-          totalQuantity: 0,
-          itemIds: [],
-        };
-      }
-      groups[price].totalQuantity += quantity;
-      groups[price].itemIds.push(itemId);
-      
-      return groups;
-    }, {}) : {};
+      // Find packaging items linked to this item
+      const linkedPackaging = order && order.items ? Object.keys(order.items)
+        .filter(packId => {
+          const packItem = order.items[packId];
+          return packItem.isPackaging && packItem.linkedToItemId === itemId;
+        })
+        .map(packId => ({
+          id: packId,
+          name: order.items[packId].name,
+          quantity: order.items[packId].quantity,
+          value: order.items[packId].value,
+        })) : [];
 
-  // Convert packaging groups to display items
-  const packagingItems = Object.keys(packagingGroups)
-    .sort((a, b) => parseFloat(b) - parseFloat(a)) // Sort by price descending
-    .map((price) => {
-      const group = packagingGroups[price];
-      const priceFloat = parseFloat(price);
-      // Format price: 1.50 -> "1,50", 1.00 -> "1", 0.50 -> "0,50"
-      let priceLabel;
-      if (priceFloat % 1 === 0) {
-        priceLabel = priceFloat.toString();
-      } else {
-        priceLabel = priceFloat.toFixed(2).replace('.', ',');
-      }
-      
       return {
-        id: `packaging_${price}`,
-        name: `Кутия ${group.totalQuantity}*${priceLabel}`,
-        quantity: group.totalQuantity,
-        image: null, // No image for packaging
-        value: priceFloat,
-        sideDishName: null,
-        isPackaging: true,
-        itemIds: group.itemIds, // Keep track of original item IDs for deletion
+        id: itemId,
+        name: item.name,
+        quantity: item.quantity,
+        image: item.image,
+        value: item.value,
+        sideDishName: item.sideDishName || null,
+        isPackaging: false,
+        linkedPackaging: linkedPackaging,
       };
-    });
+    }) : [];
 
-  // Combine regular items and grouped packaging items
-  const dataSource = [...regularItems, ...packagingItems];
+  // Combine regular items with their linked packaging items
+  const dataSource = [];
+  regularItems.forEach(item => {
+    // Add the main item
+    dataSource.push(item);
+    // Add linked packaging items right after the main item
+    if (item.linkedPackaging && item.linkedPackaging.length > 0) {
+      item.linkedPackaging.forEach(pack => {
+        dataSource.push({
+          id: pack.id,
+          name: pack.name,
+          quantity: pack.quantity,
+          image: null,
+          value: pack.value,
+          sideDishName: null,
+          isPackaging: true,
+          linkedToItemId: item.id,
+        });
+      });
+    }
+  });
 
   // Calculate total from actual items (more reliable than order.total)
   const calculatedTotal = order && order.items ? calculateTotal(order.items) : 0;
@@ -485,7 +479,17 @@ export default function Order() {
               <div className="row">
                 <div className="col-lg-8 items-section">
                   {dataSource.map((item, key) => (
-                    <div className="product row d-flex align-items-center flex-nowrap" key={key} style={{ marginBottom: "15px", paddingBottom: "15px", borderBottom: "1px solid #f0f0f0" }}>
+                    <div 
+                      className="product row d-flex align-items-center flex-nowrap" 
+                      key={key} 
+                      style={{ 
+                        marginBottom: "15px", 
+                        paddingBottom: "15px", 
+                        borderBottom: "1px solid #f0f0f0",
+                        paddingLeft: item.isPackaging ? "30px" : "0",
+                        opacity: item.isPackaging ? 0.8 : 1
+                      }}
+                    >
                       <div className="col-md-5 product-name d-flex align-items-center">
                         {!item.isPackaging && (
                           <Image
@@ -497,7 +501,9 @@ export default function Order() {
                           />
                         )}
                         <div>
-                          <a href="#">{item.name}</a>
+                          <a href="#" style={{ fontSize: item.isPackaging ? "14px" : "16px", fontWeight: item.isPackaging ? "normal" : "500" }}>
+                            {item.isPackaging && "└ "}{item.name}
+                          </a>
                           {item.sideDishName && (
                             <div style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
                               Гарнитура: {item.sideDishName}

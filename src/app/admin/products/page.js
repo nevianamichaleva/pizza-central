@@ -34,6 +34,8 @@ const AddProduct = () => {
   const [menuDrawerVisible, setMenuDrawerVisible] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [packagingList, setPackagingList] = useState([]);
+  const [selectedPackaging, setSelectedPackaging] = useState([]);
   const columns = [
     {
       title: "Действия",
@@ -98,11 +100,30 @@ const AddProduct = () => {
         />
       ),
     },
+    {
+      title: "Опаковки",
+      dataIndex: "packagingIds",
+      key: "packagingIds",
+      render: (packagingIds) => {
+        if (!packagingIds || (Array.isArray(packagingIds) && packagingIds.length === 0)) {
+          return <span style={{ color: "#999" }}>Няма</span>;
+        }
+        const ids = Array.isArray(packagingIds) ? packagingIds : [packagingIds];
+        const packagingNames = ids
+          .map(id => {
+            const pkg = packagingList.find(p => p.id === id);
+            return pkg ? pkg.name : null;
+          })
+          .filter(Boolean);
+        return <span>{packagingNames.join(', ') || 'Няма'}</span>;
+      },
+    },
   ];
 
   useEffect(() => {
     fetchCategories();
     fetchProducts();
+    fetchPackaging();
   }, []);
 
   useEffect(() => {
@@ -118,6 +139,7 @@ const AddProduct = () => {
     setIsSideDish(false);
     setForDelivery(true);
     setForRestaurant(true);
+    setSelectedPackaging([]);
     setDrawerVisible(false);
   }
   const openMenuDrawer = () => setMenuDrawerVisible(true);
@@ -139,7 +161,8 @@ const AddProduct = () => {
       requiresSideDish: requiresSideDish || false,
       isSideDish: isSideDish || false,
       forDelivery: forDelivery !== false,
-      forRestaurant: forRestaurant !== false
+      forRestaurant: forRestaurant !== false,
+      packagingIds: selectedPackaging && selectedPackaging.length > 0 ? selectedPackaging : []
     })
       .then(() => {
         closeDrawer();
@@ -213,6 +236,27 @@ const AddProduct = () => {
     }
   };
 
+  const fetchPackaging = async () => {
+    try {
+      const packagingRef = ref(rtdb, "packaging");
+      const snapshot = await get(packagingRef);
+
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const array = Object.entries(data)
+          .map(([key, value]) => ({
+            id: key,
+            ...value,
+          }));
+        setPackagingList(array);
+      } else {
+        setPackagingList([]);
+      }
+    } catch (error) {
+      console.error("Error fetching packaging:", error);
+    }
+  };
+
   // Get filtered products based on active tab and search
   const getFilteredProducts = () => {
     let filtered = products;
@@ -267,7 +311,8 @@ const AddProduct = () => {
       requiresSideDish: requiresSideDish || false,
       isSideDish: isSideDish || false,
       forDelivery: forDelivery !== false,
-      forRestaurant: forRestaurant !== false
+      forRestaurant: forRestaurant !== false,
+      packagingIds: selectedPackaging && selectedPackaging.length > 0 ? selectedPackaging : []
     };
 
     try {
@@ -295,7 +340,8 @@ const AddProduct = () => {
       requiresSideDish = false,
       isSideDish = false,
       forDelivery = true,
-      forRestaurant = true
+      forRestaurant = true,
+      packagingIds = []
     } = values || {};
 
     setName(name);
@@ -309,6 +355,7 @@ const AddProduct = () => {
     setIsSideDish(isSideDish);
     setForDelivery(forDelivery !== false);
     setForRestaurant(forRestaurant !== false);
+    setSelectedPackaging(Array.isArray(packagingIds) ? packagingIds : (packagingIds ? [packagingIds] : []));
 
     setProduct(id);
   };
@@ -558,6 +605,30 @@ const AddProduct = () => {
                     />
                     <span>Ресторант (ще се показва в central-menu)</span>
                   </div>
+                </div>
+              </div>
+              <div className="row gy-4">
+                <div className="col-md-12">
+                  <label htmlFor="packaging" style={{ marginBottom: "8px", display: "block", fontWeight: 500 }}>
+                    Видове опаковки
+                  </label>
+                  <Select
+                    mode="multiple"
+                    placeholder="Избери видове опаковки (например: кутия за ястие, кутия за сос)"
+                    value={selectedPackaging}
+                    onChange={setSelectedPackaging}
+                    style={{ width: "100%", marginBottom: "16px" }}
+                    allowClear
+                  >
+                    {packagingList.map((packaging) => (
+                      <Option key={packaging.id} value={packaging.id}>
+                        {packaging.name} ({parseFloat(packaging.price).toFixed(2)} лв.)
+                      </Option>
+                    ))}
+                  </Select>
+                  <p style={{ fontSize: "12px", color: "#666", marginTop: "-10px", marginBottom: "16px" }}>
+                    Едно ястие може да има няколко вида опаковки (например: кутия за ястие и кутия за сос)
+                  </p>
                 </div>
               </div>
               <div className="col-md-5 text-center">

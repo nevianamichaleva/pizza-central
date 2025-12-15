@@ -109,7 +109,6 @@ const AddCategory = () => {
 
       if (snapshot.exists()) {
         const data = snapshot.val();
-        console.log(data)
         const categoryArray = Object.entries(data)
           .map(([key, value]) => ({
             id: key,
@@ -129,7 +128,6 @@ const AddCategory = () => {
     const file = e.target.files[0];
     if (file) {
       setSelectedImage(file);
-      console.log(file)
       // Preview the image
       const reader = new FileReader();
       reader.onloadend = () => {

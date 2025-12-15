@@ -107,35 +107,6 @@ const MenuSection = () => {
     return products.filter(p => p.isSideDish === true);
   };
 
-  // Calculate packaging box price based on product type
-  const getPackagingPrice = (product) => {
-    // Check if product is a sauce (by ID or name)
-    const isSauce = (product.id && product.id.startsWith('sauce_')) || 
-                    (product.name && product.name.toLowerCase().includes('сос'));
-    
-    if (isSauce) {
-      return 0.10;
-    }
-    
-    // Find the category of the product
-    const productCategory = categories.find(cat => cat.id === product.category);
-    const isPizza = productCategory && productCategory.name && 
-                    (productCategory.name.toLowerCase().includes('пиц') || 
-                     productCategory.name.toLowerCase() === 'пици');
-    
-    if (isPizza) {
-      // Check for size in product name
-      const productName = (product.name || '').toUpperCase();
-      if (productName.includes('XXL')) {
-        return 1.50;
-      } else if (productName.includes('XL')) {
-        return 1.00;
-      }
-    }
-    
-    // Default price for all other items
-    return 0.50;
-  };
 
   const handleProductClick = (product) => {
     if (product.requiresSideDish) {
@@ -175,10 +146,37 @@ const MenuSection = () => {
     
     // Create a unique key for this item (include side dish in key if present)
     const itemKey = sideDish ? `${product.id}_${sideDish.id}` : product.id;
-    
-    // Calculate packaging price
-    const packagingPrice = getPackagingPrice(product);
-    const packagingKey = `${itemKey}_packaging`;
+
+    // Fetch packaging items for this product
+    let packagingItems = [];
+    // Handle both array and non-array packagingIds, and also handle empty arrays
+    const packagingIds = product.packagingIds;
+    if (packagingIds) {
+      const idsArray = Array.isArray(packagingIds) ? packagingIds : [packagingIds];
+      if (idsArray.length > 0) {
+        try {
+          const packagingRef = ref(rtdb, 'packaging');
+          const packagingSnapshot = await get(packagingRef);
+          if (packagingSnapshot.exists()) {
+            const packagingData = packagingSnapshot.val();
+            packagingItems = idsArray
+              .map(packagingId => {
+                const packaging = packagingData[packagingId];
+                if (packaging) {
+                  return {
+                    id: packagingId,
+                    ...packaging
+                  };
+                }
+                return null;
+              })
+              .filter(Boolean);
+          }
+        } catch (error) {
+          console.error("Error fetching packaging:", error);
+        }
+      }
+    }
 
     try {
       const snapshot = await get(ordersRef);
@@ -225,23 +223,32 @@ const MenuSection = () => {
             sideDishId: sideDish ? sideDish.id : null,
             sideDishName: sideDish ? sideDish.name : null,
           },
-          [packagingKey]: {
-            name: 'Кутия',
+        };
+
+        // Add packaging items linked to this product
+        let packagingTotal = 0;
+        packagingItems.forEach((packaging, index) => {
+          const packagingKey = `${itemKey}_packaging_${packaging.id}`;
+          items[packagingKey] = {
+            name: packaging.name,
             quantity: 1,
-            value: packagingPrice,
+            value: parseFloat(packaging.price),
             image: "/images/no-image.png",
             productId: null,
             sideDishId: null,
             sideDishName: null,
             isPackaging: true,
-          },
-        };
+            linkedToItemId: itemKey,
+            packagingId: packaging.id,
+          };
+          packagingTotal += parseFloat(packaging.price);
+        });
 
         const newOrder = {
           items: items,
           order_date: new Date().toLocaleString(),
           status: "pending",
-          total: productPrice + packagingPrice,
+          total: productPrice + packagingTotal,
           user_id: user ? user.uid : null,
           user_email: user ? user.email : null,
           user_phone: userDetails ? userDetails.phone : null,
@@ -261,7 +268,6 @@ const MenuSection = () => {
           : product.name;
 
         const existingItem = currentItems[itemKey];
-        const existingPackaging = currentItems[packagingKey];
         const currentQuantity = Number(existingItem?.quantity) || 0;
         
         const updatedItems = {
@@ -277,24 +283,31 @@ const MenuSection = () => {
           },
         };
 
-        // Add or update packaging item
-        if (existingPackaging) {
-          updatedItems[packagingKey] = {
-            ...existingPackaging,
-            quantity: (Number(existingPackaging.quantity) || 0) + 1,
-          };
-        } else {
-          updatedItems[packagingKey] = {
-            name: 'Кутия',
-            quantity: 1,
-            value: packagingPrice,
-            image: "/images/no-image.png",
-            productId: null,
-            sideDishId: null,
-            sideDishName: null,
-            isPackaging: true,
-          };
-        }
+        // Add or update packaging items linked to this product
+        packagingItems.forEach((packaging) => {
+          const packagingKey = `${itemKey}_packaging_${packaging.id}`;
+          const existingPackaging = currentItems[packagingKey];
+          
+          if (existingPackaging) {
+            updatedItems[packagingKey] = {
+              ...existingPackaging,
+              quantity: (Number(existingPackaging.quantity) || 0) + 1,
+            };
+          } else {
+            updatedItems[packagingKey] = {
+              name: packaging.name,
+              quantity: 1,
+              value: parseFloat(packaging.price),
+              image: "/images/no-image.png",
+              productId: null,
+              sideDishId: null,
+              sideDishName: null,
+              isPackaging: true,
+              linkedToItemId: itemKey,
+              packagingId: packaging.id,
+            };
+          }
+        });
 
         const updatedTotal = Object.values(updatedItems).reduce((total, item) => {
           const basePrice = normalizePrice(item.value);
