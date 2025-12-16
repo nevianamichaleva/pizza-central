@@ -31,6 +31,9 @@ export default function Order() {
   const [deliveryTime, setDeliveryTime] = useState("");
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [isEditingDeliveryTime, setIsEditingDeliveryTime] = useState(false);
+  const [orderType, setOrderType] = useState('pickup'); // 'pickup' or 'delivery'
+  const [selectedHour, setSelectedHour] = useState(null);
+  const [selectedMinute, setSelectedMinute] = useState(null);
 
   const resolveCartId = async () => {
     if (typeof window === "undefined") {
@@ -114,6 +117,8 @@ export default function Order() {
       setSpecialNotes(orderData.special_notes || "");
       setDeliveryTime(orderData.delivery_time || "");
       setStatus(orderData.status || "");
+      // Load order type if it exists, otherwise default to pickup
+      setOrderType(orderData.order_type || 'pickup');
       setLoading(false);
     });
 
@@ -167,6 +172,60 @@ export default function Order() {
       setDeliveryTime(getMinDeliveryTime());
     }
   };
+
+  // Generate hour options
+  const getHourOptions = () => {
+    const hours = [];
+    const now = new Date();
+    const currentHour = now.getHours();
+    // Minimum hour should be at least 1 hour from now
+    const minHour = Math.max(workingHours.startHour, currentHour + 1);
+    
+    for (let h = minHour; h < workingHours.endHour; h++) {
+      hours.push({ value: h, label: `${h.toString().padStart(2, '0')}` });
+    }
+    return hours;
+  };
+
+  // Generate minute options
+  const getMinuteOptions = () => {
+    const minutes = [];
+    for (let m = 0; m < 60; m += 15) {
+      minutes.push({ value: m, label: `${m.toString().padStart(2, '0')}` });
+    }
+    return minutes;
+  };
+
+  // Handle hour change
+  const handleHourChange = (hour) => {
+    setSelectedHour(hour);
+    if (selectedMinute !== null) {
+      const newTime = `${hour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}`;
+      if (validateDeliveryTime(newTime)) {
+        setDeliveryTime(newTime);
+      }
+    }
+  };
+
+  // Handle minute change
+  const handleMinuteChange = (minute) => {
+    setSelectedMinute(minute);
+    if (selectedHour !== null) {
+      const newTime = `${selectedHour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      if (validateDeliveryTime(newTime)) {
+        setDeliveryTime(newTime);
+      }
+    }
+  };
+
+  // Initialize hour and minute from deliveryTime
+  useEffect(() => {
+    if (deliveryTime && deliveryTime.includes(':')) {
+      const [hour, minute] = deliveryTime.split(':').map(Number);
+      setSelectedHour(hour);
+      setSelectedMinute(minute);
+    }
+  }, [deliveryTime]);
 
 
   const updateItemQuantity = async (itemId, quantity) => {
@@ -246,7 +305,7 @@ export default function Order() {
       return;
     }
 
-    if (!address || !address.trim()) {
+    if (orderType === 'delivery' && (!address || !address.trim())) {
       message.error("Моля, въведете адрес за доставка.");
       return;
     }
@@ -273,16 +332,24 @@ export default function Order() {
       }
     }
 
+    // Calculate final total with pickup discount or delivery fee
+    const pickupDiscountAmount = orderType === 'pickup' ? calculatedTotal * 0.1 : 0;
+    const deliveryFeeAmount = orderType === 'delivery' ? 3.00 : 0;
+    const finalOrderTotal = calculatedTotal - pickupDiscountAmount + deliveryFeeAmount;
+
     const updatedOrder = {
       ...order,
       status: 'in progress',
-      delivery_address: address,
+      delivery_address: orderType === 'delivery' ? address : '',
       phone: phone,
       email: email,
       special_notes: specialNotes,
-      delivery_time: deliveryTime,
+      delivery_time: orderType === 'delivery' ? deliveryTime : '',
       order_number: orderNumber,
-      total: order.total + 3
+      order_type: orderType,
+      pickup_discount: pickupDiscountAmount,
+      delivery_fee: deliveryFeeAmount,
+      total: finalOrderTotal
     };
 
     await update(ref(rtdb, `orders/${orderId}`), updatedOrder);
@@ -465,6 +532,31 @@ export default function Order() {
 
   // Calculate total from actual items (more reliable than order.total)
   const calculatedTotal = order && order.items ? calculateTotal(order.items) : 0;
+  
+  // Currency conversion rate
+  const EUR_RATE = 1.95583;
+  
+  // Format price in BGN and EUR
+  const formatPrice = (priceInBGN) => {
+    const bgn = parseFloat(priceInBGN || 0);
+    const eur = (bgn / EUR_RATE).toFixed(2);
+    return { bgn: bgn.toFixed(2), eur };
+  };
+  
+  // Calculate discount per item (10% off for pickup)
+  const getItemDiscount = (itemPrice) => {
+    return orderType === 'pickup' ? itemPrice * 0.1 : 0;
+  };
+  
+  // Calculate subtotal with pickup discount (10% off for pickup)
+  const pickupDiscount = orderType === 'pickup' ? calculatedTotal * 0.1 : 0;
+  const subtotal = calculatedTotal - pickupDiscount;
+  
+  // Delivery fee (3.00 лева)
+  const deliveryFee = orderType === 'delivery' ? 3.00 : 0;
+  
+  // Final total
+  const finalTotal = subtotal + deliveryFee;
 
   return (
     <>
@@ -478,72 +570,365 @@ export default function Order() {
             <div className="content box">
               <div className="row">
                 <div className="col-lg-8 items-section">
-                  {dataSource.map((item, key) => (
-                    <div 
-                      className="product row d-flex align-items-center flex-nowrap" 
-                      key={key} 
-                      style={{ 
-                        marginBottom: "15px", 
-                        paddingBottom: "15px", 
-                        borderBottom: "1px solid #f0f0f0",
-                        paddingLeft: item.isPackaging ? "30px" : "0",
-                        opacity: item.isPackaging ? 0.8 : 1
-                      }}
-                    >
-                      <div className="col-md-5 product-name d-flex align-items-center">
-                        {!item.isPackaging && (
-                          <Image
-                            src={item.image || "/images/no-image.png"}
-                            alt={item.name}
-                            width={80}
-                            height={80}
-                            style={{ marginRight: "10px", borderRadius: "8px" }}
-                          />
-                        )}
-                        <div>
-                          <a href="#" style={{ fontSize: item.isPackaging ? "14px" : "16px", fontWeight: item.isPackaging ? "normal" : "500" }}>
-                            {item.isPackaging && "└ "}{item.name}
-                          </a>
-                          {item.sideDishName && (
-                            <div style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
-                              Гарнитура: {item.sideDishName}
+                  {dataSource.map((item, key) => {
+                    if (item.isPackaging) {
+                      // Packaging items - desktop view only
+                      return (
+                        <div 
+                          className="product row d-flex align-items-center flex-nowrap desktop-only" 
+                          key={key} 
+                          style={{ 
+                            marginBottom: "15px", 
+                            paddingBottom: "15px", 
+                            borderBottom: "1px solid #f0f0f0",
+                            paddingLeft: "30px",
+                            opacity: 0.8
+                          }}
+                        >
+                          <div className="col-md-5 product-name d-flex align-items-center">
+                            <div>
+                              <a href="#" style={{ fontSize: "14px", fontWeight: "normal" }}>
+                                └ {item.name}
+                              </a>
+                            </div>
+                          </div>
+                          <div className="col-md-3 quantity d-flex align-items-center">
+                            <span>{item.quantity}</span>
+                          </div>
+                          <div className="col-md-2 price d-flex align-items-center justify-content-center">
+                            <span>{item.value ? parseFloat(item.value).toFixed(2) : "0.00"} лева</span>
+                          </div>
+                          <div className="col-md-2 total-price d-flex align-items-center justify-content-center">
+                            <span>
+                              {Number.isFinite(item.value * item.quantity) ? (item.value * item.quantity).toFixed(2) : "0.00"} лева
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    const itemPrice = parseFloat(item.value || 0);
+                    const itemDiscount = getItemDiscount(itemPrice);
+                    const itemDiscountTotal = itemDiscount * item.quantity;
+                    const discountedPrice = itemPrice - itemDiscount;
+                    const originalTotal = itemPrice * item.quantity;
+                    const discountedTotal = discountedPrice * item.quantity;
+                    const originalPriceFormatted = formatPrice(itemPrice);
+                    const discountedPriceFormatted = formatPrice(discountedPrice);
+                    
+                    return (
+                      <div key={key}>
+                        {/* Desktop View */}
+                        <div 
+                          className="product row d-flex align-items-center flex-nowrap desktop-only" 
+                          style={{ 
+                            marginBottom: "15px", 
+                            paddingBottom: "15px", 
+                            borderBottom: "1px solid #f0f0f0"
+                          }}
+                        >
+                          <div className="col-md-5 product-name d-flex align-items-center">
+                            <div className="desktop-only-image">
+                              <Image
+                                src={item.image || "/images/no-image.png"}
+                                alt={item.name}
+                                width={80}
+                                height={80}
+                                style={{ marginRight: "10px", borderRadius: "8px" }}
+                              />
+                            </div>
+                            <div>
+                              <a href="#" style={{ fontSize: "16px", fontWeight: "500" }}>
+                                {item.name}
+                              </a>
+                              {item.sideDishName && (
+                                <div style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
+                                  Гарнитура: {item.sideDishName}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="col-md-3 quantity d-flex align-items-center">
+                            <input
+                              type="number"
+                              value={item.quantity}
+                              onChange={(e) => updateItemQuantity(item.id, e.target.value)}
+                              className="form-control quantity-input"
+                              style={{ width: "60px" }}
+                            />
+                          </div>
+                          <div className="col-md-2 price d-flex align-items-center justify-content-center">
+                            <span>{itemPrice.toFixed(2)} лева</span>
+                          </div>
+                          <div className="col-md-2 total-price d-flex align-items-center justify-content-center">
+                            <span>{originalTotal.toFixed(2)} лева</span>
+                            {!orderCompleted &&
+                              <FaTimes
+                                onClick={() => deleteItem(item.id)}
+                                style={{ color: "red", cursor: "pointer", marginLeft: "10px" }}
+                                title="Премахни артикула"
+                              />
+                            }
+                          </div>
+                        </div>
+                        
+                        {/* Mobile View */}
+                        <div 
+                          className="product-mobile mobile-only" 
+                          style={{ 
+                            marginBottom: "20px", 
+                            padding: "15px",
+                            backgroundColor: "#fff",
+                            borderRadius: "8px",
+                            border: "1px solid #e0e0e0"
+                          }}
+                        >
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+                            <div style={{ flex: 1, textAlign: "left" }}>
+                              <div style={{ fontSize: "16px", fontWeight: "600", marginBottom: "4px", textAlign: "left" }}>
+                                {item.name}
+                              </div>
+                              {item.sideDishName && (
+                                <div style={{ fontSize: "13px", color: "#666", marginTop: "4px" }}>
+                                  Гарнитура: {item.sideDishName}
+                                </div>
+                              )}
+                            </div>
+                            {!orderCompleted && (
+                              <FaTimes
+                                onClick={() => deleteItem(item.id)}
+                                style={{ color: "#ce1212", cursor: "pointer", fontSize: "18px", marginLeft: "10px" }}
+                                title="Премахни артикула"
+                              />
+                            )}
+                          </div>
+                          
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                              <button
+                                onClick={() => updateItemQuantity(item.id, Math.max(1, item.quantity - 1))}
+                                style={{
+                                  width: "32px",
+                                  height: "32px",
+                                  borderRadius: "4px",
+                                  border: "1px solid #ce1212",
+                                  backgroundColor: "#fff",
+                                  color: "#ce1212",
+                                  fontSize: "18px",
+                                  fontWeight: "bold",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center"
+                                }}
+                                disabled={orderCompleted}
+                              >
+                                −
+                              </button>
+                              <span style={{ fontSize: "16px", fontWeight: "600", minWidth: "30px", textAlign: "center" }}>
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
+                                style={{
+                                  width: "32px",
+                                  height: "32px",
+                                  borderRadius: "4px",
+                                  border: "1px solid #ce1212",
+                                  backgroundColor: "#ce1212",
+                                  color: "#fff",
+                                  fontSize: "18px",
+                                  fontWeight: "bold",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center"
+                                }}
+                                disabled={orderCompleted}
+                              >
+                                +
+                              </button>
+                            </div>
+                            
+                            <div style={{ textAlign: "right" }}>
+                              <div>
+                                <div style={{ fontSize: "16px", fontWeight: "600" }}>
+                                  {originalPriceFormatted.bgn} лв ({originalPriceFormatted.eur}€)
+                                </div>
+                                <div style={{ fontSize: "14px", fontWeight: "600", color: "#333", marginTop: "4px" }}>
+                                  Общо: {formatPrice(originalTotal).bgn} лв ({formatPrice(originalTotal).eur}€)
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Packaging Items - Mobile */}
+                          {item.linkedPackaging && item.linkedPackaging.length > 0 && (
+                            <div style={{ 
+                              marginTop: "12px", 
+                              paddingTop: "12px", 
+                              borderTop: "1px solid #e0e0e0" 
+                            }}>
+                              {item.linkedPackaging.map((pack, packIndex) => {
+                                const packPrice = parseFloat(pack.value || 0);
+                                const packTotal = packPrice * pack.quantity;
+                                const packPriceFormatted = formatPrice(packPrice);
+                                const packTotalFormatted = formatPrice(packTotal);
+                                
+                                return (
+                                  <div 
+                                    key={packIndex} 
+                                    style={{ 
+                                      display: "flex", 
+                                      justifyContent: "space-between", 
+                                      alignItems: "center",
+                                      marginBottom: packIndex < item.linkedPackaging.length - 1 ? "8px" : "0"
+                                    }}
+                                  >
+                                    <div style={{ fontSize: "14px", color: "#666" }}>
+                                      {pack.name} (x{pack.quantity})
+                                    </div>
+                                    <div style={{ textAlign: "right" }}>
+                                      <div style={{ fontSize: "14px", fontWeight: "600" }}>
+                                        {packPriceFormatted.bgn} лв ({packPriceFormatted.eur}€)
+                                      </div>
+                                      <div style={{ fontSize: "12px", color: "#666", marginTop: "2px" }}>
+                                        Общо: {packTotalFormatted.bgn} лв ({packTotalFormatted.eur}€)
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           )}
                         </div>
                       </div>
-
-                      <div className="col-md-3 quantity d-flex align-items-center">
-                        {!item.isPackaging ? (
-                          <input
-                            type="number"
-                            value={item.quantity}
-                            onChange={(e) => updateItemQuantity(item.id, e.target.value)}
-                            className="form-control quantity-input"
-                            style={{ width: "60px" }}
-                          />
-                        ) : (
-                          <span>{item.quantity}</span>
-                        )}
-                      </div>
-
-                      <div className="col-md-2 price d-flex align-items-center justify-content-center">
-                        <span>{item.value ? parseFloat(item.value).toFixed(2) : "0.00"} лева</span>
-                      </div>
-
-                      <div className="col-md-2 total-price d-flex align-items-center justify-content-center">
-                        <span>
-                          {Number.isFinite(item.value * item.quantity) ? (item.value * item.quantity).toFixed(2) : "0.00"} лева
+                    );
+                  })}
+                  
+                  {/* Discount Summary - Mobile */}
+                  {pickupDiscount > 0 && (
+                    <div className="mobile-only" style={{ 
+                      marginTop: "20px", 
+                      padding: "15px", 
+                      backgroundColor: "#fff", 
+                      borderRadius: "8px",
+                      border: "1px solid #e0e0e0"
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: "16px", fontWeight: "600" }}>ОБЩО ОТСТЪПКА:</span>
+                        <span style={{ fontSize: "16px", fontWeight: "600", color: "#ce1212" }}>
+                          - {formatPrice(pickupDiscount).bgn} лв ({formatPrice(pickupDiscount).eur}€)
                         </span>
-                        {!orderCompleted && !item.isPackaging &&
-                          <FaTimes
-                            onClick={() => deleteItem(item.id)}
-                            style={{ color: "red", cursor: "pointer", marginLeft: "10px" }}
-                            title="Премахни артикула"
-                          />
-                        }
                       </div>
                     </div>
-                  ))}
+                  )}
+                  
+                  {/* Delivery/Pickup Options - Mobile */}
+                  {!orderCompleted && (
+                    <div className="mobile-only order-type-selection" style={{ marginTop: "20px" }}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                        <label style={{ 
+                          display: "flex", 
+                          alignItems: "center", 
+                          padding: "15px",
+                          border: orderType === 'pickup' ? "2px solid #ce1212" : "2px solid #e0e0e0",
+                          borderRadius: "8px",
+                          backgroundColor: orderType === 'pickup' ? "#ce1212" : "#fff",
+                          color: orderType === 'pickup' ? "#fff" : "#000",
+                          cursor: "pointer",
+                          transition: "all 0.3s",
+                          position: "relative"
+                        }}>
+                          <input
+                            type="radio"
+                            name="orderType"
+                            value="pickup"
+                            checked={orderType === 'pickup'}
+                            onChange={(e) => setOrderType(e.target.value)}
+                            style={{ display: "none", marginRight: "12px", width: "20px", height: "20px", cursor: "pointer" }}
+                          />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: "600", fontSize: "16px" }}>
+                              ЩЕ ВЗЕМА САМ ПОРЪЧКАТА ОТ РЕСТОРАНТА
+                            </div>
+                            <div style={{ fontSize: "14px", marginTop: "4px", opacity: 0.9 }}>
+                              (-10%)
+                            </div>
+                          </div>
+                          {orderType === 'pickup' && (
+                            <div style={{
+                              position: "absolute",
+                              right: "15px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              width: "24px",
+                              height: "24px",
+                              borderRadius: "50%",
+                              backgroundColor: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: "#ce1212",
+                              fontSize: "16px",
+                              fontWeight: "bold"
+                            }}>
+                              ✓
+                            </div>
+                          )}
+                        </label>
+                        <label style={{ 
+                          display: "flex", 
+                          alignItems: "center", 
+                          padding: "15px",
+                          border: orderType === 'delivery' ? "2px solid #ce1212" : "2px solid #e0e0e0",
+                          borderRadius: "8px",
+                          backgroundColor: orderType === 'delivery' ? "#ce1212" : "#fff",
+                          color: orderType === 'delivery' ? "#fff" : "#000",
+                          cursor: "pointer",
+                          transition: "all 0.3s",
+                          position: "relative"
+                        }}>
+                          <input
+                            type="radio"
+                            name="orderType"
+                            value="delivery"
+                            checked={orderType === 'delivery'}
+                            onChange={(e) => setOrderType(e.target.value)}
+                            style={{ display: "none", marginRight: "12px", width: "20px", height: "20px", cursor: "pointer" }}
+                          />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: "600", fontSize: "16px" }}>
+                              С ДОСТАВКА
+                            </div>
+                            <div style={{ fontSize: "14px", marginTop: "4px", opacity: 0.9 }}>
+                              {formatPrice(3.00).bgn}ЛВ ({formatPrice(3.00).eur}€)
+                            </div>
+                          </div>
+                          {orderType === 'delivery' && (
+                            <div style={{
+                              position: "absolute",
+                              right: "15px",
+                              top: "50%",
+                              transform: "translateY(-50%)",
+                              width: "24px",
+                              height: "24px",
+                              borderRadius: "50%",
+                              backgroundColor: "#fff",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              color: "#ce1212",
+                              fontSize: "16px",
+                              fontWeight: "bold"
+                            }}>
+                              ✓
+                            </div>
+                          )}
+                        </label>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="col-lg-4 summary-section">
@@ -552,28 +937,132 @@ export default function Order() {
                     <span>Сума:</span>
                     <span>{calculatedTotal.toFixed(2)} лева</span>
                   </div>
-                  <div className="summary-item">
-                    <span>Доставка:</span>
-                    <span>{calculatedTotal > 0 ? "3.00 лева" : "0.00 лева"}</span>
-                  </div>
-                  <div className="summary-item">
+                  {orderType === 'pickup' && pickupDiscount > 0 && (
+                    <div className="summary-item" style={{ color: "#ce1212" }}>
+                      <span>Отстъпка за вземане (-10%):</span>
+                      <span>-{pickupDiscount.toFixed(2)} лева</span>
+                    </div>
+                  )}
+                  {orderType === 'delivery' && (
+                    <div className="summary-item">
+                      <span>Доставка:</span>
+                      <span>{deliveryFee.toFixed(2)} лева</span>
+                    </div>
+                  )}
+                  <div className="summary-item" style={{ fontWeight: "bold", fontSize: "18px", borderTop: "2px solid #e0e0e0", paddingTop: "10px", marginTop: "10px" }}>
                     <span>Общо:</span>
-                    <span>{(calculatedTotal > 0 ? calculatedTotal + 3 : calculatedTotal).toFixed(2)} лева</span>
+                    <span>{finalTotal.toFixed(2)} лева ({formatPrice(finalTotal).eur}€)</span>
                   </div>
+                  
+                  {/* Mobile Summary */}
+                  <div className="mobile-only" style={{ 
+                    marginTop: "20px", 
+                    padding: "15px", 
+                    backgroundColor: "#fff", 
+                    borderRadius: "8px",
+                    border: "1px solid #e0e0e0"
+                  }}>
+                    <div style={{ marginBottom: "12px", paddingBottom: "12px", borderBottom: "1px solid #e0e0e0" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                        <span style={{ fontSize: "16px" }}>Сума:</span>
+                        <span style={{ fontSize: "16px", fontWeight: "600" }}>
+                          {formatPrice(calculatedTotal).bgn} лв ({formatPrice(calculatedTotal).eur}€)
+                        </span>
+                      </div>
+                      {orderType === 'delivery' && (
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                          <span style={{ fontSize: "16px" }}>Доставка:</span>
+                          <span style={{ fontSize: "16px", fontWeight: "600" }}>
+                            {formatPrice(deliveryFee).bgn} лв ({formatPrice(deliveryFee).eur}€)
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "12px" }}>
+                      <span style={{ fontSize: "20px", fontWeight: "bold" }}>Общо:</span>
+                      <span style={{ fontSize: "20px", fontWeight: "bold", color: "#ce1212" }}>
+                        {formatPrice(finalTotal).bgn} лв ({formatPrice(finalTotal).eur}€)
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Delivery/Pickup Options - Desktop */}
+                  {!orderCompleted && (
+                    <div className="desktop-only" style={{ marginTop: "20px", padding: "15px", backgroundColor: "#f9f9f9", borderRadius: "8px" }}>
+                      <h5 style={{ marginBottom: "15px", fontSize: "16px" }}>Начин на получаване:</h5>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        <label style={{ 
+                          display: "flex", 
+                          alignItems: "center", 
+                          padding: "10px",
+                          border: orderType === 'pickup' ? "2px solid #ce1212" : "2px solid #e0e0e0",
+                          borderRadius: "8px",
+                          backgroundColor: orderType === 'pickup' ? "#fff5f5" : "#fff",
+                          cursor: "pointer"
+                        }}>
+                          <input
+                            type="radio"
+                            name="orderType"
+                            value="pickup"
+                            checked={orderType === 'pickup'}
+                            onChange={(e) => setOrderType(e.target.value)}
+                            style={{ display: "none", marginRight: "10px", cursor: "pointer" }}
+                          />
+                          <div>
+                            <div style={{ fontWeight: "600" }}>
+                              Вземане от ресторанта (-10%)
+                            </div>
+                          </div>
+                        </label>
+                        <label style={{ 
+                          display: "flex", 
+                          alignItems: "center", 
+                          padding: "10px",
+                          border: orderType === 'delivery' ? "2px solid #ce1212" : "2px solid #e0e0e0",
+                          borderRadius: "8px",
+                          backgroundColor: orderType === 'delivery' ? "#fff5f5" : "#fff",
+                          cursor: "pointer"
+                        }}>
+                          <input
+                            type="radio"
+                            name="orderType"
+                            value="delivery"
+                            checked={orderType === 'delivery'}
+                            onChange={(e) => setOrderType(e.target.value)}
+                            style={{ display: "none", marginRight: "10px", cursor: "pointer" }}
+                          />
+                          <div>
+                            <div style={{ fontWeight: "600" }}>
+                              С доставка (3.00 лева)
+                            </div>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  )}
                   {!orderCompleted &&
                     <>
                       <Tooltip title={
-                        (!address || !address.trim() || !phone || !phone.trim()) 
-                          ? "Въведете адрес и телефон като натиснете бутона Добави" 
-                          : !isWithinWorkingHours() 
-                            ? `Поръчките се приемат от ${workingHours.startHour}:00 до ${workingHours.endHour}:00 часа` 
-                            : ""
+                        (!phone || !phone.trim()) 
+                          ? "Въведете телефон като натиснете бутона Добави" 
+                          : (orderType === 'delivery' && (!address || !address.trim()))
+                            ? "Въведете адрес за доставка"
+                            : !isWithinWorkingHours() 
+                              ? `Поръчките се приемат от ${workingHours.startHour}:00 до ${workingHours.endHour}:00 часа` 
+                              : ""
                       }>
-                        <span style={{ display: 'inline-block', width: '100%' }}>
+                        <span style={{ display: 'inline-block', width: '100%', marginTop: '10px' }}>
                           <button
                             className="btn btn-primary btn-lg btn-block"
                             onClick={changeOrderStatus}
-                            disabled={order?.status === 'in progress' || calculatedTotal <= 25 || !isWithinWorkingHours()}
+                            disabled={
+                              order?.status === 'in progress' || 
+                              (orderType === 'delivery' && calculatedTotal <= 25) || 
+                              !isWithinWorkingHours() ||
+                              !phone || 
+                              !phone.trim() ||
+                              (orderType === 'delivery' && (!address || !address.trim()))
+                            }
                           >
                             Поръчай
                           </button>
@@ -584,28 +1073,31 @@ export default function Order() {
                           Поръчките се приемат от {workingHours.startHour}:00 до {workingHours.endHour}:00 часа
                         </p>
                       )}
-                      {calculatedTotal < 25 && (
+                      {orderType === 'delivery' && calculatedTotal < 25 && (
                         <>
-                        <p style={{ fontSize: '15px', textAlign: 'left', coler: 'red' }}>
-                          Минимална сума за поръчка 25 лв, добавете продукти за още {(25 - calculatedTotal).toFixed(2)} лева.
+                        <p style={{ fontSize: '15px', textAlign: 'left', color: 'red' }}>
+                          Минимална сума за доставка 25 лв, добавете продукти за още {(25 - calculatedTotal).toFixed(2)} лева.
                         </p>
                         <Link href='/our-menu' className="btn btn-primary w-auto text-center py-1 px-3">Към меню</Link>
                         </>
                       )}
                     </>
                   }
-                  <div className="contact-info">
-                    <div style={{ marginBottom: "20px" }}>
-                      <h5>Адрес:</h5>
-                      {isEditing ? (
-                        <Input value={address} onChange={(e) => setAddress(e.target.value)} />
-                      ) : (
-                        <span>{address || ""}</span>
-                      )}
-                      {!orderCompleted &&
-                        <Button style={{ float: "right" }} onClick={() => setIsEditing(!isEditing)}>{isEditing ? <CheckOutlined /> : (address && address.trim() ? "Редактирай" : "Добави")}</Button>
-                      }
-                    </div>
+                  {/* Desktop Contact Info */}
+                  <div className="contact-info desktop-only">
+                    {(orderType === 'delivery' || orderCompleted) && (
+                      <div style={{ marginBottom: "20px" }}>
+                        <h5>Адрес:</h5>
+                        {isEditing ? (
+                          <Input value={address} onChange={(e) => setAddress(e.target.value)} />
+                        ) : (
+                          <span>{address || ""}</span>
+                        )}
+                        {!orderCompleted &&
+                          <Button style={{ float: "right" }} onClick={() => setIsEditing(!isEditing)}>{isEditing ? <CheckOutlined /> : (address && address.trim() ? "Редактирай" : "Добави")}</Button>
+                        }
+                      </div>
+                    )}
                     <div style={{ marginBottom: "20px" }}>
                       <h5>Email:</h5>
                       {isEditingEmail ? (
@@ -644,36 +1136,296 @@ export default function Order() {
                         <Button style={{ float: "right" }} onClick={() => setIsEditingNotes(!isEditingNotes)}>{isEditingNotes ? <CheckOutlined /> : (specialNotes && specialNotes.trim() ? "Редактирай" : "Добави")}</Button>
                       }
                     </div>
-                    <div style={{ marginBottom: "20px" }}>
-                      <h5>Час за доставка (по избор):</h5>
-                      {isEditingDeliveryTime ? (
+                    {(orderType === 'delivery' || orderCompleted) && (
+                      <div style={{ marginBottom: "20px" }}>
+                        <h5>Час за доставка (по избор):</h5>
+                        {isEditingDeliveryTime ? (
+                          <div>
+                            <div style={{ display: "flex", gap: "10px", marginBottom: "8px" }}>
+                              <div style={{ flex: 1 }}>
+                                <label style={{ fontSize: "13px", marginBottom: "5px", display: "block", color: "#666" }}>
+                                  Час:
+                                </label>
+                                <Select
+                                  placeholder="Изберете час"
+                                  value={selectedHour}
+                                  onChange={handleHourChange}
+                                  style={{ width: "100%" }}
+                                  options={getHourOptions()}
+                                />
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <label style={{ fontSize: "13px", marginBottom: "5px", display: "block", color: "#666" }}>
+                                  Минути:
+                                </label>
+                                <Select
+                                  placeholder="Изберете минути"
+                                  value={selectedMinute}
+                                  onChange={handleMinuteChange}
+                                  style={{ width: "100%" }}
+                                  options={getMinuteOptions()}
+                                />
+                              </div>
+                            </div>
+                            <p style={{ fontSize: '12px', color: '#666', marginTop: '8px', marginBottom: 0 }}>
+                              Доставката трябва да е минимум 1 час от сега и до {workingHours.endHour}:00 часа
+                            </p>
+                          </div>
+                        ) : (
+                          <span>{deliveryTime || "Възможно най-скоро"}</span>
+                        )}
+                        {!orderCompleted &&
+                          <Button style={{ float: "right" }} onClick={() => {
+                            if (!isEditingDeliveryTime) {
+                              // Initialize hour and minute when opening
+                              if (!deliveryTime || !validateDeliveryTime(deliveryTime)) {
+                                const minTime = getMinDeliveryTime();
+                                setDeliveryTime(minTime);
+                                const [hour, minute] = minTime.split(':').map(Number);
+                                setSelectedHour(hour);
+                                setSelectedMinute(minute);
+                              } else {
+                                const [hour, minute] = deliveryTime.split(':').map(Number);
+                                setSelectedHour(hour);
+                                setSelectedMinute(minute);
+                              }
+                            }
+                            setIsEditingDeliveryTime(!isEditingDeliveryTime);
+                          }}>{isEditingDeliveryTime ? <CheckOutlined /> : (deliveryTime && deliveryTime.trim() ? "Редактирай" : "Добави")}</Button>
+                        }
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Mobile Contact Info */}
+                  <div className="contact-info mobile-only" style={{ marginTop: "20px" }}>
+                    {(orderType === 'delivery' || orderCompleted) && (
+                      <div style={{ 
+                        marginBottom: "15px", 
+                        padding: "15px",
+                        backgroundColor: "#fff",
+                        borderRadius: "8px",
+                        border: "1px solid #e0e0e0"
+                      }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                          <h5 style={{ fontSize: "16px", fontWeight: "600", margin: 0, textAlign: "left" }}>Адрес:</h5>
+                          {!orderCompleted && (
+                            <Button 
+                              size="small"
+                              onClick={() => setIsEditing(!isEditing)}
+                              style={{ 
+                                padding: "4px 12px",
+                                height: "auto",
+                                fontSize: "12px"
+                              }}
+                            >
+                              {isEditing ? <CheckOutlined /> : (address && address.trim() ? "Редактирай" : "Добави")}
+                            </Button>
+                          )}
+                        </div>
+                        {isEditing ? (
+                          <Input 
+                            value={address} 
+                            onChange={(e) => setAddress(e.target.value)}
+                            style={{ width: "100%" }}
+                          />
+                        ) : (
+                          <div style={{ fontSize: "14px", color: address ? "#333" : "#999", textAlign: "left" }}>
+                            {address || "Не е въведен адрес"}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    <div style={{ 
+                      marginBottom: "15px", 
+                      padding: "15px",
+                      backgroundColor: "#fff",
+                      borderRadius: "8px",
+                      border: "1px solid #e0e0e0"
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                        <h5 style={{ fontSize: "16px", fontWeight: "600", margin: 0, textAlign: "left" }}>Email:</h5>
+                        {!orderCompleted && (
+                          <Button 
+                            size="small"
+                            onClick={() => setIsEditingEmail(!isEditingEmail)}
+                            style={{ 
+                              padding: "4px 12px",
+                              height: "auto",
+                              fontSize: "12px"
+                            }}
+                          >
+                            {isEditingEmail ? <CheckOutlined /> : (email && email.trim() ? "Редактирай" : "Добави")}
+                          </Button>
+                        )}
+                      </div>
+                      {isEditingEmail ? (
                         <Input 
-                          type="time"
-                          value={deliveryTime} 
-                          onChange={handleDeliveryTimeChange}
-                          min={getMinDeliveryTime()}
-                          max={`${workingHours.endHour - 1}:59`}
+                          value={email} 
+                          onChange={(e) => setEmail(e.target.value)}
+                          style={{ width: "100%" }}
                         />
                       ) : (
-                        <span>{deliveryTime || "Възможно най-скоро"}</span>
-                      )}
-                      {!orderCompleted &&
-                        <Button style={{ float: "right" }} onClick={() => {
-                          if (!isEditingDeliveryTime) {
-                            // When opening for editing, ensure we have a valid time
-                            if (!deliveryTime || !validateDeliveryTime(deliveryTime)) {
-                              setDeliveryTime(getMinDeliveryTime());
-                            }
-                          }
-                          setIsEditingDeliveryTime(!isEditingDeliveryTime);
-                        }}>{isEditingDeliveryTime ? <CheckOutlined /> : (deliveryTime && deliveryTime.trim() ? "Редактирай" : "Добави")}</Button>
-                      }
-                      {isEditingDeliveryTime && (
-                        <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-                          Доставката трябва да е минимум 1 час от сега и до {workingHours.endHour}:00 часа
-                        </p>
+                        <div style={{ fontSize: "14px", color: email ? "#333" : "#999", textAlign: "left" }}>
+                          {email || "Не е въведен email"}
+                        </div>
                       )}
                     </div>
+                    
+                    <div style={{ 
+                      marginBottom: "15px", 
+                      padding: "15px",
+                      backgroundColor: "#fff",
+                      borderRadius: "8px",
+                      border: "1px solid #e0e0e0"
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                        <h5 style={{ fontSize: "16px", fontWeight: "600", margin: 0, textAlign: "left" }}>Телефон:</h5>
+                        {!orderCompleted && (
+                          <Button 
+                            size="small"
+                            onClick={() => setIsEditingPhone(!isEditingPhone)}
+                            style={{ 
+                              padding: "4px 12px",
+                              height: "auto",
+                              fontSize: "12px"
+                            }}
+                          >
+                            {isEditingPhone ? <CheckOutlined /> : (phone && phone.trim() ? "Редактирай" : "Добави")}
+                          </Button>
+                        )}
+                      </div>
+                      {isEditingPhone ? (
+                        <Input 
+                          value={phone} 
+                          onChange={(e) => setPhone(e.target.value)}
+                          style={{ width: "100%" }}
+                        />
+                      ) : (
+                        <div style={{ fontSize: "14px", color: phone ? "#333" : "#999", textAlign: "left" }}>
+                          {phone || "Не е въведен телефон"}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div style={{ 
+                      marginBottom: "15px", 
+                      padding: "15px",
+                      backgroundColor: "#fff",
+                      borderRadius: "8px",
+                      border: "1px solid #e0e0e0"
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                        <h5 style={{ fontSize: "16px", fontWeight: "600", margin: 0, textAlign: "left" }}>Специални предпочитания/забележки:</h5>
+                        {!orderCompleted && (
+                          <Button 
+                            size="small"
+                            onClick={() => setIsEditingNotes(!isEditingNotes)}
+                            style={{ 
+                              padding: "4px 12px",
+                              height: "auto",
+                              fontSize: "12px"
+                            }}
+                          >
+                            {isEditingNotes ? <CheckOutlined /> : (specialNotes && specialNotes.trim() ? "Редактирай" : "Добави")}
+                          </Button>
+                        )}
+                      </div>
+                      {isEditingNotes ? (
+                        <TextArea 
+                          value={specialNotes} 
+                          onChange={(e) => setSpecialNotes(e.target.value)}
+                          placeholder="Например: без гъби, добавете пипер, без лук..."
+                          rows={3}
+                          style={{ width: "100%" }}
+                        />
+                      ) : (
+                        <div style={{ fontSize: "14px", color: specialNotes ? "#333" : "#999", textAlign: "left" }}>
+                          {specialNotes || "Няма специални забележки"}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {(orderType === 'delivery' || orderCompleted) && (
+                      <div style={{ 
+                        marginBottom: "15px", 
+                        padding: "15px",
+                        backgroundColor: "#fff",
+                        borderRadius: "8px",
+                        border: "1px solid #e0e0e0"
+                      }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                          <h5 style={{ fontSize: "16px", fontWeight: "600", margin: 0, textAlign: "left" }}>Час за доставка (по избор):</h5>
+                          {!orderCompleted && (
+                          <Button 
+                            size="small"
+                            onClick={() => {
+                              if (!isEditingDeliveryTime) {
+                                // Initialize hour and minute when opening
+                                if (!deliveryTime || !validateDeliveryTime(deliveryTime)) {
+                                  const minTime = getMinDeliveryTime();
+                                  setDeliveryTime(minTime);
+                                  const [hour, minute] = minTime.split(':').map(Number);
+                                  setSelectedHour(hour);
+                                  setSelectedMinute(minute);
+                                } else {
+                                  const [hour, minute] = deliveryTime.split(':').map(Number);
+                                  setSelectedHour(hour);
+                                  setSelectedMinute(minute);
+                                }
+                              }
+                              setIsEditingDeliveryTime(!isEditingDeliveryTime);
+                            }}
+                              style={{ 
+                                padding: "4px 12px",
+                                height: "auto",
+                                fontSize: "12px"
+                              }}
+                            >
+                              {isEditingDeliveryTime ? <CheckOutlined /> : (deliveryTime && deliveryTime.trim() ? "Редактирай" : "Добави")}
+                            </Button>
+                          )}
+                        </div>
+                        {isEditingDeliveryTime ? (
+                          <div>
+                            <div style={{ display: "flex", gap: "10px", marginBottom: "8px" }}>
+                              <div style={{ flex: 1 }}>
+                                <label style={{ fontSize: "13px", marginBottom: "5px", display: "block", color: "#666" }}>
+                                  Час:
+                                </label>
+                                <Select
+                                  placeholder="Изберете час"
+                                  value={selectedHour}
+                                  onChange={handleHourChange}
+                                  style={{ width: "100%" }}
+                                  options={getHourOptions()}
+                                />
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <label style={{ fontSize: "13px", marginBottom: "5px", display: "block", color: "#666" }}>
+                                  Минути:
+                                </label>
+                                <Select
+                                  placeholder="Изберете минути"
+                                  value={selectedMinute}
+                                  onChange={handleMinuteChange}
+                                  style={{ width: "100%" }}
+                                  options={getMinuteOptions()}
+                                />
+                              </div>
+                            </div>
+                            <p style={{ fontSize: '12px', color: '#666', marginTop: '8px', marginBottom: 0 }}>
+                              Доставката трябва да е минимум 1 час от сега и до {workingHours.endHour}:00 часа
+                            </p>
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: "14px", color: deliveryTime ? "#333" : "#999", textAlign: "left" }}>
+                            {deliveryTime || "Възможно най-скоро"}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -816,15 +1568,59 @@ export default function Order() {
           margin-top: 20px;
           text-align: left;
         }
+        .desktop-only {
+          display: block;
+        }
+        .desktop-only-image {
+          display: block;
+        }
+        .mobile-only {
+          display: none;
+        }
         @media (max-width: 768px) {
           .row {
             flex-direction: column;
           }
           .items-section, .summary-section {
             width: 100%;
+            padding-right: 0;
           }
           .contact-info {
             text-align: center;
+          }
+          .desktop-only {
+            display: none !important;
+          }
+          .desktop-only-image {
+            display: none !important;
+          }
+          .mobile-only {
+            display: block !important;
+          }
+          .product {
+            flex-direction: column;
+            align-items: flex-start !important;
+          }
+          .product-name {
+            width: 100%;
+            margin-bottom: 10px;
+          }
+          .total-price {
+            width: 100%;
+            justify-content: flex-end !important;
+            margin-top: 10px;
+          }
+          .order-type-selection {
+            margin-top: 20px;
+          }
+          .summary-section {
+            margin-top: 20px;
+          }
+          .summary-section h3 {
+            display: none;
+          }
+          .summary-section .summary-item {
+            display: none;
           }
         }
       `}
