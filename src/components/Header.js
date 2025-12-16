@@ -281,6 +281,9 @@ const Header = () => {
                     <MenuLink href="/about-us" className={pathname == '/about-us' ? 'active' : ''}>За ресторанта</MenuLink>
                   </li>
                   <li>
+                    <MenuLink href="/detski-kut" className={pathname == '/detski-kut' ? 'active' : ''}>Детски кът</MenuLink>
+                  </li>
+                  <li>
                     <MenuLink href="/new-dishes" className={pathname == '/new-dishes' ? 'active' : ''}>Нови предложения</MenuLink>
                   </li>
                   <li>
