@@ -85,6 +85,12 @@ const nextConfig = {
         destination: '/our-menu',
         permanent: true,
       },
+      // Пренасочване на sitemap_index.xml към sitemap.xml
+      {
+        source: '/sitemap_index.xml',
+        destination: '/sitemap.xml',
+        permanent: true,
+      },
     ];
   },
 };
