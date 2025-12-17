@@ -78,7 +78,7 @@ const DetskiKutPage = () => {
             {/* Image 1 */}
             <div className="text-center" style={{ borderRadius: '8px', overflow: 'hidden', marginBottom: '20px' }}>
               <img 
-                src="/images/gallery/detski-kut1.jpg" 
+                src="/images/gallery/detski-kut5-web.jpg" 
                 alt="Детски кът - снимка 1" 
                 style={{
                   width: '100%',
@@ -91,7 +91,7 @@ const DetskiKutPage = () => {
             {/* Image 2 */}
             <div className="text-center" style={{ borderRadius: '8px', overflow: 'hidden' }}>
               <img 
-                src="/images/gallery/detsi-kut2.jpg" 
+                src="/images/gallery/detski-kut3-web.jpg" 
                 alt="Детски кът - снимка 2" 
                 style={{
                   width: '100%',
