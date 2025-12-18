@@ -30,7 +30,7 @@ const DetskiKutPage = () => {
           <div className="col-lg-12" data-aos="fade-up" data-aos-delay="150">
             <div className="text-center" style={{ borderRadius: '8px', overflow: 'hidden' }}>
               <img 
-                src="/images/gallery/detski-kut_web.png" 
+                src="/images/gallery/detski-kut1.jpg" 
                 alt="Детски кът в ресторант-пицария Централ Добрич" 
                 style={{
                   width: '100%',
