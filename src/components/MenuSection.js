@@ -362,7 +362,20 @@ const MenuSection = () => {
         </div>
         <div className="menu-card-content">
           <h4 className="menu-card-title">{item.name}</h4>
-          <p className="menu-card-description">{item.description || item.ingredients}</p>
+          {(item.ingredients || item.description) && (
+            <div style={{ marginBottom: "16px" }}>
+              {item.ingredients && (
+                <p className="menu-card-description" style={{ marginBottom: "6px" }}>
+                  {item.ingredients}
+                </p>
+              )}
+              {item.description && (
+                <p className="menu-card-description" style={{ marginBottom: 0 }}>
+                  {item.description}
+                </p>
+              )}
+            </div>
+          )}
           <div className="menu-card-footer">
             {formatPrice(item.price) && (
               <p className="menu-card-price">{formatPrice(item.price)}</p>
@@ -541,7 +554,16 @@ const MenuSection = () => {
                           <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
                         </a>
                         <h4>{item.name}</h4>
-                        <p className="ingredients">{item.description || item.ingredients}</p>
+                        {item.ingredients && (
+                          <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
+                            {item.ingredients}
+                          </p>
+                        )}
+                        {item.description && (
+                          <p className="ingredients" style={{ marginBottom: "8px" }}>
+                            {item.description}
+                          </p>
+                        )}
                         {formatPrice(item.price) && (
                           <p className="price">{formatPrice(item.price)}</p>
                         )}

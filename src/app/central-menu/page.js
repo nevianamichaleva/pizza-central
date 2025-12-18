@@ -276,10 +276,22 @@ export default function CentralMenuPage() {
                                     <p className="central-menu-item-price">{formatPrice(item.price)}</p>
                                   )}
                                 </div>
-                                {(item.description || item.ingredients) && (
-                                  <p className="central-menu-item-description">
-                                    {item.description || item.ingredients}
-                                  </p>
+                                {(item.ingredients || item.description) && (
+                                  <>
+                                    {item.ingredients && (
+                                      <p
+                                        className="central-menu-item-description"
+                                        style={{ marginBottom: item.description ? "6px" : undefined }}
+                                      >
+                                        {item.ingredients}
+                                      </p>
+                                    )}
+                                    {item.description && (
+                                      <p className="central-menu-item-description" style={{ marginBottom: 0 }}>
+                                        {item.description}
+                                      </p>
+                                    )}
+                                  </>
                                 )}
                               </div>
                             </div>
@@ -310,10 +322,22 @@ export default function CentralMenuPage() {
                               <p className="central-menu-item-price">{formatPrice(item.price)}</p>
                             )}
                           </div>
-                          {(item.description || item.ingredients) && (
-                            <p className="central-menu-item-description">
-                              {item.description || item.ingredients}
-                            </p>
+                          {(item.ingredients || item.description) && (
+                            <>
+                              {item.ingredients && (
+                                <p
+                                  className="central-menu-item-description"
+                                  style={{ marginBottom: item.description ? "6px" : undefined }}
+                                >
+                                  {item.ingredients}
+                                </p>
+                              )}
+                              {item.description && (
+                                <p className="central-menu-item-description" style={{ marginBottom: 0 }}>
+                                  {item.description}
+                                </p>
+                              )}
+                            </>
                           )}
                         </div>
                       </div>
