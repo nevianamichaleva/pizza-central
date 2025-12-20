@@ -69,26 +69,24 @@ const nextConfig = {
         destination: '/profile',
         permanent: true,
       },
-      // Блог и категории - пренасочени към начална страница или меню
-      {
-        source: '/blog',
-        destination: '/',
-        permanent: true,
-      },
-      {
-        source: '/blog/:path*',
-        destination: '/',
-        permanent: true,
-      },
       {
         source: '/category/:path*',
         destination: '/our-menu',
         permanent: true,
       },
-      // Пренасочване на sitemap_index.xml към sitemap.xml
       {
         source: '/sitemap_index.xml',
         destination: '/sitemap.xml',
+        permanent: true,
+      },
+      {
+        source: '/new-dishes/-OeHhaNi-i94LBSUhan4',
+        destination: '/new-dishes/novo-torta-medovik',
+        permanent: true,
+      },
+      {
+        source: '/new-dishes/-OgXoXETuO8M3iPGYktY',
+        destination: '/new-dishes/novo-pizza-s-burata',
         permanent: true,
       },
     ];
