@@ -19,10 +19,34 @@ const DetskiKutPage = () => {
           <div className="col-lg-12" data-aos="fade-up" data-aos-delay="100">
             <div className="content text-center">
               <p className="lead" style={{ fontSize: '22px', lineHeight: '1.8' }}>
-                В ресторант-пицария <strong>„Централ"</strong> вярваме, че всяко семейно посещение трябва да бъде приятно за всички – включително и за най-малките гости. Затова сме създали специален <strong>детски кът</strong>, където децата могат да се забавляват безопасно, докато родителите им се наслаждават на вкусна храна и спокойна беседа.
+                В ресторант-пицария <strong>„Централ"</strong> вярваме, че всяко семейно посещение трябва да бъде приятно за всички – включително и за най-малките гости. Затова сме създали специален <strong>детски кът</strong>, където децата могат да се забавляват безопасно, докато родителите им се наслаждават на вкусна храна и спокойни разговори.
               </p>
             </div>
           </div>
+        </div>
+        <div className="text-center mb-5" style={{ display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
+          <a href="/reservation" className="btn btn-primary" style={{
+            backgroundColor: '#ce1212',
+            color: '#fff',
+            padding: '12px 30px',
+            borderRadius: '25px',
+            textDecoration: 'none',
+            display: 'inline-block',
+            transition: '0.3s'
+          }}>
+            Резервирай маса
+          </a>
+          <a href="/central-menu" className="btn btn-primary" style={{
+            backgroundColor: '#ce1212',
+            color: '#fff',
+            padding: '12px 30px',
+            borderRadius: '25px',
+            textDecoration: 'none',
+            display: 'inline-block',
+            transition: '0.3s'
+          }}>
+            Разгледайте менюто
+          </a>
         </div>
 
         {/* Main Image */}

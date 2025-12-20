@@ -1,5 +1,5 @@
 import Image from 'next/image';
-// import Link from 'next/link';
+import Link from 'next/link';
 
 const AboutSection = () => {
   return (
@@ -19,45 +19,31 @@ const AboutSection = () => {
             <Image 
               src="/images/terasa.jpg" 
               alt="Тераса на ресторант-пицария Централ Добрич" 
-              width={600} 
-              height={400} 
-              className="img-fluid mb-4"
+              width={800} 
+              height={500} 
+              className="img-fluid mb-2"
             />
-            <div className="book-a-table">
-              <a href="/reservation"><h3>Резервирай маса</h3></a>
-              <p>0895 516401 и 0893 315201</p>
-            </div>
           </div>
           <div className="col-lg-5" data-aos="fade-up" data-aos-delay="250">
-            <div className="content ps-0 ps-lg-5">
-              <p className="fst-italic">
-              Ресторант-пицария <strong>„Централ“</strong> вече 18 години е любимо място за вкусна храна и приятни моменти. Намираме се в <strong>центъра на Добрич</strong> – ул. Независимост 4, срещу Областна Управа.
-              </p>
-              <p>Какво ще откриете при нас?</p>
-              <ul>
+            <div className="content ps-0 ps-lg-5" style={{ fontSize: '18px', padding: '0px!important' }}>
+              <h1 style={{ fontSize: '20px', marginBottom: '30px', lineHeight: '1.5', fontStyle: 'italic' }}>
+              Ресторант-пицария <strong>„Централ"</strong> вече 18 години е любимо място за вкусна храна и приятни моменти. Намираме се в <strong>центъра на град Добрич</strong> – ул. Независимост 4, срещу Областна Управа.
+              </h1>
+              <p style={{ fontSize: '18px' }}>Какво ще откриете при нас?</p>
+              <ul style={{ fontSize: '18px' }}>
                 <li><i className="bi bi-check-circle-fill"></i> <span><strong>Автентични италиански пици</strong> – приготвени с български продукти по оригинални рецепти.</span></li>
                 <li><i className="bi bi-check-circle-fill"></i> <span><strong>Класическа българска скара</strong> – сочни меса, приготвени с майсторство.</span></li>
                 <li><i className="bi bi-check-circle-fill"></i> <span><strong>Уютна семейна обстановка</strong> – перфектно място за срещи с приятели и семейни вечери.</span></li>
-                <li><i className="bi bi-check-circle-fill"></i> <span><strong>Детски кът</strong> – за да се забавляват децата, докато родителите се наслаждават на храната.</span></li>
+                <li><i className="bi bi-check-circle-fill"></i> <span><strong><Link href="/detski-kut" style={{ color: 'inherit', textDecoration: 'none' }}>Детски кът</Link></strong> – за да се забавляват децата, докато родителите се наслаждават на храната.</span></li>
                 <li><i className="bi bi-check-circle-fill"></i> <span><strong>Любезно обслужване</strong> – с усмивка и внимание към всеки гост.</span></li>
               </ul>
-              <p>
+              <p style={{ fontSize: '18px' }}>
               Превърнахме гостите си в приятели и с радост ви очакваме да станете част от нашата история! 🍕
               </p>
-
-              {/* <div className="position-relative mt-4">
-                <Image 
-                  src="/images/about-2.jpg" 
-                  alt="About Video"
-                  width={600}
-                  height={400}
-                  className="img-fluid"
-                />
-                
-                <Link href="https://www.youtube.com/watch?v=Y7f98aduVJ8" passHref>
-                  <div className="glightbox pulsating-play-btn" />
-                </Link>
-              </div> */}
+            </div>
+            <div className="book-a-table" style={{ marginTop: '10px' }}>
+              <Link href="/reservation"><h3>Резервирай маса</h3></Link>
+              <p>0895 516401 и 0893 315201</p>
             </div>
           </div>
         </div>

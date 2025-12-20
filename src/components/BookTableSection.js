@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, DatePicker, Form, Input, InputNumber, TimePicker } from "antd";
+import { Button, DatePicker, Form, Input, InputNumber, Select } from "antd";
 import 'aos/dist/aos.css';
 import { get, push, ref, set } from 'firebase/database';
 import moment from 'moment';
@@ -33,7 +33,7 @@ const BookTableSection = () => {
       phone: values.phone || '',
       people: values.people || 0,
       date: values.date ? values.date.format('DD-MM-YYYY') : '',
-      time: values.time ? values.time.format('HH:mm') : '',
+      time: values.time || '', // time is now a string like "HH:mm"
     };
 
     try {
@@ -109,19 +109,28 @@ const BookTableSection = () => {
     return current && current.isBefore(moment().startOf('day'), 'day');
   };
 
-  const disableTime = () => {
-    return {
-      disabledHours: () => {
-        return Array.from({ length: 10 }, (_, i) => i);
-      },
-      disabledMinutes: () => {
-        return [];
-      },
-      disabledSeconds: () => {
-        return [];
-      },
-    };
+  // Generate time options every 30 minutes from 10:00 to 22:30
+  const generateTimeOptions = () => {
+    const options = [];
+    const startHour = 10;
+    const endHour = 22; // Last hour is 22 (for 22:00 and 22:30)
+    
+    for (let hour = startHour; hour <= endHour; hour++) {
+      // Add :00 option
+      const time00 = `${hour.toString().padStart(2, '0')}:00`;
+      options.push({ value: time00, label: time00 });
+      
+      // Add :30 option for all hours (including 22:30 as the last option)
+      if (hour < 23) { // We stop at 22:30, so hour 23 doesn't exist
+        const time30 = `${hour.toString().padStart(2, '0')}:30`;
+        options.push({ value: time30, label: time30 });
+      }
+    }
+    
+    return options;
   };
+
+  const timeOptions = generateTimeOptions();
 
   return (
     <section id="book-a-table" className="book-a-table section">
@@ -192,7 +201,7 @@ const BookTableSection = () => {
                   >
                     <DatePicker
                       disabledDate={disableOldDates}
-                      style={{ width: "100%" }}
+                      style={{ width: "100%", height: "38px" }}
                       placeholder="Изберете дата"
                       format="DD.MM.YYYY"
                     />
@@ -205,12 +214,15 @@ const BookTableSection = () => {
                     label="Час"
                     rules={[{ required: true, message: "Изберете час за резервацията" }]}
                   >
-                    <TimePicker
-                      style={{ width: "100%" }}
+                    <Select
+                      style={{ width: "100%", height: "39px" }}
                       placeholder="Изберете час"
                       className="form-control"
-                      disabledTime={disableTime}
-                      format="HH:mm"
+                      showSearch
+                      filterOption={(input, option) =>
+                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                      }
+                      options={timeOptions}
                     />
                   </Form.Item>
                 </div>
@@ -221,7 +233,16 @@ const BookTableSection = () => {
                     label="За колко човека?"
                     rules={[{ required: true, message: "Моля, въведере брой на хората" }]}
                   >
-                    <InputNumber style={{ width: "100%" }} placeholder="Брой хора" min={1} className="form-control" />
+                    <InputNumber 
+                      style={{ 
+                        width: "100%", 
+                        height: "38px",
+                        lineHeight: "38px"
+                      }} 
+                      placeholder="Брой хора" 
+                      min={1} 
+                      className="form-control" 
+                    />
                   </Form.Item>
                 </div>
               </div>
