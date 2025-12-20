@@ -1,11 +1,11 @@
 'use client';
 
 import { default as showAToast } from '@/components/common/showAToast';
-import { useUser } from '@/context/UserContext';
-import { useProducts } from '@/context/ProductsContext';
 import { useCategories } from '@/context/CategoriesContext';
-import { Button, Modal, Radio, Select } from 'antd';
-import { get, push, ref, set, update } from 'firebase/database';
+import { useProducts } from '@/context/ProductsContext';
+import { useUser } from '@/context/UserContext';
+import { Button, Modal, Radio } from 'antd';
+import { get, push, ref, set } from 'firebase/database';
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -24,39 +24,46 @@ const NewDishDetailsPage = ({ params }) => {
   const [addingToCart, setAddingToCart] = useState(false);
   const [sideDishModalVisible, setSideDishModalVisible] = useState(false);
   const [selectedSideDish, setSelectedSideDish] = useState(null);
-  const dishId = params?.id || (typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : '');
+  const slug = params?.id || (typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : '');
 
   useEffect(() => {
-    if (!dishId) return;
+    if (!slug) return;
 
     const fetchDish = async () => {
       try {
-        const dishRef = ref(rtdb, `new-dishes/${dishId}`);
-        const dishSnapshot = await get(dishRef);
+        const dishesRef = ref(rtdb, "new-dishes");
+        const snapshot = await get(dishesRef);
 
-        if (dishSnapshot.exists()) {
-          const dishData = dishSnapshot.val();
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const foundDish = Object.entries(data).find(([key, value]) => value.slug === slug);
           
-          // Fetch product data if productId exists
-          if (dishData.productId) {
-            const productRef = ref(rtdb, `products/${dishData.productId}`);
-            const productSnapshot = await get(productRef);
+          if (foundDish) {
+            const [dishId, dishData] = foundDish;
             
-            if (productSnapshot.exists()) {
-              const productData = productSnapshot.val();
-              setDish({ 
-                id: dishId, 
-                ...dishData,
-                product: {
-                  id: dishData.productId,
-                  ...productData
-                }
-              });
+            // Fetch product data if productId exists
+            if (dishData.productId) {
+              const productRef = ref(rtdb, `products/${dishData.productId}`);
+              const productSnapshot = await get(productRef);
+              
+              if (productSnapshot.exists()) {
+                const productData = productSnapshot.val();
+                setDish({ 
+                  id: dishId, 
+                  ...dishData,
+                  product: {
+                    id: dishData.productId,
+                    ...productData
+                  }
+                });
+              } else {
+                setDish({ id: dishId, ...dishData });
+              }
             } else {
               setDish({ id: dishId, ...dishData });
             }
           } else {
-            setDish({ id: dishId, ...dishData });
+            router.push('/new-dishes');
           }
         } else {
           router.push('/new-dishes');
@@ -70,7 +77,7 @@ const NewDishDetailsPage = ({ params }) => {
     };
 
     fetchDish();
-  }, [dishId, router]);
+  }, [slug, router]);
 
   const getSideDishes = () => {
     return products.filter(p => p.isSideDish === true);

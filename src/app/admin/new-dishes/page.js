@@ -39,6 +39,12 @@ const AdminNewDishesPage = () => {
       key: "name",
     },
     {
+      title: "Slug",
+      dataIndex: "slug",
+      key: "slug",
+      render: (slug) => slug || '-',
+    },
+    {
       title: "Категория",
       dataIndex: "title",
       key: "title",
@@ -141,9 +147,19 @@ const AdminNewDishesPage = () => {
     }
   };
 
+  const generateSlug = (name) => {
+    return name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  };
+
   const addNewDish = () => {
     form.setFieldsValue({
       name: '',
+      slug: '',
       title: '',
       description: '',
       productId: null,
@@ -158,6 +174,7 @@ const AdminNewDishesPage = () => {
   const editDish = (dish) => {
     form.setFieldsValue({
       name: dish.name,
+      slug: dish.slug || '',
       title: dish.title,
       description: dish.description,
       productId: dish.productId || null,
@@ -175,8 +192,11 @@ const AdminNewDishesPage = () => {
         return;
       }
 
+      const slug = values.slug || generateSlug(values.name);
+
       const dishData = {
         name: values.name,
+        slug: slug,
         title: values.title,
         description: values.description,
         productId: values.productId,
@@ -278,7 +298,26 @@ const AdminNewDishesPage = () => {
                 label="Име на ястието"
                 rules={[{ required: true, message: "Моля, въведете име" }]}
               >
-                <Input placeholder="Име на ястието" />
+                <Input 
+                  placeholder="Име на ястието" 
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    const currentSlug = form.getFieldValue('slug');
+                    // Auto-generate slug only if slug field is empty
+                    if (!currentSlug) {
+                      form.setFieldsValue({ slug: generateSlug(name) });
+                    }
+                  }}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="slug"
+                label="Slug (URL)"
+                rules={[{ required: true, message: "Моля, въведете slug" }]}
+                extra="URL-френдли идентификатор за ястието (автоматично се генерира от името)"
+              >
+                <Input placeholder="novo-torta-medovik" />
               </Form.Item>
 
               <Form.Item

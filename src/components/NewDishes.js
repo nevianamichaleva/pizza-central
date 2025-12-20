@@ -71,7 +71,7 @@ const NewDishes = () => {
               data-aos-delay={(index + 1) * 100}
               key={index}
             >
-              <Link href={`/new-dishes/${chef.id}`} className="team-member" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Link href={`/new-dishes/${chef.slug}`} className="team-member" style={{ textDecoration: 'none', color: 'inherit' }}>
                 <div className="member-img">
                   <img src={chef.img} className="img-fluid" alt={chef.name} />
                   <div className="social">
