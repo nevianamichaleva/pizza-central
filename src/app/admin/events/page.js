@@ -4,11 +4,13 @@ import { default as showAToast } from '@/components/common/showAToast';
 import CloudinaryUpload from '@/components/uploadForm';
 import { useUser } from '@/context/UserContext';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Button, Drawer, Form, Image, Input, Space, Table } from "antd";
+import { Button, Drawer, Form, Image, Input, Select, Space, Table, Tag } from "antd";
 import { get, push, ref, remove, set } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { rtdb } from '../../../../lib/firebase';
+
+const { Option } = Select;
 
 const AdminEventsPage = () => {
   const { isAdmin } = useUser();
@@ -53,6 +55,24 @@ const AdminEventsPage = () => {
           style={{ borderRadius: "8px" }}
         />
       ),
+    },
+    {
+      title: "Статус",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => {
+        const statusMap = {
+          'active': { text: 'Активно', color: 'green' },
+          'inactive': { text: 'Неактивно', color: 'red' },
+          'archived': { text: 'Архивирано', color: 'orange' }
+        };
+        const currentStatus = status || 'active';
+        return (
+          <Tag color={statusMap[currentStatus]?.color || 'default'}>
+            {statusMap[currentStatus]?.text || currentStatus}
+          </Tag>
+        );
+      },
     },
   ];
 
@@ -106,6 +126,7 @@ const AdminEventsPage = () => {
       description: '',
       slug: '',
       image: null,
+      status: 'active',
       id: null
     });
     setImage('');
@@ -119,6 +140,7 @@ const AdminEventsPage = () => {
       description: event.description,
       slug: event.slug,
       image: event.image,
+      status: event.status || 'active',
       id: event.id
     });
     setImage(event.image || '');
@@ -142,6 +164,7 @@ const AdminEventsPage = () => {
         description: values.description,
         slug: slug,
         image: image || '',
+        status: values.status || 'active',
       };
 
       if (selectedEvent && selectedEvent.id) {
@@ -266,6 +289,18 @@ const AdminEventsPage = () => {
                     />
                   </div>
                 )}
+              </Form.Item>
+
+              <Form.Item
+                name="status"
+                label="Статус"
+                rules={[{ required: true, message: "Моля, изберете статус" }]}
+              >
+                <Select>
+                  <Option value="active">Активно</Option>
+                  <Option value="inactive">Неактивно</Option>
+                  <Option value="archived">Архивирано</Option>
+                </Select>
               </Form.Item>
 
               <Form.Item>

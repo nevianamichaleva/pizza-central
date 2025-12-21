@@ -1,12 +1,12 @@
 'use client';
 
 import { get, ref } from 'firebase/database';
+import moment from 'moment';
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { rtdb } from '../../../../lib/firebase';
-import moment from 'moment';
 import styles from "./page.module.css";
 
 const BlogPostPage = ({ params }) => {
@@ -31,10 +31,10 @@ const BlogPostPage = ({ params }) => {
             const [postId, postData] = foundPost;
             
             // Only show published posts (unless in admin mode)
-            if (postData.status !== 'published') {
-              router.push('/blog');
-              return;
-            }
+            // if (postData.status !== 'published') {
+            //   router.push('/blog');
+            //   return;
+            // }
             
             setPost({ 
               id: postId, 
@@ -97,15 +97,22 @@ const BlogPostPage = ({ params }) => {
             </header>
 
             {post.image && (
-              <div className={styles.heroImageWrapper}>
-                <Image
-                  src={post.image}
-                  alt={post.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 1200px"
-                  className={styles.heroImage}
-                  priority
-                />
+              <div>
+                <div className={styles.heroImageWrapper} style={{ marginBottom: '0px' }}>
+                  <Image
+                    src={post.image}
+                    alt={post.image_caption || post.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 1200px"
+                    className={styles.heroImage}
+                    priority
+                  />
+                </div>
+                {post.image_caption && (
+                  <div>
+                    {post.image_caption}
+                  </div>
+                )}
               </div>
             )}
 

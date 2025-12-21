@@ -25,6 +25,7 @@ const AddCategory = () => {
   const [forDelivery, setForDelivery] = useState(true);
   const [forRestaurant, setForRestaurant] = useState(true);
   const [order, setOrder] = useState(0);
+  const [status, setStatus] = useState('active');
   const [selectedImage, setSelectedImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [uploadStatus, setUploadStatus] = useState("");
@@ -41,6 +42,7 @@ const AddCategory = () => {
     setForDelivery(true);
     setForRestaurant(true);
     setOrder(0);
+    setStatus('active');
     setMenuDrawerVisible(true);
   };
   const closeMenuDrawer = () => {
@@ -49,6 +51,7 @@ const AddCategory = () => {
     setForDelivery(true);
     setForRestaurant(true);
     setOrder(0);
+    setStatus('active');
     setMenuDrawerVisible(false);
   };
 
@@ -95,7 +98,8 @@ const AddCategory = () => {
       parent: parent,
       forDelivery: forDelivery !== false,
       forRestaurant: forRestaurant !== false,
-      order: order || 0
+      order: order || 0,
+      status: status || 'active'
     })
       .then(() => {
         fetchCategories();
@@ -183,7 +187,8 @@ const AddCategory = () => {
       parent: updatedRecord.parent,
       forDelivery: updatedRecord.forDelivery !== false,
       forRestaurant: updatedRecord.forRestaurant !== false,
-      order: orderValue
+      order: orderValue,
+      status: updatedRecord.status || 'active'
     };
     try {
       const recordRef = ref(rtdb, `category/${updatedRecord.id}`);
@@ -418,6 +423,20 @@ const AddCategory = () => {
                     />
                     <span>Ресторант (ще се показва в central-menu)</span>
                   </div>
+                </div>
+                <div className="col-md-12">
+                  <label style={{ display: "block", marginBottom: "8px" }}>
+                    <strong>Статус:</strong>
+                  </label>
+                  <Select
+                    value={status}
+                    onChange={setStatus}
+                    style={{ width: "100%" }}
+                  >
+                    <Option value="active">Активна</Option>
+                    <Option value="inactive">Неактивна</Option>
+                    <Option value="archived">Архивирана</Option>
+                  </Select>
                 </div>
                 <div className="col-md-5 text-center">
                   <Button type="primary" htmlType="submit" block>

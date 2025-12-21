@@ -1,3 +1,4 @@
+import '@ant-design/v5-patch-for-react-19';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { ToastContainer } from 'react-toastify';

@@ -1,8 +1,9 @@
 'use client';
 
 import { useUser } from '@/context/UserContext';
-import { Button, Card, Drawer, Input, message, Select, Space, Switch, Table, Tabs } from "antd";
-import { get, ref, set } from 'firebase/database';
+import { DeleteOutlined } from '@ant-design/icons';
+import { Button, Card, Drawer, Input, message, Popconfirm, Select, Space, Switch, Table, Tabs } from "antd";
+import { get, ref, remove, set } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useState } from "react";
 import { rtdb } from '../../../../lib/firebase';
@@ -114,16 +115,37 @@ const AdminOrdersPage = () => {
         {
             title: 'Действия',
             key: 'actions',
-            width: 120,
+            width: 180,
             fixed: 'right',
             render: (_, record) => (
-                <Button 
-                    type="primary" 
-                    size="small"
-                    onClick={() => showDrawer(record)}
-                >
-                    Детайли
-                </Button>
+                <Space size="small">
+                    <Button 
+                        type="primary" 
+                        size="small"
+                        onClick={() => showDrawer(record)}
+                    >
+                        Детайли
+                    </Button>
+                    <Popconfirm
+                        title="Изтриване на поръчка"
+                        description={`Сигурни ли сте, че искате да изтриете поръчка ${generateOrderNumber(record)}?`}
+                        onConfirm={() => deleteOrder(record)}
+                        okText="Да, изтрий"
+                        cancelText="Отказ"
+                        okButtonProps={{ danger: true }}
+                    >
+                        <Button 
+                            type="text" 
+                            danger
+                            size="small"
+                            icon={<DeleteOutlined />}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }}
+                        />
+                    </Popconfirm>
+                </Space>
             ),
         },
     ];
@@ -374,8 +396,22 @@ const AdminOrdersPage = () => {
         return colorMap[status] || '#d9d9d9';
     };
 
-
-
+    const deleteOrder = async (order) => {
+        if (!order || !order.id) {
+            message.error('Невалидна поръчка');
+            return;
+        }
+        
+        try {
+            const orderRef = ref(rtdb, `orders/${order.id}`);
+            await remove(orderRef);
+            message.success('Поръчката е изтрита успешно');
+            fetchOrders();
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            message.error('Грешка при изтриване на поръчката');
+        }
+    };
 
     const fetchOrders = async () => {
         try {
@@ -384,7 +420,6 @@ const AdminOrdersPage = () => {
 
             if (snapshot.exists()) {
                 const data = snapshot.val();
-                console.log(data);
                 const array = Object.entries(data)
                     .map(([key, value]) => ({
                         id: key,
@@ -394,7 +429,19 @@ const AdminOrdersPage = () => {
                         // Sort by order_date in descending order (newest first)
                         const dateA = a.order_date ? new Date(a.order_date).getTime() : 0;
                         const dateB = b.order_date ? new Date(b.order_date).getTime() : 0;
-                        return dateB - dateA; // Descending order
+                        
+                        // If both have dates, sort by date (newest first)
+                        if (dateA > 0 && dateB > 0) {
+                            return dateB - dateA; // Descending order (newest first)
+                        }
+                        
+                        // If only one has date, prioritize it
+                        if (dateA > 0 && dateB === 0) return -1;
+                        if (dateB > 0 && dateA === 0) return 1;
+                        
+                        // If neither has date, sort by Firebase key (which is chronologically sorted)
+                        // Firebase keys are lexicographically sortable and newer keys come after older ones
+                        return b.id.localeCompare(a.id); // Descending order (newest first)
                     });
                 setOrders(array);
             } else {
@@ -428,6 +475,7 @@ const AdminOrdersPage = () => {
                         bordered
                         dataSource={orders}
                         columns={columns}
+                        rowKey="id"
                         scroll={{ x: 1200 }}
                         pagination={{
                             pageSize: 10,
@@ -696,7 +744,7 @@ const AdminOrdersPage = () => {
                     
                     <Drawer
                         title={`Детайли на поръчка: ${selectedOrder ? generateOrderNumber(selectedOrder) : 'N/A'}`}
-                        visible={visible}
+                        open={visible}
                         onClose={onClose}
                         width={700}
                     >

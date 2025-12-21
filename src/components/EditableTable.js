@@ -1,5 +1,5 @@
 import { CloseOutlined, DeleteOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
-import { Input, Select, Space, Switch, Table } from "antd";
+import { Input, Select, Space, Switch, Table, Tag } from "antd";
 import { useState } from "react";
 
 const { Option } = Select;
@@ -151,6 +151,35 @@ const EditableTable = ({ data, categories, onSave, onDelete }) => {
           />
         ) : (
           record.order !== undefined ? record.order : 0
+        );
+      },
+    },
+    {
+      title: "Статус",
+      dataIndex: "status",
+      key: "status",
+      render: (_, record) => {
+        const isEditing = editingId === record.id;
+        const status = record.status || 'active';
+        const statusMap = {
+          'active': { text: 'Активна', color: 'green' },
+          'inactive': { text: 'Неактивна', color: 'red' },
+          'archived': { text: 'Архивирана', color: 'orange' }
+        };
+        return isEditing ? (
+          <Select
+            value={editingRecord.status || 'active'}
+            onChange={(value) => handleChange("status", value)}
+            style={{ width: "100%" }}
+          >
+            <Option value="active">Активна</Option>
+            <Option value="inactive">Неактивна</Option>
+            <Option value="archived">Архивирана</Option>
+          </Select>
+        ) : (
+          <Tag color={statusMap[status]?.color || 'default'}>
+            {statusMap[status]?.text || status}
+          </Tag>
         );
       },
     },

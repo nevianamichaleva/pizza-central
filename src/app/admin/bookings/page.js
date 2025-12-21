@@ -1,8 +1,9 @@
 'use client';
 
 import { useUser } from '@/context/UserContext';
-import { Button, Drawer, Input, Modal, Select, Space, Table, Tag, message } from "antd";
-import { get, ref, set } from 'firebase/database';
+import { DeleteOutlined } from '@ant-design/icons';
+import { Button, Drawer, Input, Modal, Popconfirm, Select, Space, Table, Tag, message } from "antd";
+import { get, ref, remove, set } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useState } from "react";
 import { rtdb } from '../../../../lib/firebase';
@@ -167,7 +168,7 @@ const AdminBookingsPage = () => {
         {
             title: "Действия",
             key: "actions",
-            width: 180,
+            width: 240,
             fixed: 'right',
             render: (_, record) => (
                 <Space size="small">
@@ -185,6 +186,25 @@ const AdminBookingsPage = () => {
                     >
                         {record.replied ? 'Отговори отново' : 'Отговори'}
                     </Button>
+                    <Popconfirm
+                        title="Изтриване на резервация"
+                        description={`Сигурни ли сте, че искате да изтриете резервацията от ${record.name} за ${record.date || 'неизвестна дата'}?`}
+                        onConfirm={() => deleteBooking(record)}
+                        okText="Да, изтрий"
+                        cancelText="Отказ"
+                        okButtonProps={{ danger: true }}
+                    >
+                        <Button 
+                            type="text" 
+                            danger
+                            size="small"
+                            icon={<DeleteOutlined />}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }}
+                        />
+                    </Popconfirm>
                 </Space>
             ),
         },
@@ -427,6 +447,23 @@ const AdminBookingsPage = () => {
         setReplyMessage('');
         setReplySubject('');
         setSelectedBooking(null);
+    };
+
+    const deleteBooking = async (booking) => {
+        if (!booking || !booking.id) {
+            message.error('Невалидна резервация');
+            return;
+        }
+        
+        try {
+            const bookingRef = ref(rtdb, `booking/${booking.id}`);
+            await remove(bookingRef);
+            message.success('Резервацията е изтрита успешно');
+            fetchBookings();
+        } catch (error) {
+            console.error('Error deleting booking:', error);
+            message.error('Грешка при изтриване на резервацията');
+        }
     };
     
     if (!isAdmin) {

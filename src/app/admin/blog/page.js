@@ -148,6 +148,7 @@ const AdminBlogPage = () => {
       content: '',
       excerpt: '',
       image: null,
+      image_caption: '',
       status: 'draft',
       published_at: null,
       seo_title: '',
@@ -168,6 +169,7 @@ const AdminBlogPage = () => {
       content: post.content || '',
       excerpt: post.excerpt || '',
       image: post.image,
+      image_caption: post.image_caption || '',
       status: post.status || 'draft',
       published_at: post.published_at ? moment(post.published_at) : null,
       seo_title: post.seo_title || '',
@@ -178,6 +180,7 @@ const AdminBlogPage = () => {
     });
     setImage(post.image || '');
     setSelectedPost(post);
+    openDrawer();
   };
 
   const handleSubmit = async (values) => {
@@ -190,6 +193,7 @@ const AdminBlogPage = () => {
         content: values.content || '',
         excerpt: values.excerpt || '',
         image: image || '',
+        image_caption: values.image_caption || '',
         status: values.status || 'draft',
         published_at: values.published_at ? values.published_at.toISOString() : null,
         seo_title: values.seo_title || '',
@@ -383,6 +387,17 @@ const AdminBlogPage = () => {
                     />
                   </div>
                 )}
+              </Form.Item>
+
+              <Form.Item
+                name="image_caption"
+                label="Текст под снимката"
+                extra="Заглавие, източник или обяснение за снимката (незадължително)"
+              >
+                <Input.TextArea 
+                  rows={2} 
+                  placeholder="Например: Източник: Unsplash или Заглавие на снимката" 
+                />
               </Form.Item>
 
               <Form.Item

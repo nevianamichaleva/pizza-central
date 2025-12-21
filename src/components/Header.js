@@ -292,6 +292,9 @@ const Header = () => {
                   <li>
                     <MenuLink href="/gallery" className={pathname == '/gallery' ? 'active' : ''}>Галерия</MenuLink>
                   </li>
+                  <li>
+                    <MenuLink href="/blog" className={pathname == '/blog' ? 'active' : ''}>Любопитно</MenuLink>
+                  </li>
                 </ul>
               )}
             </li>
