@@ -29,6 +29,81 @@ export default async function sitemap() {
     console.error('Error fetching blog posts for sitemap:', error);
   }
 
+  // Fetch new dishes from Firebase
+  let newDishes = [];
+  try {
+    const dishesRef = ref(rtdb, "new-dishes");
+    const snapshot = await get(dishesRef);
+    
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      newDishes = Object.entries(data)
+        .map(([key, value]) => ({
+          id: key,
+          ...value,
+        }))
+        .filter(dish => dish.slug)
+        .map(dish => ({
+          url: `${baseUrl}/new-dishes/${dish.slug}`,
+          lastModified: dish.updated_at ? new Date(dish.updated_at) : new Date(),
+          changeFrequency: 'weekly',
+          priority: 0.7,
+        }));
+    }
+  } catch (error) {
+    console.error('Error fetching new dishes for sitemap:', error);
+  }
+
+  // Fetch events from Firebase
+  let events = [];
+  try {
+    const eventsRef = ref(rtdb, "events");
+    const snapshot = await get(eventsRef);
+    
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      events = Object.entries(data)
+        .map(([key, value]) => ({
+          id: key,
+          ...value,
+        }))
+        .filter(event => event.slug)
+        .map(event => ({
+          url: `${baseUrl}/events/${event.slug}`,
+          lastModified: event.updated_at ? new Date(event.updated_at) : new Date(),
+          changeFrequency: 'weekly',
+          priority: 0.7,
+        }));
+    }
+  } catch (error) {
+    console.error('Error fetching events for sitemap:', error);
+  }
+
+  // Fetch products with slug from Firebase
+  let products = [];
+  try {
+    const productsRef = ref(rtdb, "products");
+    const snapshot = await get(productsRef);
+    
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      products = Object.entries(data)
+        .map(([key, value]) => ({
+          id: key,
+          ...value,
+        }))
+        .filter(product => product.slug && !product.isSideDish)
+        .map(product => ({
+          url: `${baseUrl}/products/${product.slug}`,
+          lastModified: product.updated_at ? new Date(product.updated_at) : new Date(),
+          changeFrequency: 'weekly',
+          priority: 0.7,
+        }));
+    }
+  } catch (error) {
+    console.error('Error fetching products for sitemap:', error);
+  }
+
   return [
     {
       url: baseUrl,
@@ -103,6 +178,9 @@ export default async function sitemap() {
       priority: 0.6,
     },
     ...blogPosts,
+    ...newDishes,
+    ...events,
+    ...products,
   ];
 }
 

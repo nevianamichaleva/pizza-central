@@ -6,6 +6,7 @@ import { useUser } from '@/context/UserContext';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 import { Button, Modal, Radio } from "antd";
 import { get, push, ref, set, update } from "firebase/database";
+import Link from "next/link";
 import { useEffect, useState } from 'react';
 import { rtdb } from "../../lib/firebase";
 import showAToast from "../components/common/showAToast";
@@ -376,12 +377,16 @@ const MenuSection = () => {
             <div style={{ marginBottom: "16px" }}>
               {item.ingredients && (
                 <p className="menu-card-description" style={{ marginBottom: "6px" }}>
-                  {item.ingredients}
+                  {item.ingredients.length > 60
+                    ? `${item.ingredients.substring(0, 60)}...` 
+                    : item.ingredients}
                 </p>
               )}
               {item.description && (
                 <p className="menu-card-description" style={{ marginBottom: 0 }}>
-                  {item.description}
+                  {item.description.length > 100 
+                    ? `${item.description.substring(0, 100)}...` 
+                    : item.description}
                 </p>
               )}
             </div>
@@ -390,15 +395,28 @@ const MenuSection = () => {
             {formatPrice(item.price) && (
               <p className="menu-card-price">{formatPrice(item.price)}</p>
             )}
-            <Button
-              type="primary"
-              onClick={() => handleProductClick(item)}
-              icon={<ShoppingCartOutlined />}
-              className="menu-card-mobile-btn"
-              size="large"
-            >
-              Добави
-            </Button>
+            <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
+              {item.slug && (
+                <Link href={`/products/${item.slug}`}>
+                  <Button
+                    type="default"
+                    style={{ width: '100%' }}
+                    size="large"
+                  >
+                    Виж повече
+                  </Button>
+                </Link>
+              )}
+              <Button
+                type="primary"
+                onClick={() => handleProductClick(item)}
+                icon={<ShoppingCartOutlined />}
+                className="menu-card-mobile-btn"
+                size="large"
+              >
+                Добави
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -569,16 +587,36 @@ const MenuSection = () => {
                         <h4>{item.name}</h4>
                         {item.ingredients && (
                           <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
-                            {item.ingredients}
+                            {item.ingredients.length > 85 
+                              ? `${item.ingredients.substring(0, 85)}...` 
+                              : item.ingredients}
                           </p>
                         )}
                         {item.description && (
                           <p className="ingredients" style={{ marginBottom: "8px" }}>
-                            {item.description}
+                            {item.description.length > 100 
+                              ? `${item.description.substring(0, 100)}...` 
+                              : item.description}
                           </p>
                         )}
                         {formatPrice(item.price) && (
                           <p className="price">{formatPrice(item.price)}</p>
+                        )}
+                        {item.slug && (
+                          <Link href={`/products/${item.slug}`} style={{ marginBottom: '8px', display: 'block' }}>
+                            <Button
+                              type="default"
+                              style={{
+                                width: '100%',
+                                borderRadius: '10px',
+                                padding: '10px 20px',
+                                fontSize: '16px',
+                              }}
+                              size="large"
+                            >
+                              Виж повече
+                            </Button>
+                          </Link>
                         )}
                         <Button
                           type="primary"

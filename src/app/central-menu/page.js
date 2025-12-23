@@ -305,6 +305,18 @@ export default function CentralMenuPage() {
                                     )}
                                   </>
                                 )}
+                                {item.slug && (
+                                  <div style={{ marginTop: '12px' }}>
+                                    <Link href={`/products/${item.slug}`}>
+                                      <Button
+                                        type="default"
+                                        style={{ width: '100%' }}
+                                      >
+                                        Виж повече
+                                      </Button>
+                                    </Link>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ))}
@@ -350,6 +362,18 @@ export default function CentralMenuPage() {
                                 </p>
                               )}
                             </>
+                          )}
+                          {item.slug && (
+                            <div style={{ marginTop: '12px' }}>
+                              <Link href={`/products/${item.slug}`}>
+                                <Button
+                                  type="default"
+                                  style={{ width: '100%' }}
+                                >
+                                  Виж повече
+                                </Button>
+                              </Link>
+                            </div>
                           )}
                         </div>
                       </div>

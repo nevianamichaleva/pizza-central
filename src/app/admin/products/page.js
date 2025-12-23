@@ -18,6 +18,7 @@ const AddProduct = () => {
   const [description, setDescription] = useState('');
   const [ingredients, setIngredients] = useState('');
   const [price, setPrice] = useState('');
+  const [slug, setSlug] = useState('');
   const [category, setCategory] = useState('');
   const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
@@ -53,6 +54,12 @@ const AddProduct = () => {
       title: "Име",
       dataIndex: "name",
       key: "name",
+    },
+    {
+      title: "Slug",
+      dataIndex: "slug",
+      key: "slug",
+      render: (slug) => <span>{slug || <span style={{ color: "#999" }}>Няма</span>}</span>,
     },
     {
       title: "Меню",
@@ -145,6 +152,15 @@ const AddProduct = () => {
   }, [product])
 
   const openDrawer = () => setDrawerVisible(true);
+  const generateSlug = (name) => {
+    return name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  };
+
   const closeDrawer = () => {
     handleViewProduct(null, null);
     setRequiresSideDish(false);
@@ -153,6 +169,7 @@ const AddProduct = () => {
     setForRestaurant(true);
     setSelectedPackaging([]);
     setSelectedCategories([]);
+    setSlug('');
     setDrawerVisible(false);
   }
   const openMenuDrawer = () => setMenuDrawerVisible(true);
@@ -163,11 +180,13 @@ const AddProduct = () => {
     const productsRef = ref(rtdb, 'products');
 
     const newProductRef = push(productsRef);
+    const productSlug = slug || generateSlug(name);
     set(newProductRef, {
       name: name,
       price: price,
       description: description,
       ingredients: ingredients,
+      slug: productSlug,
       categories: selectedCategories && selectedCategories.length > 0 ? selectedCategories : [],
       subcategory: subcategory,
       image: image,
@@ -319,11 +338,13 @@ const AddProduct = () => {
   const updateRecord = async (e) => {
     e.preventDefault();
 
+    const productSlug = slug || generateSlug(name);
     const updatedData = {
       name: name,
       price: price,
       description: description,
       ingredients: ingredients,
+      slug: productSlug,
       categories: selectedCategories && selectedCategories.length > 0 ? selectedCategories : [],
       subcategory: subcategory,
       image: image,
@@ -353,6 +374,7 @@ const AddProduct = () => {
       price = null,
       description = null,
       ingredients = null,
+      slug = null,
       category = null,
       categories = null,
       subcategory = null,
@@ -368,6 +390,7 @@ const AddProduct = () => {
     setPrice(price);
     setDescription(description);
     setIngredients(ingredients);
+    setSlug(slug || '');
     // Support both old format (category) and new format (categories array)
     if (categories && Array.isArray(categories) && categories.length > 0) {
       setSelectedCategories(categories);
@@ -496,9 +519,6 @@ const AddProduct = () => {
             <form onSubmit={product ? updateRecord : handleAddRecord} className="php-email-form">
               <div className="row gy-4">
                 <div className="col-md-6">
-                  <label htmlFor="categories-select" style={{ marginBottom: "8px", display: "block", fontWeight: 500 }}>
-                    Избери в кои менюта (може да избереш повече от едно)
-                  </label>
                   <Select
                     mode="multiple"
                     placeholder="Избери в кои менюта"
@@ -540,9 +560,32 @@ const AddProduct = () => {
                   <Input
                     placeholder="Име на продукта"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      // Auto-generate slug if empty
+                      if (!slug) {
+                        setSlug(generateSlug(e.target.value));
+                      }
+                    }}
                     style={{ marginBottom: "16px" }}
                   />
+                </div>
+              </div>
+              <div className="row gy-4">
+                <div className="col-md-12">
+                  <label htmlFor="slug-input" style={{ marginBottom: "8px", display: "block", fontWeight: 500 }}>
+                    Slug (URL адрес) - за страница с детайли на продукта
+                  </label>
+                  <Input
+                    id="slug-input"
+                    placeholder="Автоматично генерира се от името"
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
+                    style={{ marginBottom: "16px" }}
+                  />
+                  <p style={{ fontSize: "12px", color: "#666", marginTop: "-10px", marginBottom: "16px" }}>
+                    Ако има slug, ще се показва бутон "Виж повече" на продукта в менюто
+                  </p>
                 </div>
               </div>
               <div className="row gy-4">
