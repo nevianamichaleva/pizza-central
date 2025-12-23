@@ -43,7 +43,8 @@ const Hero = () => {
                 alt="Вкусни ястия от ресторант-пицария Централ Добрич"
                 width={500}
                 height={500}
-                className="img-fluid animated"
+                //className="img-fluid animated"
+                className="img-fluid"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 priority
               />
