@@ -78,6 +78,16 @@ export default function CentralMenuPage() {
   // Get selected category
   const selectedCategory = mainCategories.find(cat => cat.id === selectedCategoryId) || mainCategories[0];
   
+  // Helper function to check if product belongs to a category
+  // Supports both old format (category) and new format (categories array)
+  const productBelongsToCategory = (product, categoryId) => {
+    if (product.categories && Array.isArray(product.categories) && product.categories.length > 0) {
+      return product.categories.includes(categoryId);
+    }
+    // Fallback to old format
+    return product.category === categoryId;
+  };
+  
   // Get products for selected category
   // Show products that are for restaurant (forRestaurant === true)
   // If both fields are missing, show all products (backward compatibility)
@@ -88,7 +98,7 @@ export default function CentralMenuPage() {
     
     return products.filter(
       (item) => {
-        if (item.category != categoryId) return false;
+        if (!productBelongsToCategory(item, categoryId)) return false;
         // For "Гарнитури" category, show side dishes. For other categories, filter them out
         if (!isGarnituriCategory && item.isSideDish) return false;
         // If both fields are missing, show the product in both menus
@@ -227,6 +237,8 @@ export default function CentralMenuPage() {
                   selectedCategory.children.map((subcategory) => {
                     const subcategoryProducts = products.filter(
                       (item) => {
+                        // Check if product belongs to the parent category
+                        if (!productBelongsToCategory(item, selectedCategory.id)) return false;
                         if (item?.subcategory != subcategory.id) return false;
                         // Check if this subcategory belongs to "Гарнитури" category
                         const parentCategory = categories.find(cat => cat.id === selectedCategory.id);

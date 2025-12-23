@@ -19,13 +19,14 @@ const AddProduct = () => {
   const [ingredients, setIngredients] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [subcategory, setSubcategory] = useState('');
   const [image, setImage] = useState('');
   const [requiresSideDish, setRequiresSideDish] = useState(false);
   const [isSideDish, setIsSideDish] = useState(false);
   const [forDelivery, setForDelivery] = useState(true);
   const [forRestaurant, setForRestaurant] = useState(true);
-  const [categories, setCategories] = useState([]);
   const [product, setProduct] = useState(false);
   const [products, setProducts] = useState([]);
   const [parent, setParent] = useState('');
@@ -55,11 +56,22 @@ const AddProduct = () => {
     },
     {
       title: "Меню",
-      dataIndex: "category",
-      key: "category",
-      render: (categoryId) => {
-        const category = categories.find((cat) => cat.id === categoryId);
-        return <span>{category ? category.name : ""}</span>;
+      dataIndex: "categories",
+      key: "categories",
+      render: (categoriesArray, record) => {
+        // Support both old format (category) and new format (categories array)
+        const categoryIds = categoriesArray && Array.isArray(categoriesArray) && categoriesArray.length > 0 
+          ? categoriesArray 
+          : (record.category ? [record.category] : []);
+        
+        const categoryNames = categoryIds
+          .map(id => {
+            const cat = categories.find((c) => c.id === id);
+            return cat ? cat.name : null;
+          })
+          .filter(Boolean);
+        
+        return <span>{categoryNames.length > 0 ? categoryNames.join(', ') : ""}</span>;
       },
     },
     {
@@ -140,6 +152,7 @@ const AddProduct = () => {
     setForDelivery(true);
     setForRestaurant(true);
     setSelectedPackaging([]);
+    setSelectedCategories([]);
     setDrawerVisible(false);
   }
   const openMenuDrawer = () => setMenuDrawerVisible(true);
@@ -155,7 +168,7 @@ const AddProduct = () => {
       price: price,
       description: description,
       ingredients: ingredients,
-      category: category,
+      categories: selectedCategories && selectedCategories.length > 0 ? selectedCategories : [],
       subcategory: subcategory,
       image: image,
       requiresSideDish: requiresSideDish || false,
@@ -263,7 +276,13 @@ const AddProduct = () => {
 
     // Filter by category tab
     if (activeTab !== 'all') {
-      filtered = filtered.filter(product => product.category === activeTab);
+      filtered = filtered.filter(product => {
+        // Support both old format (category) and new format (categories array)
+        const productCategories = product.categories && Array.isArray(product.categories) && product.categories.length > 0
+          ? product.categories
+          : (product.category ? [product.category] : []);
+        return productCategories.includes(activeTab);
+      });
     }
 
     // Filter by search text
@@ -305,7 +324,7 @@ const AddProduct = () => {
       price: price,
       description: description,
       ingredients: ingredients,
-      category: category,
+      categories: selectedCategories && selectedCategories.length > 0 ? selectedCategories : [],
       subcategory: subcategory,
       image: image,
       requiresSideDish: requiresSideDish || false,
@@ -335,6 +354,7 @@ const AddProduct = () => {
       description = null,
       ingredients = null,
       category = null,
+      categories = null,
       subcategory = null,
       image = null,
       requiresSideDish = false,
@@ -348,7 +368,15 @@ const AddProduct = () => {
     setPrice(price);
     setDescription(description);
     setIngredients(ingredients);
-    setCategory(category);
+    // Support both old format (category) and new format (categories array)
+    if (categories && Array.isArray(categories) && categories.length > 0) {
+      setSelectedCategories(categories);
+    } else if (category) {
+      setSelectedCategories([category]);
+    } else {
+      setSelectedCategories([]);
+    }
+    setCategory(category); // Keep for backward compatibility
     setSubcategory(subcategory);
     setImage(image);
     setRequiresSideDish(requiresSideDish);
@@ -438,7 +466,13 @@ const AddProduct = () => {
               },
               ...getMainCategories().map(category => ({
                 key: category.id,
-                label: `${category.name} (${products.filter(p => p.category === category.id).length})`,
+                label: `${category.name} (${products.filter(p => {
+                  // Support both old format (category) and new format (categories array)
+                  const productCategories = p.categories && Array.isArray(p.categories) && p.categories.length > 0
+                    ? p.categories
+                    : (p.category ? [p.category] : []);
+                  return productCategories.includes(category.id);
+                }).length})`,
               }))
             ]}
           />
@@ -462,11 +496,16 @@ const AddProduct = () => {
             <form onSubmit={product ? updateRecord : handleAddRecord} className="php-email-form">
               <div className="row gy-4">
                 <div className="col-md-6">
+                  <label htmlFor="categories-select" style={{ marginBottom: "8px", display: "block", fontWeight: 500 }}>
+                    Избери в кои менюта (може да избереш повече от едно)
+                  </label>
                   <Select
-                    placeholder="Избери в кое меню"
-                    value={category}
-                    onChange={(value) => setCategory(value)}
+                    mode="multiple"
+                    placeholder="Избери в кои менюта"
+                    value={selectedCategories}
+                    onChange={(value) => setSelectedCategories(value)}
                     style={{ width: "100%", marginBottom: "16px" }}
+                    allowClear
                   >
                     {categories
                       .filter((category) => category.parent === '' || category.parent === undefined)
@@ -476,6 +515,9 @@ const AddProduct = () => {
                         </Option>
                       ))}
                   </Select>
+                  <p style={{ fontSize: "12px", color: "#666", marginTop: "-10px", marginBottom: "16px" }}>
+                    Един продукт може да се показва в повече от една категория
+                  </p>
                 </div>
                 <div className="col-md-6">
                   <Select

@@ -32,6 +32,16 @@ const MenuSection = () => {
   const { categories } = useCategories();
   const { user, userDetails } = useUser();
 
+  // Helper function to check if product belongs to a category
+  // Supports both old format (category) and new format (categories array)
+  const productBelongsToCategory = (product, categoryId) => {
+    if (product.categories && Array.isArray(product.categories) && product.categories.length > 0) {
+      return product.categories.includes(categoryId);
+    }
+    // Fallback to old format
+    return product.category === categoryId;
+  };
+
   // Validate and set active tab when categories are loaded
   useEffect(() => {
     if (categories && categories.length > 0) {
@@ -480,6 +490,9 @@ const MenuSection = () => {
                 {subcategoryActiveTab ?
                   <>
                     {products.filter((item) => {
+                      // Check if product belongs to the parent category of this subcategory
+                      const parentCategory = categories.find(cat => cat.id === subcategory.parent || cat.children?.some(child => child.id === subcategory.id));
+                      if (!parentCategory || !productBelongsToCategory(item, parentCategory.id)) return false;
                       if (item?.subcategory != subcategory.id || item.isSideDish) return false;
                       // If both fields are missing, show the product in both menus
                       const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
@@ -494,7 +507,7 @@ const MenuSection = () => {
                   :
                   <>
                     {products.filter((item) => {
-                      if (item.category != category.id || item.isSideDish) return false;
+                      if (!productBelongsToCategory(item, category.id) || item.isSideDish) return false;
                       // If both fields are missing, show the product in both menus
                       const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
                       const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
@@ -531,7 +544,7 @@ const MenuSection = () => {
             })
             .map((category) => {
               const categoryProducts = products.filter((item) => {
-                if (item.category != category.id || item.isSideDish) return false;
+                if (!productBelongsToCategory(item, category.id) || item.isSideDish) return false;
                 // If both fields are missing, show the product in both menus
                 const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
                 const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
