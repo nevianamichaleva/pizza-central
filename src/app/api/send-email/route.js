@@ -34,10 +34,14 @@ export async function POST(request) {
         }).join('\n')
       : 'Няма артикули';
 
-    // orderData.total already includes delivery fee (added in order/page.js)
-    const deliveryFee = 3.00;
-    const total = (parseFloat(orderData.total || 0) - deliveryFee).toFixed(2);
-    const grandTotal = parseFloat(orderData.total || 0).toFixed(2);
+    // Get order type and calculate totals
+    const orderType = orderData.order_type || 'pickup'; // 'pickup' or 'delivery'
+    const pickupDiscount = parseFloat(orderData.pickup_discount || 0);
+    const deliveryFee = parseFloat(orderData.delivery_fee || (orderType === 'delivery' ? 3.00 : 0));
+    
+    // Calculate subtotal (before discount/delivery fee)
+    const grandTotal = parseFloat(orderData.total || 0);
+    const subtotal = grandTotal - deliveryFee + pickupDiscount;
 
     const orderNumber = orderData.order_number ? `ORD-${String(orderData.order_number).padStart(4, '0')}` : (orderData.id || 'N/A');
     const emailSubject = `Нова поръчка #${orderNumber}`;
@@ -51,9 +55,9 @@ ID: ${orderData.id || 'N/A'}
 Статус: ${orderData.status || 'pending'}
 
 Клиент:
-Име: ${orderData.user_email || 'Не е посочено'}
+Име: ${orderData.user_name || orderData.name || 'Не е посочено'}
 Телефон: ${orderData.user_phone || orderData.phone || 'Не е посочено'}
-Адрес: ${orderData.user_address || orderData.delivery_address || 'Не е посочено'}
+${orderType === 'delivery' ? `Адрес за доставка: ${orderData.user_address || orderData.delivery_address || 'Не е посочено'}` : ''}
 Email: ${orderData.user_email || orderData.email || 'Не е посочено'}
 
 Артикули:
@@ -62,11 +66,13 @@ ${itemsList}
 ${orderData.special_notes ? `Специални забележки:
 ${orderData.special_notes}
 
-` : ''}${orderData.delivery_time ? `Желан час за доставка: ${orderData.delivery_time}
+` : ''}Начин на получаване: ${orderType === 'pickup' ? 'Вземане от ресторанта' : 'Доставка'}
+${orderData.delivery_time && orderType === 'delivery' ? `Желан час за доставка: ${orderData.delivery_time}
 
-` : ''}Сума: ${total} лв
-Доставка: ${deliveryFee.toFixed(2)} лв
-Общо: ${grandTotal} лв
+` : ''}Сума: ${subtotal.toFixed(2)} лв
+${pickupDiscount > 0 ? `Отстъпка за вземане (-10%): -${pickupDiscount.toFixed(2)} лв
+` : ''}${deliveryFee > 0 ? `Доставка: ${deliveryFee.toFixed(2)} лв
+` : ''}Общо: ${grandTotal.toFixed(2)} лв
     `.trim();
 
     // Try to send email using nodemailer
