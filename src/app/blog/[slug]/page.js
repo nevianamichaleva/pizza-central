@@ -13,7 +13,16 @@ const BlogPostPage = ({ params }) => {
   const router = useRouter();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
-  const slug = params?.slug || (typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : '');
+  const [slug, setSlug] = useState('');
+
+  useEffect(() => {
+    const getSlug = async () => {
+      const resolvedParams = await params;
+      const slugValue = resolvedParams?.slug || (typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : '');
+      setSlug(slugValue);
+    };
+    getSlug();
+  }, [params]);
 
   useEffect(() => {
     if (!slug) return;
@@ -31,10 +40,10 @@ const BlogPostPage = ({ params }) => {
             const [postId, postData] = foundPost;
             
             // Only show published posts (unless in admin mode)
-            // if (postData.status !== 'published') {
-            //   router.push('/blog');
-            //   return;
-            // }
+            if (postData.status !== 'published') {
+              router.push('/blog');
+              return;
+            }
             
             setPost({ 
               id: postId, 

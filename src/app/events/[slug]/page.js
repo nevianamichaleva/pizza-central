@@ -13,7 +13,16 @@ const EventDetailsPage = ({ params }) => {
   const router = useRouter();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const slug = params?.slug || (typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : '');
+  const [slug, setSlug] = useState('');
+
+  useEffect(() => {
+    const getSlug = async () => {
+      const resolvedParams = await params;
+      const slugValue = resolvedParams?.slug || (typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : '');
+      setSlug(slugValue);
+    };
+    getSlug();
+  }, [params]);
 
   useEffect(() => {
     if (!slug) return;

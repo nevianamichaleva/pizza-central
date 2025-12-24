@@ -24,7 +24,16 @@ const NewDishDetailsPage = ({ params }) => {
   const [addingToCart, setAddingToCart] = useState(false);
   const [sideDishModalVisible, setSideDishModalVisible] = useState(false);
   const [selectedSideDish, setSelectedSideDish] = useState(null);
-  const slug = params?.id || (typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : '');
+  const [slug, setSlug] = useState('');
+
+  useEffect(() => {
+    const getSlug = async () => {
+      const resolvedParams = await params;
+      const slugValue = resolvedParams?.id || (typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : '');
+      setSlug(slugValue);
+    };
+    getSlug();
+  }, [params]);
 
   useEffect(() => {
     if (!slug) return;

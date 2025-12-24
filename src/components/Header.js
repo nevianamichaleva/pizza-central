@@ -293,7 +293,7 @@ const Header = () => {
                     <MenuLink href="/gallery" className={pathname == '/gallery' ? 'active' : ''}>Галерия</MenuLink>
                   </li>
                   <li>
-                    <MenuLink href="/blog" className={pathname == '/blog' ? 'active' : ''}>Любопитно</MenuLink>
+                    <MenuLink href="/blog" className={pathname == '/blog' ? 'active' : ''}>Любопитно от Централ</MenuLink>
                   </li>
                 </ul>
               )}
