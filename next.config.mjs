@@ -65,6 +65,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: '/central-menu',
+        destination: '/bg/central-menu',
+        permanent: true,
+      },
+      {
         source: '/my-account',
         destination: '/profile',
         permanent: true,

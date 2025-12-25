@@ -37,6 +37,7 @@ const AdministrationPage = () => {
                         <Link href='/admin/contacts' className="btn btn-primary w-auto text-center py-1 px-3">Управление на контакти</Link>
                         <Link href='/admin/packaging' className="btn btn-primary w-auto text-center py-1 px-3">Управление на опаковки</Link>
                         <Link href='/admin/blog' className="btn btn-primary w-auto text-center py-1 px-3">Управление на блог статии</Link>
+                        {/* <Link href='/admin/translations' className="btn btn-primary w-auto text-center py-1 px-3">Управление на преводи</Link> */}
                     </div>
 
                 </div>

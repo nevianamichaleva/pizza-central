@@ -2,16 +2,42 @@
 
 import { useCategories } from '@/context/CategoriesContext';
 import { useProducts } from '@/context/ProductsContext';
+// import { useTranslations } from '@/context/TranslationsContext'; използвай този ако има нужда от преводи от базата данни
+//използвай този ако има нужда от преводи от json файл
+import translations from '@/locales/central-menu.json';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
-import { Button, Image } from "antd";
+import { Button, Image, Select } from "antd";
 import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
-export default function CentralMenuPage() {
+export default function CentralMenuPage({ params }) {
+  const router = useRouter();
+  const urlParams = useParams();
   const { products } = useProducts();
   const { categories } = useCategories();
+  // const { translations } = useTranslations();
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const categoriesSliderRef = useRef(null);
+  const [selectedLanguage, setSelectedLanguage] = useState('bg');
+
+  // Get lang from URL params
+  useEffect(() => {
+    const getLang = async () => {
+      const resolvedParams = params ? await params : urlParams;
+      const langValue = resolvedParams?.lang || 'bg';
+      setSelectedLanguage(langValue);
+    };
+    getLang();
+  }, [params, urlParams]);
+
+  // Translation function
+  const t = (key) => {
+    if (selectedLanguage === 'bg') {
+      return key; // Return original Bulgarian text
+    }
+    return translations?.[selectedLanguage]?.[key] || key;
+  };
 
   const normalizePrice = (rawPrice) => {
     if (rawPrice === undefined || rawPrice === null) {
@@ -139,31 +165,52 @@ export default function CentralMenuPage() {
       <div className="central-menu-header">
         <div className="container">
           <div className="central-menu-header-content">
-            <h1 className="central-menu-title desktop-title">Меню на Ресторант-пицария Централ град Добрич</h1>
+            <h1 className="central-menu-title desktop-title" style={{fontSize: '36px'}}>{t("Меню на Ресторант-пицария Централ град Добрич")}</h1>
             {selectedCategory && (
               <h1 className="central-menu-title mobile-title">
-                {selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1)}
+                {t(selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1))}
               </h1>
             )}
-            <Link href="/for-home">
-              <Button 
-                type="primary" 
-                size="large"
-                className="order-home-btn"
-                style={{
-                  backgroundColor: '#FFA500',
-                  borderColor: '#ce1212',
-                  height: '50px',
-                  fontSize: '18px',
-                  fontWeight: 600,
-                  padding: '0 40px',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 15px #ce1212',
+            <div className="language-selector-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <Select
+                value={selectedLanguage}
+                onChange={(newLang) => {
+                  setSelectedLanguage(newLang);
+                  router.push(`/${newLang}/central-menu`);
                 }}
-              >
-                Поръчай за вкъщи
-              </Button>
-            </Link>
+                className="language-selector"
+                style={{
+                  width: 120,
+                  height: '50px',
+                }}
+                size="large"
+                options={[
+                  { value: 'bg', label: '🇧🇬 BG' },
+                  { value: 'en', label: '🇬🇧 EN' },
+                  { value: 'ro', label: '🇷🇴 RO' },
+                  { value: 'de', label: '🇩🇪 DE' },
+                ]}
+              />
+              <Link href="/for-home">
+                <Button 
+                  type="primary" 
+                  size="large"
+                  className="order-home-btn"
+                  style={{
+                    backgroundColor: '#FFA500',
+                    borderColor: '#ce1212',
+                    height: '50px',
+                    fontSize: '18px',
+                    fontWeight: 600,
+                    padding: '0 40px',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 15px #ce1212',
+                  }}
+                >
+                  {t("Поръчай за вкъщи")}
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -175,7 +222,7 @@ export default function CentralMenuPage() {
             <button 
               className="central-menu-category-arrow central-menu-category-arrow-left"
               onClick={() => scrollCategories('left')}
-              aria-label="Предишни категории"
+              aria-label={t("Предишни категории")}
             >
               <LeftOutlined />
             </button>
@@ -194,7 +241,10 @@ export default function CentralMenuPage() {
                     className={`central-menu-category-btn ${selectedCategoryId === category.id ? 'active' : ''}`}
                     onClick={() => setSelectedCategoryId(category.id)}
                   >
-                    {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+                    {(() => {
+                      const translatedName = t(category.name);
+                      return translatedName.charAt(0).toUpperCase() + translatedName.slice(1);
+                    })()}
                   </button>
                 );
               })}
@@ -202,7 +252,7 @@ export default function CentralMenuPage() {
             <button 
               className="central-menu-category-arrow central-menu-category-arrow-right"
               onClick={() => scrollCategories('right')}
-              aria-label="Следващи категории"
+              aria-label={t("Следващи категории")}
             >
               <RightOutlined />
             </button>
@@ -220,7 +270,7 @@ export default function CentralMenuPage() {
               return (
                 <div className="central-menu-category">
                   <p style={{ textAlign: 'center', padding: '40px', color: '#6c757d' }}>
-                    Няма продукти в тази категория.
+                    {t("Няма продукти в тази категория.")}
                   </p>
                 </div>
               );
@@ -229,7 +279,7 @@ export default function CentralMenuPage() {
             return (
               <div key={selectedCategory.id} className="central-menu-category">
                 <h2 className="central-menu-category-title">
-                  {selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1)}
+                  {t(selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1))}
                 </h2>
                 
                 {/* Subcategories if they exist */}
@@ -265,7 +315,7 @@ export default function CentralMenuPage() {
                     return (
                       <div key={subcategory.id} className="central-menu-subcategory">
                         <h3 className="central-menu-subcategory-title">
-                          {subcategory.name.charAt(0).toUpperCase() + subcategory.name.slice(1)}
+                          {t(subcategory.name.charAt(0).toUpperCase() + subcategory.name.slice(1))}
                         </h3>
                         <div className="central-menu-items">
                           {subcategoryProducts.map((item, index) => (
@@ -276,18 +326,23 @@ export default function CentralMenuPage() {
                                   alt={item.name}
                                   className="menu-item-img"
                                   preview={{
-                                    mask: 'Преглед',
+                                    mask: t('Преглед'),
                                     maskClassName: 'central-menu-image-preview-mask'
                                   }}
                                 />
                               </div>
                               <div className="central-menu-item-content">
                                 <div className="central-menu-item-header">
-                                  <h4 className="central-menu-item-name">{item.name}</h4>
+                                  <h4 className="central-menu-item-name">{t(item.name)}</h4>
                                   {formatPrice(item.price) && (
                                     <p className="central-menu-item-price">{formatPrice(item.price)}</p>
                                   )}
                                 </div>
+                                {item.weight && (
+                                  <div style={{ marginBottom: (item.ingredients || item.description) ? "12px" : 0, fontSize: '16px' }}>
+                                    <strong>{t("Грамаж")}:</strong> {item.weight} {item.weightUnit || t("г")}
+                                  </div>
+                                )}
                                 {(item.ingredients || item.description) && (
                                   <>
                                     {item.ingredients && (
@@ -295,28 +350,28 @@ export default function CentralMenuPage() {
                                         className="central-menu-item-description"
                                         style={{ marginBottom: item.description ? "6px" : undefined }}
                                       >
-                                        {item.ingredients}
+                                        {t(item.ingredients)}
                                       </p>
                                     )}
                                     {item.description && (
                                       <p className="central-menu-item-description" style={{ marginBottom: 0 }}>
-                                        {item.description}
+                                        {t(item.description)}
                                       </p>
                                     )}
                                   </>
                                 )}
-                                {item.slug && (
+                                {/* {item.slug && (
                                   <div style={{ marginTop: '12px' }}>
                                     <Link href={`/products/${item.slug}`}>
                                       <Button
                                         type="default"
                                         style={{ width: '100%' }}
                                       >
-                                        Виж повече
+                                        {t("Виж повече")}
                                       </Button>
                                     </Link>
                                   </div>
-                                )}
+                                )} */}
                               </div>
                             </div>
                           ))}
@@ -334,18 +389,23 @@ export default function CentralMenuPage() {
                             alt={item.name}
                             className="menu-item-img"
                             preview={{
-                              mask: 'Преглед',
+                              mask: t('Преглед'),
                               maskClassName: 'central-menu-image-preview-mask'
                             }}
                           />
                         </div>
                         <div className="central-menu-item-content">
                           <div className="central-menu-item-header">
-                            <h4 className="central-menu-item-name">{item.name}</h4>
+                            <h4 className="central-menu-item-name">{t(item.name)}</h4>
                             {formatPrice(item.price) && (
                               <p className="central-menu-item-price">{formatPrice(item.price)}</p>
                             )}
                           </div>
+                          {item.weight && (
+                            <div style={{ marginBottom: (item.ingredients || item.description) ? "12px" : 0, fontSize: '16px' }}>
+                              <strong>{t("Грамаж")}:</strong> {item.weight} {item.weightUnit || t("г")}
+                            </div>
+                          )}
                           {(item.ingredients || item.description) && (
                             <>
                               {item.ingredients && (
@@ -353,28 +413,28 @@ export default function CentralMenuPage() {
                                   className="central-menu-item-description"
                                   style={{ marginBottom: item.description ? "6px" : undefined }}
                                 >
-                                  {item.ingredients}
+                                  {t(item.ingredients)}
                                 </p>
                               )}
                               {item.description && (
                                 <p className="central-menu-item-description" style={{ marginBottom: 0 }}>
-                                  {item.description}
+                                  {t(item.description)}
                                 </p>
                               )}
                             </>
                           )}
-                          {item.slug && (
+                          {/* {item.slug && (
                             <div style={{ marginTop: '12px' }}>
                               <Link href={`/products/${item.slug}`}>
                                 <Button
                                   type="default"
                                   style={{ width: '100%' }}
                                 >
-                                  Виж повече
+                                  {t("Виж повече")}
                                 </Button>
                               </Link>
                             </div>
-                          )}
+                          )} */}
                         </div>
                       </div>
                     ))}

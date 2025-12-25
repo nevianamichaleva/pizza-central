@@ -338,6 +338,17 @@ a {
   box-shadow: 0 6px 20px rgba(255, 165, 0, 0.4) !important;
 }
 
+.language-selector-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.language-selector .ant-select-selector {
+  border-radius: 8px !important;
+  border-color: #ce1212 !important;
+}
+
 .central-menu-categories-container {
   background: #ffffff;
   padding: 20px 0;
@@ -629,6 +640,15 @@ a {
 
   .central-menu-title {
     font-size: 32px;
+  }
+
+  .language-selector-wrapper {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .language-selector {
+    width: 120px !important;
   }
 
   .order-home-btn {

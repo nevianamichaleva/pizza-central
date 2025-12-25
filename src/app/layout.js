@@ -10,6 +10,7 @@ import './globals.css';
 
 import { CategoriesProvider } from '@/context/CategoriesContext';
 import { ProductsProvider } from '@/context/ProductsContext';
+import { TranslationsProvider } from '@/context/TranslationsContext';
 import { UserProvider } from '@/context/UserContext';
 
 export const metadata = {
@@ -81,10 +82,12 @@ export default function RootLayout({ children }) {
         <UserProvider>
           <CategoriesProvider>
             <ProductsProvider>
-              <Header />
-              {children}
-              <Footer />
-              <ToastContainer />
+              <TranslationsProvider>
+                <Header />
+                {children}
+                <Footer />
+                <ToastContainer />
+              </TranslationsProvider>
             </ProductsProvider>
           </CategoriesProvider>
         </UserProvider>
