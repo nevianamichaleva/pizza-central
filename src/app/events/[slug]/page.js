@@ -1,72 +1,122 @@
-'use client';
-
 import { get, ref } from 'firebase/database';
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { notFound } from "next/navigation";
 import { rtdb } from '../../../../lib/firebase';
-
 import styles from "./page.module.css";
 
-const EventDetailsPage = ({ params }) => {
-  const router = useRouter();
-  const [event, setEvent] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [slug, setSlug] = useState('');
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-central.bg';
 
-  useEffect(() => {
-    const getSlug = async () => {
-      const resolvedParams = await params;
-      const slugValue = resolvedParams?.slug || (typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : '');
-      setSlug(slugValue);
-    };
-    getSlug();
-  }, [params]);
+// Fetch event from Firebase
+async function getEvent(slug) {
+  try {
+    const eventsRef = ref(rtdb, "events");
+    const snapshot = await get(eventsRef);
 
-  useEffect(() => {
-    if (!slug) return;
-
-    const fetchEvent = async () => {
-      try {
-        const eventsRef = ref(rtdb, "events");
-        const snapshot = await get(eventsRef);
-
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          const foundEvent = Object.values(data).find((e) => e.slug === slug);
-          
-          if (foundEvent) {
-            setEvent(foundEvent);
-          } else {
-            router.push('/events');
-          }
-        } else {
-          router.push('/events');
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const foundEvent = Object.entries(data).find(([key, value]) => value.slug === slug);
+      
+      if (foundEvent) {
+        const [eventId, eventData] = foundEvent;
+        
+        // Only show active events (or events without status field for backward compatibility)
+        if (eventData.status !== undefined && eventData.status !== 'active') {
+          return null;
         }
-      } catch (error) {
-        console.error("Error fetching event:", error);
-        router.push('/events');
-      } finally {
-        setLoading(false);
+        
+        return { 
+          id: eventId, 
+          ...eventData
+        };
       }
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching event:", error);
+    return null;
+  }
+}
+
+// Generate metadata for SEO
+export async function generateMetadata({ params }) {
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug;
+  
+  if (!slug) {
+    return {
+      title: 'Събитие не намерено | Ресторант-пицария Централ Добрич',
     };
-
-    fetchEvent();
-  }, [slug, router]);
-
-  if (loading) {
-    return (
-      <section className="section">
-        <div className="container">
-          <p>Зареждане...</p>
-        </div>
-      </section>
-    );
   }
 
+  const event = await getEvent(slug);
+
   if (!event) {
-    return null;
+    return {
+      title: 'Събитие не намерено | Ресторант-пицария Централ Добрич',
+    };
+  }
+
+  const title = `${event.title} | Ресторант-пицария Централ Добрич`;
+  const description = event.description || `${event.title} - Събитие в Ресторант-пицария Централ в Добрич.`;
+  const url = `${baseUrl}/events/${slug}`;
+  const imageUrl = event.image || `${baseUrl}/images/pizza-central-delivery.png`;
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: event.title,
+      description,
+      url,
+      siteName: 'Ресторант-пицария Централ Добрич',
+      locale: 'bg_BG',
+      type: 'website',
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: event.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: event.title,
+      description,
+      images: [imageUrl],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+  };
+}
+
+// Main page component (Server Component)
+export default async function EventDetailsPage({ params }) {
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug;
+
+  if (!slug) {
+    notFound();
+  }
+
+  const event = await getEvent(slug);
+
+  if (!event) {
+    notFound();
   }
 
   return (
@@ -94,7 +144,4 @@ const EventDetailsPage = ({ params }) => {
       </div>
     </section>
   );
-};
-
-export default EventDetailsPage;
-
+}

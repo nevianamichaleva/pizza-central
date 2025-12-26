@@ -92,7 +92,13 @@ export default async function sitemap() {
           id: key,
           ...value,
         }))
-        .filter(product => product.slug && !product.isSideDish)
+        .filter(product => {
+          // Only include products with valid slug that are not side dishes
+          return product.slug && 
+                 product.slug.trim() !== '' && 
+                 !product.isSideDish &&
+                 product.status !== 'archived'; // Exclude archived products if status field exists
+        })
         .map(product => ({
           url: `${baseUrl}/products/${product.slug}`,
           lastModified: product.updated_at ? new Date(product.updated_at) : new Date(),

@@ -1,161 +1,191 @@
-'use client';
-
-import { get, ref, runTransaction } from 'firebase/database';
+import { get, ref } from 'firebase/database';
 import moment from 'moment';
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { notFound } from "next/navigation";
 import { rtdb } from '../../../../lib/firebase';
+import BlogViewCounter from '@/components/BlogViewCounter';
 import styles from "./page.module.css";
 
-const BlogPostPage = ({ params }) => {
-  const router = useRouter();
-  const [post, setPost] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [slug, setSlug] = useState('');
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-central.bg';
 
-  useEffect(() => {
-    const getSlug = async () => {
-      const resolvedParams = await params;
-      const slugValue = resolvedParams?.slug || (typeof window !== 'undefined' ? window.location.pathname.split('/').pop() : '');
-      setSlug(slugValue);
-    };
-    getSlug();
-  }, [params]);
+// Fetch blog post from Firebase
+async function getBlogPost(slug) {
+  try {
+    const postsRef = ref(rtdb, "blog_posts");
+    const snapshot = await get(postsRef);
 
-  useEffect(() => {
-    if (!slug) return;
-
-    const fetchPost = async () => {
-      try {
-        const postsRef = ref(rtdb, "blog_posts");
-        const snapshot = await get(postsRef);
-
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          const foundPost = Object.entries(data).find(([key, value]) => value.slug === slug);
-          
-          if (foundPost) {
-            const [postId, postData] = foundPost;
-
-            // Only show published posts (unless in admin mode)
-            if (postData.status !== 'published') {
-              router.push('/blog');
-              return;
-            }
-            
-            const postWithViews = { 
-              id: postId, 
-              ...postData,
-              views: postData.views || 0
-            };
-            
-            setPost(postWithViews);
-            
-            // Update page title
-            if (typeof document !== 'undefined') {
-              document.title = `${postData.seo_title || postData.title} | Ресторант-пицария Централ`;
-            }
-            
-            // Increment view count atomically
-            const postRef = ref(rtdb, `blog_posts/${postId}/views`);
-            runTransaction(postRef, (currentViews) => {
-              return (currentViews || 0) + 1;
-            }).catch((error) => {
-              console.error("Error incrementing view count:", error);
-            });
-          } else {
-            router.push('/blog');
-          }
-        } else {
-          router.push('/blog');
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      const foundPost = Object.entries(data).find(([key, value]) => value.slug === slug);
+      
+      if (foundPost) {
+        const [postId, postData] = foundPost;
+        
+        // Only show published posts
+        if (postData.status !== 'published') {
+          return null;
         }
-      } catch (error) {
-        console.error("Error fetching blog post:", error);
-        router.push('/blog');
-      } finally {
-        setLoading(false);
+        
+        return { 
+          id: postId, 
+          ...postData,
+          views: postData.views || 0
+        };
       }
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching blog post:", error);
+    return null;
+  }
+}
+
+// Generate metadata for SEO
+export async function generateMetadata({ params }) {
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug;
+  
+  if (!slug) {
+    return {
+      title: 'Статия не намерена | Ресторант-пицария Централ Добрич',
     };
-
-    fetchPost();
-  }, [slug, router]);
-
-  if (loading) {
-    return (
-      <section className="section">
-        <div className="container">
-          <p>Зареждане...</p>
-        </div>
-      </section>
-    );
   }
 
+  const post = await getBlogPost(slug);
+
   if (!post) {
-    return null;
+    return {
+      title: 'Статия не намерена | Ресторант-пицария Централ Добрич',
+    };
+  }
+
+  const title = post.seo_title || post.title;
+  const description = post.meta_description || post.excerpt || (post.content 
+    ? post.content.replace(/<[^>]*>/g, '').substring(0, 160)
+    : `${post.title} - Статия от Ресторант-пицария Централ в Добрич.`);
+  const url = post.canonical_url || `${baseUrl}/blog/${slug}`;
+  const imageUrl = post.image || `${baseUrl}/images/pizza-central-delivery.png`;
+
+  return {
+    title: `${title} | Ресторант-пицария Централ Добрич`,
+    description,
+    keywords: post.meta_keywords ? post.meta_keywords.split(',').map(k => k.trim()) : undefined,
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      title: post.title,
+      description,
+      url,
+      siteName: 'Ресторант-пицария Централ Добрич',
+      locale: 'bg_BG',
+      type: 'article',
+      publishedTime: post.published_at,
+      modifiedTime: post.updated_at,
+      authors: ['Ресторант-пицария Централ'],
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: post.image_caption || post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description,
+      images: [imageUrl],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+  };
+}
+
+// Main page component (Server Component)
+export default async function BlogPostPage({ params }) {
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug;
+
+  if (!slug) {
+    notFound();
+  }
+
+  const post = await getBlogPost(slug);
+
+  if (!post) {
+    notFound();
   }
 
   return (
     <section className="section">
-        <div className="container">
-          <Link className={styles.backLink} href="/blog">
-            &larr; Назад към блога
-          </Link>
-          
-          <article className={styles.blogPost}>
-            <header className={styles.blogHeader}>
-              <h1 className={styles.blogTitle}>{post.title}</h1>
-              
-              <div className={styles.blogMeta}>
-                {post.published_at && (
-                  <time dateTime={post.published_at}>
-                    {moment(post.published_at).format('DD.MM.YYYY')}
-                  </time>
-                )}
-                {post.views !== undefined && (
-                  <span style={{ marginLeft: post.published_at ? '15px' : '0', color: '#666', fontSize: '14px' }}>
-                    👁️ {post.views} {post.views === 1 ? 'преглед' : 'прегледа'}
-                  </span>
-                )}
-              </div>
-            </header>
+      <BlogViewCounter postId={post.id} />
+      <div className="container">
+        <Link className={styles.backLink} href="/blog">
+          &larr; Назад към блога
+        </Link>
+        
+        <article className={styles.blogPost}>
+          <header className={styles.blogHeader}>
+            <h1 className={styles.blogTitle}>{post.title}</h1>
+            
+            <div className={styles.blogMeta}>
+              {post.published_at && (
+                <time dateTime={post.published_at}>
+                  {moment(post.published_at).format('DD.MM.YYYY')}
+                </time>
+              )}
+              {post.views !== undefined && (
+                <span style={{ marginLeft: post.published_at ? '15px' : '0', color: '#666', fontSize: '14px' }}>
+                  👁️ {post.views} {post.views === 1 ? 'преглед' : 'прегледа'}
+                </span>
+              )}
+            </div>
+          </header>
 
-            {post.image && (
-              <div>
-                <div className={styles.heroImageWrapper} style={{ marginBottom: '0px' }}>
-                  <Image
-                    src={post.image}
-                    alt={post.image_caption || post.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 1200px"
-                    className={styles.heroImage}
-                    priority
-                  />
+          {post.image && (
+            <div>
+              <div className={styles.heroImageWrapper} style={{ marginBottom: '0px' }}>
+                <Image
+                  src={post.image}
+                  alt={post.image_caption || post.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 1200px"
+                  className={styles.heroImage}
+                  priority
+                />
+              </div>
+              {post.image_caption && (
+                <div>
+                  {post.image_caption}
                 </div>
-                {post.image_caption && (
-                  <div>
-                    {post.image_caption}
-                  </div>
-                )}
-              </div>
-            )}
+              )}
+            </div>
+          )}
 
-            {post.excerpt && (
-              <div className={styles.blogExcerpt}>
-                <p style={{ whiteSpace: 'pre-line' }}>{post.excerpt}</p>
-              </div>
-            )}
+          {post.excerpt && (
+            <div className={styles.blogExcerpt}>
+              <p style={{ whiteSpace: 'pre-line' }}>{post.excerpt}</p>
+            </div>
+          )}
 
-            <div 
-              className={styles.blogContent}
-              dangerouslySetInnerHTML={{ __html: post.content }}
-            />
-          </article>
-        </div>
-      </section>
+          <div 
+            className={styles.blogContent}
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+        </article>
+      </div>
+    </section>
   );
-};
-
-export default BlogPostPage;
-
+}
