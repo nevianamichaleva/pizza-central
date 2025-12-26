@@ -119,12 +119,43 @@ export default async function EventDetailsPage({ params }) {
     notFound();
   }
 
+  // Generate Schema.org structured data for Event
+  const eventSchema = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": event.title,
+    "description": event.description || event.title,
+    "image": event.image 
+      ? (event.image.startsWith('http') ? event.image : `${baseUrl}${event.image.startsWith('/') ? '' : '/'}${event.image}`)
+      : `${baseUrl}/images/pizza-central-delivery.png`,
+    "location": {
+      "@type": "Place",
+      "name": "Ресторант-пицария Централ",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Добрич",
+        "addressCountry": "BG"
+      }
+    },
+    "organizer": {
+      "@type": "Organization",
+      "name": "Ресторант-пицария Централ",
+      "url": baseUrl
+    },
+    "url": `${baseUrl}/events/${slug}`
+  };
+
   return (
-    <section className="section">
-      <div className="container">
-        <Link className={styles.backLink} href="/events">
-          &larr; Назад към събитията
-        </Link>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventSchema) }}
+      />
+      <section className="section">
+        <div className="container">
+          <Link className={styles.backLink} href="/events">
+            &larr; Назад към събитията
+          </Link>
         <div className={styles.hero}>
           <div className={styles.imageWrapper}>
             <Image
@@ -143,5 +174,6 @@ export default async function EventDetailsPage({ params }) {
         </div>
       </div>
     </section>
+    </>
   );
 }

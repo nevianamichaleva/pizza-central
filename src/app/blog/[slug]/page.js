@@ -128,15 +128,55 @@ export default async function BlogPostPage({ params }) {
     notFound();
   }
 
+  // Generate Schema.org structured data for Article/BlogPosting
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.meta_description || post.excerpt || (post.content 
+      ? post.content.replace(/<[^>]*>/g, '').substring(0, 200)
+      : post.title),
+    "image": post.image 
+      ? (post.image.startsWith('http') ? post.image : `${baseUrl}${post.image.startsWith('/') ? '' : '/'}${post.image}`)
+      : `${baseUrl}/images/pizza-central-delivery.png`,
+    "datePublished": post.published_at || undefined,
+    "dateModified": post.updated_at || post.published_at || undefined,
+    "author": {
+      "@type": "Organization",
+      "name": "Ресторант-пицария Централ"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Ресторант-пицария Централ",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${baseUrl}/images/logo.png`
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `${baseUrl}/blog/${slug}`
+    }
+  };
+
+  // Remove undefined fields
+  if (!articleSchema.datePublished) delete articleSchema.datePublished;
+  if (!articleSchema.dateModified) delete articleSchema.dateModified;
+
   return (
-    <section className="section">
-      <BlogViewCounter postId={post.id} />
-      <div className="container">
-        <Link className={styles.backLink} href="/blog">
-          &larr; Назад към блога
-        </Link>
-        
-        <article className={styles.blogPost}>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <section className="section">
+        <BlogViewCounter postId={post.id} />
+        <div className="container">
+          <Link className={styles.backLink} href="/blog">
+            &larr; Назад към блога
+          </Link>
+          
+          <article className={styles.blogPost}>
           <header className={styles.blogHeader}>
             <h1 className={styles.blogTitle}>{post.title}</h1>
             
@@ -187,5 +227,6 @@ export default async function BlogPostPage({ params }) {
         </article>
       </div>
     </section>
+    </>
   );
 }

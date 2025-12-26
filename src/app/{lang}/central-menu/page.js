@@ -155,9 +155,9 @@ export default function CentralMenuPage({ params }) {
           <div className="central-menu-header-content">
             <h1 className="central-menu-title desktop-title" style={{fontSize: '36px'}}>Меню на Ресторант-пицария Централ град Добрич</h1>
             {selectedCategory && (
-              <h1 className="central-menu-title mobile-title">
+              <div className="central-menu-title mobile-title">
                 {selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1)}
-              </h1>
+              </div>
             )}
             <div className="language-selector-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <Select

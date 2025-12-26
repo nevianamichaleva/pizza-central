@@ -36,7 +36,7 @@ const DetskiKutPage = () => {
           }}>
             Резервирай маса
           </a>
-          <a href="/central-menu" className="btn btn-primary" style={{
+          <a href="/bg/central-menu" className="btn btn-primary" style={{
             backgroundColor: '#ce1212',
             color: '#fff',
             padding: '12px 30px',

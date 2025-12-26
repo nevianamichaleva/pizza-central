@@ -26,9 +26,9 @@ const AboutSection = () => {
           </div>
           <div className="col-lg-5" data-aos="fade-up" data-aos-delay="250">
             <div className="content ps-0 ps-lg-5" style={{ fontSize: '18px', padding: '0px!important' }}>
-              <h1 style={{ fontSize: '20px', marginBottom: '30px', lineHeight: '1.5', fontStyle: 'italic' }}>
+              <p style={{ fontSize: '20px', marginBottom: '30px', lineHeight: '1.5', fontStyle: 'italic' }}>
               Ресторант-пицария <strong>„Централ"</strong> вече 18 години е любимо място за вкусна храна и приятни моменти. Намираме се в <strong>центъра на град Добрич</strong> – ул. Независимост 4, срещу Областна Управа.
-              </h1>
+              </p>
               <p style={{ fontSize: '18px' }}>Какво ще откриете при нас?</p>
               <ul style={{ fontSize: '18px' }}>
                 <li><i className="bi bi-check-circle-fill"></i> <span><strong>Автентични италиански пици</strong> – приготвени с български продукти по оригинални рецепти.</span></li>

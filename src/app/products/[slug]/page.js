@@ -141,12 +141,47 @@ export default async function ProductDetailsPage({ params }) {
     notFound();
   }
 
+  // Generate Schema.org structured data for Product
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "description": product.description 
+      ? product.description.replace(/<[^>]*>/g, '')
+      : product.ingredients || product.name,
+    "image": product.image 
+      ? (product.image.startsWith('http') ? product.image : `${baseUrl}${product.image.startsWith('/') ? '' : '/'}${product.image}`)
+      : `${baseUrl}/images/no-image.png`,
+    "offers": product.price ? {
+      "@type": "Offer",
+      "price": parseFloat(product.price).toFixed(2),
+      "priceCurrency": "BGN",
+      "availability": "https://schema.org/InStock",
+      "url": `${baseUrl}/products/${slug}`
+    } : undefined,
+    "brand": {
+      "@type": "Brand",
+      "name": "Ресторант-пицария Централ"
+    },
+    "aggregateRating": undefined, // Can be added later if you have ratings
+  };
+
+  // Remove undefined fields
+  if (!productSchema.offers) {
+    delete productSchema.offers;
+  }
+
   return (
-    <section className="section">
-      <div className="container">
-        <Link className={styles.backLink} href="/our-menu">
-          &larr; Назад към менюто
-        </Link>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <section className="section">
+        <div className="container">
+          <Link className={styles.backLink} href="/our-menu">
+            &larr; Назад към менюто
+          </Link>
         <div className={styles.hero}>
           <div className={styles.imageWrapper}>
             <Image
@@ -201,5 +236,6 @@ export default async function ProductDetailsPage({ params }) {
         </div>
       </div>
     </section>
+    </>
   );
 }

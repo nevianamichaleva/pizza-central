@@ -164,7 +164,7 @@ const Header = () => {
               priority
             />
           </div>
-          <h1 className="sitename">Централ</h1>
+          <div className="sitename">Централ</div>
           <span></span>
         </Link>
 
@@ -262,16 +262,13 @@ const Header = () => {
               onMouseLeave={handleMouseLeave}
             >
               <a
-                href="/for-us"
+                href="#"
                 style={{fontSize: '18px'}}
                 onClick={(e) => {
                   e.preventDefault();
                   toggleDeepDropdown();
-                  // if (typeof window !== "undefined") {
-                  //   window.location.href = "/for-us";
-                  // }
                 }}
-                className={pathname == '/for-us' ? 'active dropdown-toggle' : 'dropdown-toggle'}
+                className={(pathname == '/about-us' || pathname == '/detski-kut' || pathname == '/new-dishes' || pathname == '/events' || pathname == '/gallery' || pathname == '/blog') ? 'active dropdown-toggle' : 'dropdown-toggle'}
               >
                 <span>За нас</span>
               </a>
