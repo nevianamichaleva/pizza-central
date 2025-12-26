@@ -16,6 +16,18 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Пренасочване на всичко от mozzarella.bg към pizza-central.bg
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'mozzarella.bg',
+          },
+        ],
+        destination: 'https://pizza-central.bg/:path*',
+        permanent: true,
+      },
       // Пренасочване на всичко от dostavka.pizza-central.bg към начална страница
       {
         source: '/:path*',
