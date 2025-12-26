@@ -4,12 +4,13 @@ import { Button, DatePicker, Form, Input, InputNumber, Select } from "antd";
 import 'aos/dist/aos.css';
 import { get, push, ref, set } from 'firebase/database';
 import moment from 'moment';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { rtdb } from '../../lib/firebase';
 import showAToast from "./common/showAToast";
 
 const BookTableSection = () => {
   const [form] = Form.useForm();
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const initAOS = async () => {
@@ -26,6 +27,12 @@ const BookTableSection = () => {
   }, []);
 
   const handleSubmit = async (values) => {
+    // Prevent double submission
+    if (submitting) {
+      return;
+    }
+
+    setSubmitting(true);
     const bookingData = {
       name: values.name || '',
       email: values.email || '',
@@ -42,66 +49,91 @@ const BookTableSection = () => {
 
       await set(newBookingRef, bookingData);
 
-      // Send email notification
+      // Send email notifications
       try {
-        // Get admin email from Firebase settings
+        // Get SMTP config from Firebase settings
         const emailRef = ref(rtdb, 'settings/email');
         const emailSnapshot = await get(emailRef);
         let adminEmail = null;
+        let smtpConfig = null;
         
         if (emailSnapshot.exists()) {
           const emailData = emailSnapshot.val();
           adminEmail = emailData.adminEmail || emailData.email;
+          smtpConfig = {
+            smtpHost: emailData.smtpHost,
+            smtpPort: emailData.smtpPort,
+            smtpUser: emailData.smtpUser,
+            smtpPassword: emailData.smtpPassword,
+            smtpSecure: emailData.smtpSecure,
+            fromEmail: emailData.fromEmail
+          };
         }
 
+        // Send email notification to admin
         if (adminEmail) {
-          // Also get SMTP config to send to API
-          const smtpRef = ref(rtdb, 'settings/email');
-          const smtpSnapshot = await get(smtpRef);
-          let smtpConfig = null;
-          
-          if (smtpSnapshot.exists()) {
-            const smtpData = smtpSnapshot.val();
-            smtpConfig = {
-              smtpHost: smtpData.smtpHost,
-              smtpPort: smtpData.smtpPort,
-              smtpUser: smtpData.smtpUser,
-              smtpPassword: smtpData.smtpPassword,
-              smtpSecure: smtpData.smtpSecure,
-              fromEmail: smtpData.fromEmail
-            };
-          }
+          try {
+            const response = await fetch('/api/send-booking-email', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                bookingData: bookingData,
+                adminEmail: adminEmail,
+                smtpConfig: smtpConfig,
+              }),
+            });
 
-          const response = await fetch('/api/send-booking-email', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              bookingData: bookingData,
-              adminEmail: adminEmail,
-              smtpConfig: smtpConfig,
-            }),
-          });
-
-          const result = await response.json();
-          if (!result.success && !result.logged) {
-            console.error('Failed to send email notification:', result);
+            const result = await response.json();
+            if (!result.success && !result.logged) {
+              console.error('Failed to send email notification:', result);
+            }
+          } catch (adminEmailError) {
+            console.error('Error sending admin email notification:', adminEmailError);
+            // Don't block the booking process if admin email fails
           }
         } else {
-          console.log('No admin email configured, skipping email notification');
+          console.log('No admin email configured, skipping admin email notification');
+        }
+
+        // Send confirmation email to customer (always try if email exists)
+        if (bookingData.email) {
+          try {
+            const confirmationResponse = await fetch('/api/send-booking-confirmation', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                bookingData: bookingData,
+                smtpConfig: smtpConfig,
+              }),
+            });
+
+            const confirmationResult = await confirmationResponse.json();
+            if (!confirmationResult.success && !confirmationResult.logged) {
+              console.error('Failed to send confirmation email:', confirmationResult);
+            }
+          } catch (confirmationError) {
+            console.error('Error sending confirmation email:', confirmationError);
+            // Don't block the booking process if confirmation email fails
+          }
         }
       } catch (error) {
-        console.error('Error sending email notification:', error);
+        console.error('Error sending email notifications:', error);
         // Don't block the booking process if email fails
       }
 
       setTimeout(() => {
         showAToast('success', 'Вашата резервация е успешна. Очаквайте нашето обаждане за да обсъдим подробностите!');
         form.resetFields();
+        setSubmitting(false);
       }, 1000);
     } catch (error) {
+      console.error('Error submitting booking:', error);
       showAToast('error', 'Неуспешна резервация, моля опитайте отново или се обадете на телефон +359 895 516 401');
+      setSubmitting(false);
     }
   };
 
@@ -252,7 +284,7 @@ const BookTableSection = () => {
               </Form.Item>
 
               <div className="text-center mt-3">
-                <Button type="primary" htmlType="submit">
+                <Button type="primary" htmlType="submit" loading={submitting} disabled={submitting}>
                   Запази
                 </Button>
               </div>
