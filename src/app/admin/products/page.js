@@ -4,7 +4,7 @@ import { default as Message, default as showAToast } from '@/components/common/s
 import CloudinaryUpload from '@/components/uploadForm';
 import { useUser } from '@/context/UserContext';
 import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Drawer, Image, Input, message, Select, Space, Switch, Table, Tabs } from "antd";
+import { Button, Checkbox, Drawer, Image, Input, message, Select, Space, Switch, Table, Tabs } from "antd";
 import { get, push, ref, remove, set, update } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -38,6 +38,25 @@ const AddProduct = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [packagingList, setPackagingList] = useState([]);
   const [selectedPackaging, setSelectedPackaging] = useState([]);
+  const [selectedAllergens, setSelectedAllergens] = useState([]);
+  
+  // 14 основни алергена според ЕС регулациите
+  const allergens = [
+    { value: 'gluten', label: '1. Глутен' },
+    { value: 'crustaceans', label: '2. Ракообразни' },
+    { value: 'eggs', label: '3. Яйца' },
+    { value: 'fish', label: '4. Риба' },
+    { value: 'peanuts', label: '5. Фъстъци' },
+    { value: 'soybeans', label: '6. Соя' },
+    { value: 'milk', label: '7. Мляко' },
+    { value: 'nuts', label: '8. Ядки' },
+    { value: 'celery', label: '9. Целина' },
+    { value: 'mustard', label: '10. Горчица' },
+    { value: 'sesame', label: '11. Сусам' },
+    { value: 'sulphites', label: '12. Сулфити' },
+    { value: 'lupin', label: '13. Лупина' },
+    { value: 'molluscs', label: '14. Мекотели' },
+  ];
   const columns = [
     {
       title: "Действия",
@@ -137,6 +156,24 @@ const AddProduct = () => {
         return <span>{packagingNames.join(', ') || 'Няма'}</span>;
       },
     },
+    {
+      title: "Алергени",
+      dataIndex: "allergens",
+      key: "allergens",
+      render: (productAllergens) => {
+        if (!productAllergens || (Array.isArray(productAllergens) && productAllergens.length === 0)) {
+          return <span style={{ color: "#999" }}>Няма</span>;
+        }
+        const allergenValues = Array.isArray(productAllergens) ? productAllergens : [productAllergens];
+        const allergenLabels = allergenValues
+          .map(value => {
+            const allergen = allergens.find(a => a.value === value);
+            return allergen ? allergen.label : value;
+          })
+          .filter(Boolean);
+        return <span>{allergenLabels.join(', ') || 'Няма'}</span>;
+      },
+    },
   ];
 
   useEffect(() => {
@@ -169,6 +206,7 @@ const AddProduct = () => {
     setForRestaurant(true);
     setSelectedPackaging([]);
     setSelectedCategories([]);
+    setSelectedAllergens([]);
     setSlug('');
     setDrawerVisible(false);
   }
@@ -194,7 +232,8 @@ const AddProduct = () => {
       isSideDish: isSideDish || false,
       forDelivery: forDelivery !== false,
       forRestaurant: forRestaurant !== false,
-      packagingIds: selectedPackaging && selectedPackaging.length > 0 ? selectedPackaging : []
+      packagingIds: selectedPackaging && selectedPackaging.length > 0 ? selectedPackaging : [],
+      allergens: selectedAllergens && selectedAllergens.length > 0 ? selectedAllergens : []
     })
       .then(() => {
         closeDrawer();
@@ -352,7 +391,8 @@ const AddProduct = () => {
       isSideDish: isSideDish || false,
       forDelivery: forDelivery !== false,
       forRestaurant: forRestaurant !== false,
-      packagingIds: selectedPackaging && selectedPackaging.length > 0 ? selectedPackaging : []
+      packagingIds: selectedPackaging && selectedPackaging.length > 0 ? selectedPackaging : [],
+      allergens: selectedAllergens && selectedAllergens.length > 0 ? selectedAllergens : []
     };
 
     try {
@@ -383,7 +423,8 @@ const AddProduct = () => {
       isSideDish = false,
       forDelivery = true,
       forRestaurant = true,
-      packagingIds = []
+      packagingIds = [],
+      allergens = []
     } = values || {};
 
     setName(name);
@@ -407,6 +448,7 @@ const AddProduct = () => {
     setForDelivery(forDelivery !== false);
     setForRestaurant(forRestaurant !== false);
     setSelectedPackaging(Array.isArray(packagingIds) ? packagingIds : (packagingIds ? [packagingIds] : []));
+    setSelectedAllergens(Array.isArray(allergens) ? allergens : (allergens ? [allergens] : []));
 
     setProduct(id);
   };
@@ -713,6 +755,29 @@ const AddProduct = () => {
                   </Select>
                   <p style={{ fontSize: "12px", color: "#666", marginTop: "-10px", marginBottom: "16px" }}>
                     Едно ястие може да има няколко вида опаковки (например: кутия за ястие и кутия за сос)
+                  </p>
+                </div>
+              </div>
+              <div className="row gy-4">
+                <div className="col-md-12">
+                  <label htmlFor="allergens" style={{ marginBottom: "8px", display: "block", fontWeight: 500 }}>
+                    Алергени
+                  </label>
+                  <Checkbox.Group
+                    value={selectedAllergens}
+                    onChange={setSelectedAllergens}
+                    style={{ width: "100%", marginBottom: "16px" }}
+                  >
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "12px" }}>
+                      {allergens.map((allergen) => (
+                        <Checkbox key={allergen.value} value={allergen.value}>
+                          {allergen.label}
+                        </Checkbox>
+                      ))}
+                    </div>
+                  </Checkbox.Group>
+                  <p style={{ fontSize: "12px", color: "#666", marginTop: "-10px", marginBottom: "16px" }}>
+                    Изберете всички алергени, които съдържа продуктът
                   </p>
                 </div>
               </div>

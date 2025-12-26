@@ -13,6 +13,29 @@ import { rtdb } from '../../../../lib/firebase';
 
 import styles from "./page.module.css";
 
+// 14 основни алергена според ЕС регулациите
+const allergens = [
+  { value: 'gluten', label: 'Глутен' },
+  { value: 'crustaceans', label: 'Ракообразни' },
+  { value: 'eggs', label: 'Яйца' },
+  { value: 'fish', label: 'Риба' },
+  { value: 'peanuts', label: 'Фъстъци' },
+  { value: 'soybeans', label: 'Соя' },
+  { value: 'milk', label: 'Мляко' },
+  { value: 'nuts', label: 'Ядки' },
+  { value: 'celery', label: 'Целина' },
+  { value: 'mustard', label: 'Горчица' },
+  { value: 'sesame', label: 'Сусам' },
+  { value: 'sulphites', label: 'Сулфити' },
+  { value: 'lupin', label: 'Лупина' },
+  { value: 'molluscs', label: 'Мекотели' },
+];
+
+const getAllergenLabel = (allergenValue) => {
+  const allergen = allergens.find(a => a.value === allergenValue);
+  return allergen ? allergen.label : allergenValue;
+};
+
 const ProductDetailsPage = ({ params }) => {
   const router = useRouter();
   const { user, userDetails } = useUser();
@@ -307,6 +330,15 @@ const ProductDetailsPage = ({ params }) => {
               <div style={{ marginBottom: '15px' }}>
                 <strong>Описание:</strong>
                 <p style={{ marginTop: '5px', lineHeight: '1.6' }} dangerouslySetInnerHTML={{ __html: product.description }} />
+              </div>
+            )}
+            
+            {product.allergens && Array.isArray(product.allergens) && product.allergens.length > 0 && (
+              <div style={{ marginBottom: '15px' }}>
+                <strong>Алергени:</strong>
+                <p style={{ marginTop: '5px', lineHeight: '1.6', color: '#d32f2f' }}>
+                  {product.allergens.map(allergenValue => getAllergenLabel(allergenValue)).join(', ')}
+                </p>
               </div>
             )}
             

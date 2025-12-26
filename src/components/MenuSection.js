@@ -11,6 +11,29 @@ import { useEffect, useState } from 'react';
 import { rtdb } from "../../lib/firebase";
 import showAToast from "../components/common/showAToast";
 
+// 14 основни алергена според ЕС регулациите
+const allergens = [
+  { value: 'gluten', label: 'Глутен' },
+  { value: 'crustaceans', label: 'Ракообразни' },
+  { value: 'eggs', label: 'Яйца' },
+  { value: 'fish', label: 'Риба' },
+  { value: 'peanuts', label: 'Фъстъци' },
+  { value: 'soybeans', label: 'Соя' },
+  { value: 'milk', label: 'Мляко' },
+  { value: 'nuts', label: 'Ядки' },
+  { value: 'celery', label: 'Целина' },
+  { value: 'mustard', label: 'Горчица' },
+  { value: 'sesame', label: 'Сусам' },
+  { value: 'sulphites', label: 'Сулфити' },
+  { value: 'lupin', label: 'Лупина' },
+  { value: 'molluscs', label: 'Мекотели' },
+];
+
+const getAllergenLabel = (allergenValue) => {
+  const allergen = allergens.find(a => a.value === allergenValue);
+  return allergen ? allergen.label : allergenValue;
+};
+
 const MenuSection = () => {
   const STORAGE_KEY = 'menuActiveTab';
   const DEFAULT_TAB = "menu-Пици";
@@ -389,6 +412,14 @@ const MenuSection = () => {
                     : item.description}
                 </p>
               )}
+            </div>
+          )}
+          {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+            <div style={{ marginBottom: "16px", fontSize: '14px' }}>
+              <strong>Алергени:</strong>{' '}
+              <span style={{ color: '#d32f2f' }}>
+                {item.allergens.map(allergenValue => getAllergenLabel(allergenValue)).join(', ')}
+              </span>
             </div>
           )}
           <div className="menu-card-footer">

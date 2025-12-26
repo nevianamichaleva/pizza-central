@@ -72,6 +72,31 @@ export default function CentralMenuPage({ params }) {
     return `${priceInLv} лв. / ${priceInEuro} €`;
   };
 
+  // Мапване на стойностите на алергените към техните български имена (за търсене в JSON)
+  const allergenValueToBgName = {
+    'gluten': 'Глутен',
+    'crustaceans': 'Ракообразни',
+    'eggs': 'Яйца',
+    'fish': 'Риба',
+    'peanuts': 'Фъстъци',
+    'soybeans': 'Соя',
+    'milk': 'Мляко',
+    'nuts': 'Ядки',
+    'celery': 'Целина',
+    'mustard': 'Горчица',
+    'sesame': 'Сусам',
+    'sulphites': 'Сулфити',
+    'lupin': 'Лупина',
+    'molluscs': 'Мекотели',
+  };
+
+  const getAllergenLabel = (allergenValue) => {
+    const bgName = allergenValueToBgName[allergenValue];
+    if (!bgName) return allergenValue;
+    // Използваме функцията t() за превод от JSON файла
+    return t(bgName);
+  };
+
 
   // Filter categories by forRestaurant field
   // If both fields are missing, show the category (backward compatibility)
@@ -360,6 +385,14 @@ export default function CentralMenuPage({ params }) {
                                     )}
                                   </>
                                 )}
+                                {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                                  <div style={{ marginTop: '12px', fontSize: '14px' }}>
+                                    <strong>{t("Алергени")}:</strong>{' '}
+                                    <span style={{ color: '#d32f2f' }}>
+                                      {item.allergens.map(allergenValue => getAllergenLabel(allergenValue)).join(', ')}
+                                    </span>
+                                  </div>
+                                )}
                                 {/* {item.slug && (
                                   <div style={{ marginTop: '12px' }}>
                                     <Link href={`/products/${item.slug}`}>
@@ -422,6 +455,14 @@ export default function CentralMenuPage({ params }) {
                                 </p>
                               )}
                             </>
+                          )}
+                          {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                            <div style={{ marginTop: '12px', fontSize: '14px' }}>
+                              <strong>{t("Алергени")}:</strong>{' '}
+                              <span style={{ color: '#d32f2f' }}>
+                                {item.allergens.map(allergenValue => getAllergenLabel(allergenValue)).join(', ')}
+                              </span>
+                            </div>
                           )}
                           {/* {item.slug && (
                             <div style={{ marginTop: '12px' }}>
