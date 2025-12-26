@@ -112,11 +112,18 @@ const BlogPage = () => {
                   </div>
                   <div className="member-info" style={{ padding: '20px 0' }}>
                     <h4 style={{ marginBottom: '10px', fontSize: '20px', fontWeight: '600' }}>{post.title}</h4>
-                    {post.published_at && (
-                      <span style={{ display: 'block', marginBottom: '10px', color: '#999', fontSize: '14px' }}>
-                        {moment(post.published_at).format('DD.MM.YYYY')}
-                      </span>
-                    )}
+                    <div style={{ display: 'flex', gap: '15px', marginBottom: '10px', color: '#999', fontSize: '14px', flexWrap: 'wrap' }}>
+                      {post.published_at && (
+                        <span>
+                          {moment(post.published_at).format('DD.MM.YYYY')}
+                        </span>
+                      )}
+                      {post.views !== undefined && (
+                        <span>
+                          👁️ {post.views} {post.views === 1 ? 'преглед' : 'прегледа'}
+                        </span>
+                      )}
+                    </div>
                     <p style={{ 
                       marginTop: '10px', 
                       lineHeight: '1.6',

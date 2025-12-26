@@ -89,6 +89,14 @@ const AdminBlogPage = () => {
         />
       ),
     },
+    {
+      title: "Посещения",
+      dataIndex: "views",
+      key: "views",
+      render: (views) => views !== undefined ? views : 0,
+      sorter: (a, b) => (a.views || 0) - (b.views || 0),
+      defaultSortOrder: 'descend',
+    },
   ];
 
   useEffect(() => {

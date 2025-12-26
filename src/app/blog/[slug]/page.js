@@ -1,6 +1,6 @@
 'use client';
 
-import { get, ref } from 'firebase/database';
+import { get, ref, runTransaction } from 'firebase/database';
 import moment from 'moment';
 import Image from "next/image";
 import Link from "next/link";
@@ -38,22 +38,33 @@ const BlogPostPage = ({ params }) => {
           
           if (foundPost) {
             const [postId, postData] = foundPost;
-            
+
             // Only show published posts (unless in admin mode)
-            // if (postData.status !== 'published') {
-            //   router.push('/blog');
-            //   return;
-            // }
+            if (postData.status !== 'published') {
+              router.push('/blog');
+              return;
+            }
             
-            setPost({ 
+            const postWithViews = { 
               id: postId, 
-              ...postData
-            });
+              ...postData,
+              views: postData.views || 0
+            };
+            
+            setPost(postWithViews);
             
             // Update page title
             if (typeof document !== 'undefined') {
               document.title = `${postData.seo_title || postData.title} | Ресторант-пицария Централ`;
             }
+            
+            // Increment view count atomically
+            const postRef = ref(rtdb, `blog_posts/${postId}/views`);
+            runTransaction(postRef, (currentViews) => {
+              return (currentViews || 0) + 1;
+            }).catch((error) => {
+              console.error("Error incrementing view count:", error);
+            });
           } else {
             router.push('/blog');
           }
@@ -96,13 +107,18 @@ const BlogPostPage = ({ params }) => {
             <header className={styles.blogHeader}>
               <h1 className={styles.blogTitle}>{post.title}</h1>
               
-              {post.published_at && (
-                <div className={styles.blogMeta}>
+              <div className={styles.blogMeta}>
+                {post.published_at && (
                   <time dateTime={post.published_at}>
                     {moment(post.published_at).format('DD.MM.YYYY')}
                   </time>
-                </div>
-              )}
+                )}
+                {post.views !== undefined && (
+                  <span style={{ marginLeft: post.published_at ? '15px' : '0', color: '#666', fontSize: '14px' }}>
+                    👁️ {post.views} {post.views === 1 ? 'преглед' : 'прегледа'}
+                  </span>
+                )}
+              </div>
             </header>
 
             {post.image && (
