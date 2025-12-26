@@ -40,10 +40,10 @@ const BlogPostPage = ({ params }) => {
             const [postId, postData] = foundPost;
             
             // Only show published posts (unless in admin mode)
-            if (postData.status !== 'published') {
-              router.push('/blog');
-              return;
-            }
+            // if (postData.status !== 'published') {
+            //   router.push('/blog');
+            //   return;
+            // }
             
             setPost({ 
               id: postId, 
@@ -127,7 +127,7 @@ const BlogPostPage = ({ params }) => {
 
             {post.excerpt && (
               <div className={styles.blogExcerpt}>
-                <p>{post.excerpt}</p>
+                <p style={{ whiteSpace: 'pre-line' }}>{post.excerpt}</p>
               </div>
             )}
 

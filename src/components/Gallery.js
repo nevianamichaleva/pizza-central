@@ -124,6 +124,21 @@ const Gallery = () => {
                 <img src="/images/gallery/gallery-8.jpg" className="img-fluid" alt="Ресторант-пицария Централ Добрич - снимки от галерията" />
               </a>
             </div>
+            <div className="swiper-slide">
+              <a className="glightbox" data-gallery="images-gallery" href="/images/gallery/galery-9.jpg">
+                <img src="/images/gallery/galery-9.jpg" className="img-fluid" alt="Ресторант-пицария Централ Добрич - снимки от галерията" />
+              </a>
+            </div>
+            <div className="swiper-slide">
+              <a className="glightbox" data-gallery="images-gallery" href="/images/gallery/galery-10.jpg">
+                <img src="/images/gallery/galery-10.jpg" className="img-fluid" alt="Ресторант-пицария Централ Добрич - снимки от галерията" />
+              </a>
+            </div>
+            <div className="swiper-slide">
+              <a className="glightbox" data-gallery="images-gallery" href="/images/gallery/galery-11.jpg">
+                <img src="/images/gallery/galery-11.jpg" className="img-fluid" alt="Ресторант-пицария Централ Добрич - снимки от галерията" />
+              </a>
+            </div>
           </div>
           <div className="swiper-pagination"></div>
         </div>
