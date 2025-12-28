@@ -143,7 +143,7 @@ const DetskiKutPage = () => {
               </p>
               <div style={{ marginTop: '25px' }}>
                 <a 
-                  href="https://pizza-dobrich.bg/blog/detski-rojden-den-dobrich" 
+                  href="https://www.pizza-central.bg/blog/detski-rojden-den-dobrich" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="btn btn-primary" 
