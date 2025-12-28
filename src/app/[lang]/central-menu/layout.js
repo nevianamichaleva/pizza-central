@@ -35,7 +35,7 @@ export async function generateMetadata({ params }) {
   const locale = langToLocale[lang] || 'bg_BG';
   
   const title = `${meta.title} | Ресторант-пицария Централ Добрич`;
-  const url = lang === 'bg' ? `${baseUrl}/central-menu` : `${baseUrl}/${lang}/central-menu`;
+  const url = `${baseUrl}/${lang}/central-menu`;
   
   // Generate alternate languages (hreflang tags for SEO)
   const languages = ['bg', 'en', 'ro', 'de'];
@@ -45,13 +45,9 @@ export async function generateMetadata({ params }) {
   };
   
   languages.forEach(l => {
-    if (l === 'bg') {
-      alternates.languages['bg'] = `${baseUrl}/central-menu`;
-      alternates.languages['x-default'] = `${baseUrl}/central-menu`;
-    } else {
-      alternates.languages[l] = `${baseUrl}/${l}/central-menu`;
-    }
+    alternates.languages[l] = `${baseUrl}/${l}/central-menu`;
   });
+  alternates.languages['x-default'] = `${baseUrl}/bg/central-menu`;
 
   return {
     title,
