@@ -25,7 +25,7 @@ const Footer = () => {
               <p>
                 <strong>Телефон:</strong> <span>+359 895 516 401 / +359 893 315 201</span>
                 <br />
-                <strong>Email:</strong> <span>info@central.bg</span>
+                <strong>Email:</strong> <span>pizzacentraldobrich@gmail.com</span>
               </p>
             </div>
           </div>

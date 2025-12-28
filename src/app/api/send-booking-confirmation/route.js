@@ -103,7 +103,7 @@ export async function POST(request) {
   <div class="content">
     <p>Здравейте,</p>
     
-    <p>Благодарим Ви за направената резервация в <strong>Ресторант-пицария Централ – традиция и вкус!</strong></p>
+    <p>Благодарим Ви за направената резервация в <strong>Ресторант-пицария Централ – Добрич!</strong></p>
     
     <div class="details">
       <div class="detail-item">

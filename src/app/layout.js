@@ -4,7 +4,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../public/css/main.css';
+import CookieConsent from '../components/CookieConsent';
 import Footer from '../components/Footer';
+import GoogleTagManager, { GoogleTagManagerNoscript } from '../components/GoogleTagManager';
 import Header from '../components/Header';
 import './globals.css';
 
@@ -18,7 +20,7 @@ export const metadata = {
     default: "Ресторант-пицария Централ Добрич",
     template: "%s | Ресторант-пицария Централ Добрич"
   },
-  description: "Ресторант-пицария Централ в Добрич – вкусни пици, основни ястия, обедни менюта, детски кът и бърза доставка до дома.",
+  description: "Ресторант-пицария Централ (бивш Моцарела) в Добрич предлага вкусна храна, пица, основни ястия, обедни менюта, доставка до дома и детски кът за вашите деца",
   keywords: ["ресторант Добрич", "пицария Добрич", "доставка храна Добрич", "обедно меню Добрич", "резервация ресторант", "пица Добрич", "ястия Добрич", "детски кът Добрич", "ресторант с детски кът", "доставка храна", "доставка на храна Добрич", "Моцарела Добрич", "Моцарела ресторант Добрич", "бивш Моцарела Добрич"],
   authors: [{ name: "Ресторант-пицария Централ" }],
   creator: "Ресторант-пицария Централ",
@@ -79,6 +81,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="bg">
       <body className="index-page">
+        <GoogleTagManager />
+        <GoogleTagManagerNoscript />
         <UserProvider>
           <CategoriesProvider>
             <ProductsProvider>
@@ -87,6 +91,7 @@ export default function RootLayout({ children }) {
                 {children}
                 <Footer />
                 <ToastContainer />
+                <CookieConsent />
               </TranslationsProvider>
             </ProductsProvider>
           </CategoriesProvider>

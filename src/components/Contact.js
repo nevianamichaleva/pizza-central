@@ -145,7 +145,7 @@ const Contact = () => {
                 <i className="icon bi bi-envelope flex-shrink-0"></i>
                 <div>
                   <h3>Email</h3>
-                  <p>info@central.bg</p>
+                  <p>pizzacentraldobrich@gmail.com</p>
                 </div>
               </div>
           </div>
