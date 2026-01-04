@@ -844,25 +844,45 @@ const AdminOrdersPage = () => {
                                         borderRadius: '4px',
                                         border: '1px solid #d9f7be'
                                     }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                                            <span>Сума на продукти:</span>
-                                            <span>{selectedOrder.total ? parseFloat(selectedOrder.total).toFixed(2) : '0.00'} лв</span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                                            <span>Доставка:</span>
-                                            <span>3.00 лв</span>
-                                        </div>
-                                        <div style={{ 
-                                            display: 'flex', 
-                                            justifyContent: 'space-between', 
-                                            fontWeight: 'bold',
-                                            fontSize: '16px',
-                                            borderTop: '1px solid #d9f7be',
-                                            paddingTop: '5px'
-                                        }}>
-                                            <span>Общо:</span>
-                                            <span>{selectedOrder.total ? (parseFloat(selectedOrder.total) + 3).toFixed(2) : '3.00'} лв</span>
-                                        </div>
+                                        {(() => {
+                                            // Calculate subtotal (products before discount/delivery)
+                                            const total = parseFloat(selectedOrder.total || 0);
+                                            const deliveryFee = parseFloat(selectedOrder.delivery_fee || 0);
+                                            const pickupDiscount = parseFloat(selectedOrder.pickup_discount || 0);
+                                            const subtotal = total - deliveryFee + pickupDiscount;
+                                            
+                                            return (
+                                                <>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                                                        <span>Сума на продукти:</span>
+                                                        <span>{subtotal.toFixed(2)} лв</span>
+                                                    </div>
+                                                    {pickupDiscount > 0 && (
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: '#52c41a' }}>
+                                                            <span>Отстъпка за вземане (10%):</span>
+                                                            <span>-{pickupDiscount.toFixed(2)} лв</span>
+                                                        </div>
+                                                    )}
+                                                    {deliveryFee > 0 && (
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                                                            <span>Такса за доставка:</span>
+                                                            <span>{deliveryFee.toFixed(2)} лв</span>
+                                                        </div>
+                                                    )}
+                                                    <div style={{ 
+                                                        display: 'flex', 
+                                                        justifyContent: 'space-between', 
+                                                        fontWeight: 'bold',
+                                                        fontSize: '16px',
+                                                        borderTop: '1px solid #d9f7be',
+                                                        paddingTop: '5px'
+                                                    }}>
+                                                        <span>Общо:</span>
+                                                        <span>{total.toFixed(2)} лв</span>
+                                                    </div>
+                                                </>
+                                            );
+                                        })()}
                                     </div>
                                 </div>
 

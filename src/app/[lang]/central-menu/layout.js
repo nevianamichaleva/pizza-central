@@ -1,4 +1,9 @@
+import { redirect } from 'next/navigation';
+
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-central.bg';
+
+// Valid language codes
+const validLanguages = ['bg', 'en', 'ro', 'de'];
 
 // Translations for metadata
 const metadataTranslations = {
@@ -31,11 +36,14 @@ const langToLocale = {
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const lang = resolvedParams?.lang || 'bg';
-  const meta = metadataTranslations[lang] || metadataTranslations.bg;
-  const locale = langToLocale[lang] || 'bg_BG';
+  
+  // Use default language if invalid (don't redirect in metadata generation)
+  const validLang = validLanguages.includes(lang) ? lang : 'bg';
+  const meta = metadataTranslations[validLang] || metadataTranslations.bg;
+  const locale = langToLocale[validLang] || 'bg_BG';
   
   const title = `${meta.title} | Ресторант-пицария Централ Добрич`;
-  const url = `${baseUrl}/${lang}/central-menu`;
+  const url = `${baseUrl}/${validLang}/central-menu`;
   
   // Generate alternate languages (hreflang tags for SEO)
   const languages = ['bg', 'en', 'ro', 'de'];
@@ -89,7 +97,15 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default function CentralMenuLayout({ children }) {
+export default async function CentralMenuLayout({ children, params }) {
+  const resolvedParams = await params;
+  const lang = resolvedParams?.lang || 'bg';
+  
+  // Validate language and redirect if invalid
+  if (!validLanguages.includes(lang)) {
+    redirect('/bg/central-menu');
+  }
+  
   return children;
 }
 
