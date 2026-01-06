@@ -1,5 +1,6 @@
 'use client';
 import AboutSection from '@/components/AboutSection';
+import BlogSection from '@/components/BlogSection';
 import BookTableSection from '@/components/BookTableSection';
 import Contact from '@/components/Contact';
 // import EventsSection from '@/components/EventsSection';
@@ -18,6 +19,7 @@ export default function Home() {
       <MenuSection />
       <BookTableSection />
       <AboutSection />
+      <BlogSection />
       <WhyUsSection />
       <StatsSection />
       

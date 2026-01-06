@@ -22,6 +22,7 @@ const AddCategory = () => {
   const [categories, setCategories] = useState([]);
   const [parent, setParent] = useState('');
   const [catName, setCatName] = useState('');
+  const [slug, setSlug] = useState('');
   const [forDelivery, setForDelivery] = useState(true);
   const [forRestaurant, setForRestaurant] = useState(true);
   const [order, setOrder] = useState(0);
@@ -48,6 +49,7 @@ const AddCategory = () => {
   const closeMenuDrawer = () => {
     setCatName('');
     setParent('');
+    setSlug('');
     setForDelivery(true);
     setForRestaurant(true);
     setOrder(0);
@@ -95,6 +97,7 @@ const AddCategory = () => {
     const newCatRef = push(catRef);
     set(newCatRef, {
       name: catName,
+      slug: slug || '',
       parent: parent,
       forDelivery: forDelivery !== false,
       forRestaurant: forRestaurant !== false,
@@ -182,14 +185,24 @@ const AddCategory = () => {
       ? (typeof updatedRecord.order === 'string' ? parseInt(updatedRecord.order) || 0 : updatedRecord.order)
       : 0;
     
+    // Remove undefined values - Firebase doesn't accept them
     const updatedData = {
       name: updatedRecord.name,
-      parent: updatedRecord.parent,
+      slug: updatedRecord.slug !== undefined && updatedRecord.slug !== null ? updatedRecord.slug : '',
+      parent: updatedRecord.parent !== undefined && updatedRecord.parent !== null ? updatedRecord.parent : '',
       forDelivery: updatedRecord.forDelivery !== false,
       forRestaurant: updatedRecord.forRestaurant !== false,
       order: orderValue,
       status: updatedRecord.status || 'active'
     };
+    
+    // Remove any undefined values that might have slipped through
+    Object.keys(updatedData).forEach(key => {
+      if (updatedData[key] === undefined) {
+        delete updatedData[key];
+      }
+    });
+    
     try {
       const recordRef = ref(rtdb, `category/${updatedRecord.id}`);
       await update(recordRef, updatedData);
@@ -396,6 +409,13 @@ const AddCategory = () => {
                     placeholder="Име на категория"
                     value={catName}
                     onChange={(e) => setCatName(e.target.value)}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <Input
+                    placeholder="Slug"
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
                   />
                 </div>
                 <div className="col-md-6">

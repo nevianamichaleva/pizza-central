@@ -1,5 +1,6 @@
 'use client';
 
+import { useCategories } from '@/context/CategoriesContext';
 import { useUser } from '@/context/UserContext';
 import { CaretDownOutlined, LoginOutlined, UserOutlined } from '@ant-design/icons';
 import { Dropdown, Space } from 'antd';
@@ -18,8 +19,10 @@ const Header = () => {
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [deepDropdownOpen, setDeepDropdownOpen] = useState(false);
+  const [forHomeDropdownOpen, setForHomeDropdownOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { user, setUser, isAdmin } = useUser();
+  const { categories } = useCategories();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hasLaunchMenuToday, setHasLaunchMenuToday] = useState(false);
@@ -55,6 +58,10 @@ const Header = () => {
     setDeepDropdownOpen(!deepDropdownOpen);
   };
 
+  const toggleForHomeDropdown = () => {
+    setForHomeDropdownOpen(!forHomeDropdownOpen);
+  };
+
   const handleMouseEnter = () => {
     setDropdownOpen(true);
   };
@@ -62,6 +69,30 @@ const Header = () => {
   const handleMouseLeave = () => {
     setDropdownOpen(false);
   };
+
+  const handleForHomeMouseEnter = () => {
+    setForHomeDropdownOpen(true);
+  };
+
+  const handleForHomeMouseLeave = () => {
+    setForHomeDropdownOpen(false);
+  };
+
+  // Get categories for delivery (for-home)
+  const deliveryCategories = categories.filter((category) => {
+    // Only show categories with slug and forDelivery === true
+    if (!category.slug || category.slug.trim() === '') return false;
+    const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
+    const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
+    if (!hasDeliveryField && !hasRestaurantField) {
+      return true; // Show if both fields are missing (backward compatibility)
+    }
+    return category.forDelivery === true;
+  }).sort((a, b) => {
+    const orderA = a.order !== undefined ? a.order : 0;
+    const orderB = b.order !== undefined ? b.order : 0;
+    return orderA - orderB;
+  });
 
   useEffect(() => {
     const handleResize = () => {
@@ -253,8 +284,44 @@ const Header = () => {
               <MenuLink href="/reservation" className={pathname == '/reservation' ? 'active' : ''}>Резервации</MenuLink>
             </li>
 
-            <li>
-              <MenuLink href="/for-home" className={pathname == '/for-home' ? 'active' : ''}>Поръчай за вкъщи</MenuLink>
+            <li
+              className="dropdown"
+              onMouseEnter={handleForHomeMouseEnter}
+              onMouseLeave={handleForHomeMouseLeave}
+            >
+              <a
+                href="#"
+                style={{fontSize: '18px'}}
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleForHomeDropdown();
+                }}
+                className={(pathname == '/for-home' || pathname?.startsWith('/for-home/')) ? 'active dropdown-toggle' : 'dropdown-toggle'}
+              >
+                <span>Поръчай за вкъщи</span>
+              </a>
+              {forHomeDropdownOpen && deliveryCategories.length > 0 && (
+                <ul key="for-home-categories">
+                  <li>
+                    <MenuLink 
+                      href="/for-home" 
+                      className={pathname == '/for-home' ? 'active' : ''}
+                    >
+                      Всички категории
+                    </MenuLink>
+                  </li>
+                  {deliveryCategories.map((category) => (
+                    <li key={category.id}>
+                      <MenuLink 
+                        href={`/for-home/${category.slug}`} 
+                        className={pathname == `/for-home/${category.slug}` ? 'active' : ''}
+                      >
+                        {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+                      </MenuLink>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </li>
             <li
               className="dropdown"

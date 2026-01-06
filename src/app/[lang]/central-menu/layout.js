@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation';
-
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-central.bg';
 
 // Valid language codes
@@ -32,6 +30,13 @@ const langToLocale = {
   ro: 'ro_RO',
   de: 'de_DE',
 };
+
+// Generate static params for all valid languages
+export async function generateStaticParams() {
+  return validLanguages.map((lang) => ({
+    lang: lang,
+  }));
+}
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
@@ -101,9 +106,12 @@ export default async function CentralMenuLayout({ children, params }) {
   const resolvedParams = await params;
   const lang = resolvedParams?.lang || 'bg';
   
-  // Validate language and redirect if invalid
+  // Validate language - use default if invalid (don't redirect to avoid indexing errors)
+  // The page component will handle the language display correctly
   if (!validLanguages.includes(lang)) {
-    redirect('/bg/central-menu');
+    // Return children without redirect - this prevents redirect errors during indexing
+    // The page will still work correctly as it defaults to 'bg' language
+    return children;
   }
   
   return children;

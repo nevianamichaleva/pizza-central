@@ -10,7 +10,10 @@ const EditableTable = ({ data, categories, onSave, onDelete }) => {
 
   const editRow = (record) => {
     setEditingId(record.id);
-    setEditingRecord({ ...record }); 
+    setEditingRecord({ 
+      ...record,
+      slug: record.slug || '' // Ensure slug is always initialized
+    }); 
   };
 
   const saveRow = () => {
@@ -29,6 +32,9 @@ const EditableTable = ({ data, categories, onSave, onDelete }) => {
         ? 0 
         : (typeof value === 'string' ? parseInt(value) || 0 : value);
       setEditingRecord((prev) => ({ ...prev, [key]: numValue }));
+    } else if (key === 'slug') {
+      // Ensure slug is always a string (even if empty)
+      setEditingRecord((prev) => ({ ...prev, [key]: value || '' }));
     } else {
       setEditingRecord((prev) => ({ ...prev, [key]: value }));
     }
@@ -79,6 +85,22 @@ const EditableTable = ({ data, categories, onSave, onDelete }) => {
           />
         ) : (
           record.name
+        );
+      },
+    },
+    {
+      title: "Slug",
+      dataIndex: "slug",
+      key: "slug",
+      render: (_, record) => {
+        const isEditing = editingId === record.id;
+        return isEditing ? (
+          <Input
+            value={editingRecord.slug || ''}
+            onChange={(e) => handleChange("slug", e.target.value)}
+          />
+        ) : (
+          record.slug || ''
         );
       },
     },

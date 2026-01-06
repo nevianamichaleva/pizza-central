@@ -110,6 +110,37 @@ export default async function sitemap() {
     console.error('Error fetching products for sitemap:', error);
   }
 
+  // Fetch categories with slug from Firebase for for-home routes
+  let categories = [];
+  try {
+    const categoriesRef = ref(rtdb, "category");
+    const snapshot = await get(categoriesRef);
+    
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      categories = Object.entries(data)
+        .map(([key, value]) => ({
+          id: key,
+          ...value,
+        }))
+        .filter(category => {
+          // Only include categories with valid slug that are for delivery
+          return category.slug && 
+                 category.slug.trim() !== '' && 
+                 (category.forDelivery === true || (category.forDelivery === undefined && category.forRestaurant === undefined)) &&
+                 category.status !== 'archived'; // Exclude archived categories if status field exists
+        })
+        .map(category => ({
+          url: `${baseUrl}/for-home/${category.slug}`,
+          lastModified: new Date(),
+          changeFrequency: 'weekly',
+          priority: 0.8,
+        }));
+    }
+  } catch (error) {
+    console.error('Error fetching categories for sitemap:', error);
+  }
+
   return [
     {
       url: baseUrl,
@@ -211,6 +242,7 @@ export default async function sitemap() {
     ...newDishes,
     ...events,
     ...products,
+    ...categories,
   ];
 }
 

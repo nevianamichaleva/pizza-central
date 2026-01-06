@@ -34,13 +34,13 @@ const getAllergenLabel = (allergenValue) => {
   return allergen ? allergen.label : allergenValue;
 };
 
-const MenuSection = () => {
+const MenuSection = ({ categorySlug = null }) => {
   const STORAGE_KEY = 'menuActiveTab';
   const DEFAULT_TAB = "menu-Пици";
   
   // Initialize activeTab from localStorage or use default
   const [activeTab, setActiveTab] = useState(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !categorySlug) {
       const savedTab = localStorage.getItem(STORAGE_KEY);
       return savedTab || DEFAULT_TAB;
     }
@@ -55,6 +55,18 @@ const MenuSection = () => {
   const { products } = useProducts();
   const { categories } = useCategories();
   const { user, userDetails } = useUser();
+
+  // Find category by slug if categorySlug is provided
+  const selectedCategory = categorySlug 
+    ? categories.find(cat => cat.slug === categorySlug && (cat.forDelivery === true || (cat.forDelivery === undefined && cat.forRestaurant === undefined)))
+    : null;
+
+  // Set active tab to selected category when categorySlug is provided
+  useEffect(() => {
+    if (categorySlug && selectedCategory) {
+      setActiveTab(`menu-${selectedCategory.name}`);
+    }
+  }, [categorySlug, selectedCategory]);
 
   // Helper function to check if product belongs to a category
   // Supports both old format (category) and new format (categories array)
@@ -454,16 +466,37 @@ const MenuSection = () => {
     </div>
   );
 
+  // If categorySlug is provided and category not found, return null
+  if (categorySlug && !selectedCategory) {
+    return null;
+  }
+
   return (
     <section id="menu" className="menu section">
       <div className="container section-title" data-aos="fade-up">
-        <h2>Ресторант-пицария Централ град Добрич</h2>
-        <p><span>Нашето</span> <span className="description-title">меню</span></p>
+        <h2>
+          {selectedCategory 
+            ? selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1)
+            : 'Ресторант-пицария Централ град Добрич'
+          }
+        </h2>
+        <p>
+          <span>
+            {selectedCategory ? 'Нашите' : 'Нашето'}
+          </span>{' '}
+          <span className="description-title">
+            {selectedCategory 
+              ? selectedCategory.name.toLowerCase()
+              : 'меню'
+            }
+          </span>
+        </p>
       </div>
 
       <div className="container">
-        {/* Desktop Tab Navigation */}
-        <ul className="nav nav-tabs d-flex justify-content-center menu-desktop-tabs" data-aos="fade-up" data-aos-delay="100">
+        {/* Desktop Tab Navigation - Hide if single category */}
+        {!categorySlug && (
+          <ul className="nav nav-tabs d-flex justify-content-center menu-desktop-tabs" data-aos="fade-up" data-aos-delay="100">
           {categories
             .filter((category) => {
               // If both fields are missing, show the category in both menus
@@ -490,21 +523,24 @@ const MenuSection = () => {
                 </a>
               </li>
             ))}
-        </ul>
+          </ul>
+        )}
 
         {/* Desktop Tab Content */}
         <div className="tab-content menu-desktop-content" data-aos="fade-up" data-aos-delay="200">
-          {categories
-            .filter((category) => {
-              // If both fields are missing, show the category in both menus
-              const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
-              const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
-              if (!hasDeliveryField && !hasRestaurantField) {
-                return true;
-              }
-              // Show if forDelivery is true
-              return category.forDelivery === true;
-            })
+          {(categorySlug && selectedCategory 
+            ? [selectedCategory] 
+            : categories.filter((category) => {
+                // If both fields are missing, show the category in both menus
+                const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
+                const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
+                if (!hasDeliveryField && !hasRestaurantField) {
+                  return true;
+                }
+                // Show if forDelivery is true
+                return category.forDelivery === true;
+              })
+          )
             .sort((a, b) => {
               const orderA = a.order !== undefined ? a.order : 0;
               const orderB = b.order !== undefined ? b.order : 0;
@@ -513,7 +549,7 @@ const MenuSection = () => {
             .map((category) => (
             <div
               key={category.id}
-              className={`tab-pane fade ${activeTab === `menu-${category.name}` ? 'active show' : ''}`}
+              className={`tab-pane fade ${(categorySlug && selectedCategory) || activeTab === `menu-${category.name}` ? 'active show' : ''}`}
               id={`menu-${category.name}`}
             >
               <div className="tab-header text-center">
@@ -573,25 +609,26 @@ const MenuSection = () => {
           ))}
         </div>
 
-        {/* Mobile Category List with Sliders */}
-        <div className="menu-mobile-categories">
-          {categories
-            .filter((category) => {
-              // If both fields are missing, show the category in both menus
-              const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
-              const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
-              if (!hasDeliveryField && !hasRestaurantField) {
-                return true;
-              }
-              // Show if forDelivery is true
-              return category.forDelivery === true;
-            })
-            .sort((a, b) => {
-              const orderA = a.order !== undefined ? a.order : 0;
-              const orderB = b.order !== undefined ? b.order : 0;
-              return orderA - orderB;
-            })
-            .map((category) => {
+        {/* Mobile Category List with Sliders - Hide if single category */}
+        {!categorySlug && (
+          <div className="menu-mobile-categories">
+            {categories
+              .filter((category) => {
+                // If both fields are missing, show the category in both menus
+                const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
+                const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
+                if (!hasDeliveryField && !hasRestaurantField) {
+                  return true;
+                }
+                // Show if forDelivery is true
+                return category.forDelivery === true;
+              })
+              .sort((a, b) => {
+                const orderA = a.order !== undefined ? a.order : 0;
+                const orderB = b.order !== undefined ? b.order : 0;
+                return orderA - orderB;
+              })
+              .map((category) => {
               const categoryProducts = products.filter((item) => {
                 if (!productBelongsToCategory(item, category.id) || item.isSideDish) return false;
                 // If both fields are missing, show the product in both menus
@@ -673,7 +710,90 @@ const MenuSection = () => {
                 </div>
               );
             })}
-        </div>
+          </div>
+        )}
+        
+        {/* Mobile view for single category */}
+        {categorySlug && selectedCategory && (
+          <div className="menu-mobile-categories">
+            <div className="menu-mobile-category-section">
+              <h3 className="menu-mobile-category-title">
+                {selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1)}
+              </h3>
+              <div className="menu-mobile-products-slider">
+                {products
+                  .filter((item) => {
+                    if (!productBelongsToCategory(item, selectedCategory.id) || item.isSideDish) return false;
+                    const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
+                    const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
+                    if (!hasDeliveryField && !hasRestaurantField) {
+                      return true;
+                    }
+                    return item.forDelivery === true;
+                  })
+                  .map((item, index) => (
+                    <div key={index} className="menu-mobile-product-item">
+                      <a href={item.url || item.image || "#"} className="glightbox">
+                        <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
+                      </a>
+                      <h4>{item.name}</h4>
+                      {item.ingredients && (
+                        <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
+                          {item.ingredients.length > 85 
+                            ? `${item.ingredients.substring(0, 85)}...` 
+                            : item.ingredients}
+                        </p>
+                      )}
+                      {item.description && (
+                        <p className="ingredients" style={{ marginBottom: "8px" }}>
+                          {item.description.length > 100 
+                            ? `${item.description.substring(0, 100)}...` 
+                            : item.description}
+                        </p>
+                      )}
+                      {formatPrice(item.price) && (
+                        <p className="price">{formatPrice(item.price)}</p>
+                      )}
+                      {item.slug && (
+                        <Link href={`/products/${item.slug}`} style={{ marginBottom: '8px', display: 'block' }}>
+                          <Button
+                            type="default"
+                            style={{
+                              width: '100%',
+                              borderRadius: '10px',
+                              padding: '10px 20px',
+                              fontSize: '16px',
+                            }}
+                            size="large"
+                          >
+                            Виж повече
+                          </Button>
+                        </Link>
+                      )}
+                      <Button
+                        type="primary"
+                        onClick={() => handleProductClick(item)}
+                        shape="circle"
+                        icon={<ShoppingCartOutlined />}
+                        style={{
+                          backgroundColor: '#FFA500',
+                          borderRadius: '10px',
+                          padding: '10px 20px',
+                          fontSize: '16px',
+                          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                          transition: 'background-color 0.3s, transform 0.2s',
+                          width: '100%',
+                        }}
+                        size="large"
+                      >
+                        Добави
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <Modal
