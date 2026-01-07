@@ -528,25 +528,34 @@ const MenuSection = ({ categorySlug = null }) => {
 
         {/* Desktop Tab Content */}
         <div className="tab-content menu-desktop-content" data-aos="fade-up" data-aos-delay="200">
-          {(categorySlug && selectedCategory 
-            ? [selectedCategory] 
-            : categories.filter((category) => {
-                // If both fields are missing, show the category in both menus
-                const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
-                const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
-                if (!hasDeliveryField && !hasRestaurantField) {
-                  return true;
-                }
-                // Show if forDelivery is true
-                return category.forDelivery === true;
-              })
-          )
-            .sort((a, b) => {
+          {(() => {
+            const filteredCategories = categories.filter((category) => {
+              // If both fields are missing, show the category in both menus
+              const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
+              const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
+              if (!hasDeliveryField && !hasRestaurantField) {
+                return true;
+              }
+              // Show if forDelivery is true
+              return category.forDelivery === true;
+            }).sort((a, b) => {
               const orderA = a.order !== undefined ? a.order : 0;
               const orderB = b.order !== undefined ? b.order : 0;
               return orderA - orderB;
-            })
-            .map((category) => (
+            });
+
+            const categoriesToDisplay = categorySlug && selectedCategory 
+              ? [selectedCategory] 
+              : filteredCategories;
+
+            return categoriesToDisplay.map((category, index) => {
+              // Find next category in the filtered list
+              const currentIndexInFiltered = filteredCategories.findIndex(cat => cat.id === category.id);
+              const nextCategory = currentIndexInFiltered >= 0 && currentIndexInFiltered < filteredCategories.length - 1
+                ? filteredCategories[currentIndexInFiltered + 1]
+                : filteredCategories[0]; // If last category, link to first
+
+              return (
             <div
               key={category.id}
               className={`tab-pane fade ${(categorySlug && selectedCategory) || activeTab === `menu-${category.name}` ? 'active show' : ''}`}
@@ -555,6 +564,21 @@ const MenuSection = ({ categorySlug = null }) => {
               <div className="tab-header text-center">
                 <p>Меню</p>
                 <h3>{category.name.charAt(0).toUpperCase() + category.name.slice(1)}</h3>
+                {nextCategory && nextCategory.slug && nextCategory.id !== category.id && (
+                  <div style={{ marginTop: '15px' }}>
+                    <Link 
+                      href={`/for-home/${nextCategory.slug}`}
+                      style={{ 
+                        color: '#c41d7f', 
+                        textDecoration: 'none',
+                        fontSize: '22px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      → Виж нашите {nextCategory.name.charAt(0).toUpperCase() + nextCategory.name.slice(1)}
+                    </Link>
+                  </div>
+                )}
               </div>
               {category?.children && category.children?.length &&
                 <ul className="nav nav-tabs d-flex justify-content-center" data-aos="fade-up" data-aos-delay="100">
@@ -606,46 +630,70 @@ const MenuSection = ({ categorySlug = null }) => {
                 }
               </div>
             </div>
-          ))}
+              );
+            });
+          })()}
         </div>
 
         {/* Mobile Category List with Sliders - Hide if single category */}
         {!categorySlug && (
           <div className="menu-mobile-categories">
-            {categories
-              .filter((category) => {
-                // If both fields are missing, show the category in both menus
-                const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
-                const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
-                if (!hasDeliveryField && !hasRestaurantField) {
-                  return true;
-                }
-                // Show if forDelivery is true
-                return category.forDelivery === true;
-              })
-              .sort((a, b) => {
-                const orderA = a.order !== undefined ? a.order : 0;
-                const orderB = b.order !== undefined ? b.order : 0;
-                return orderA - orderB;
-              })
-              .map((category) => {
-              const categoryProducts = products.filter((item) => {
-                if (!productBelongsToCategory(item, category.id) || item.isSideDish) return false;
-                // If both fields are missing, show the product in both menus
-                const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
-                const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
-                if (!hasDeliveryField && !hasRestaurantField) {
-                  return true;
-                }
-                // Show if forDelivery is true
-                return item.forDelivery === true;
-              });
+            {(() => {
+              const filteredCategories = categories
+                .filter((category) => {
+                  // If both fields are missing, show the category in both menus
+                  const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
+                  const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
+                  if (!hasDeliveryField && !hasRestaurantField) {
+                    return true;
+                  }
+                  // Show if forDelivery is true
+                  return category.forDelivery === true;
+                })
+                .sort((a, b) => {
+                  const orderA = a.order !== undefined ? a.order : 0;
+                  const orderB = b.order !== undefined ? b.order : 0;
+                  return orderA - orderB;
+                });
+
+              return filteredCategories.map((category, index) => {
+                const categoryProducts = products.filter((item) => {
+                  if (!productBelongsToCategory(item, category.id) || item.isSideDish) return false;
+                  // If both fields are missing, show the product in both menus
+                  const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
+                  const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
+                  if (!hasDeliveryField && !hasRestaurantField) {
+                    return true;
+                  }
+                  // Show if forDelivery is true
+                  return item.forDelivery === true;
+                });
+
+                // Find next category in the filtered list
+                const nextCategory = index < filteredCategories.length - 1
+                  ? filteredCategories[index + 1]
+                  : filteredCategories[0]; // If last category, link to first
               
-              return (
-                <div key={category.id} className="menu-mobile-category-section">
-                  <h3 className="menu-mobile-category-title">
-                    {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
-                  </h3>
+                return (
+                  <div key={category.id} className="menu-mobile-category-section">
+                    <h3 className="menu-mobile-category-title">
+                      {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+                    </h3>
+                    {nextCategory && nextCategory.slug && nextCategory.id !== category.id && (
+                      <div style={{ marginTop: '10px', marginBottom: '15px', textAlign: 'center' }}>
+                        <Link 
+                          href={`/for-home/${nextCategory.slug}`}
+                          style={{ 
+                            color: '#c41d7f', 
+                            textDecoration: 'none',
+                            fontSize: '16px',
+                            fontWeight: '500'
+                          }}
+                        >
+                          → Виж нашите {nextCategory.name.charAt(0).toUpperCase() + nextCategory.name.slice(1)}
+                        </Link>
+                      </div>
+                    )}
                   <div className="menu-mobile-products-slider">
                     {categoryProducts.map((item, index) => (
                       <div key={index} className="menu-mobile-product-item">
@@ -708,19 +756,56 @@ const MenuSection = ({ categorySlug = null }) => {
                     ))}
                   </div>
                 </div>
-              );
-            })}
+                );
+              });
+            })()}
           </div>
         )}
         
         {/* Mobile view for single category */}
-        {categorySlug && selectedCategory && (
-          <div className="menu-mobile-categories">
-            <div className="menu-mobile-category-section">
-              <h3 className="menu-mobile-category-title">
-                {selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1)}
-              </h3>
-              <div className="menu-mobile-products-slider">
+        {categorySlug && selectedCategory && (() => {
+          const filteredCategories = categories
+            .filter((category) => {
+              const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
+              const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
+              if (!hasDeliveryField && !hasRestaurantField) {
+                return true;
+              }
+              return category.forDelivery === true;
+            })
+            .sort((a, b) => {
+              const orderA = a.order !== undefined ? a.order : 0;
+              const orderB = b.order !== undefined ? b.order : 0;
+              return orderA - orderB;
+            });
+
+          const currentIndex = filteredCategories.findIndex(cat => cat.id === selectedCategory.id);
+          const nextCategory = currentIndex >= 0 && currentIndex < filteredCategories.length - 1
+            ? filteredCategories[currentIndex + 1]
+            : filteredCategories[0];
+
+          return (
+            <div className="menu-mobile-categories">
+              <div className="menu-mobile-category-section">
+                <h3 className="menu-mobile-category-title">
+                  {selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1)}
+                </h3>
+                {nextCategory && nextCategory.slug && nextCategory.id !== selectedCategory.id && (
+                  <div style={{ marginTop: '10px', marginBottom: '15px', textAlign: 'center' }}>
+                    <Link 
+                      href={`/for-home/${nextCategory.slug}`}
+                      style={{ 
+                        color: '#c41d7f', 
+                        textDecoration: 'none',
+                        fontSize: '16px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      → Виж нашите {nextCategory.name.charAt(0).toUpperCase() + nextCategory.name.slice(1)}
+                    </Link>
+                  </div>
+                )}
+                <div className="menu-mobile-products-slider">
                 {products
                   .filter((item) => {
                     if (!productBelongsToCategory(item, selectedCategory.id) || item.isSideDish) return false;
@@ -790,10 +875,11 @@ const MenuSection = ({ categorySlug = null }) => {
                       </Button>
                     </div>
                   ))}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       <Modal

@@ -2,7 +2,7 @@ import { get, ref } from 'firebase/database';
 import { rtdb } from '../../lib/firebase';
 
 export default async function sitemap() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-central.bg';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
 
   // Fetch blog posts from Firebase
   let blogPosts = [];
