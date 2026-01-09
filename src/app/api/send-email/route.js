@@ -22,10 +22,24 @@ export async function POST(request) {
       );
     }
 
+    // Currency conversion rate
+    const EUR_RATE = 1.95583;
+    
+    // Format price in BGN and EUR
+    const formatPrice = (priceInBGN) => {
+      const bgn = parseFloat(priceInBGN || 0);
+      const eur = (bgn / EUR_RATE).toFixed(2);
+      return { bgn: bgn.toFixed(2), eur };
+    };
+
     // Format order details
     const itemsList = orderData.items 
       ? Object.values(orderData.items).map(item => {
-          let itemLine = `- ${item.name} x${item.quantity} - ${parseFloat(item.value || 0).toFixed(2)} лв`;
+          const itemPrice = parseFloat(item.value || 0);
+          const itemTotal = itemPrice * item.quantity;
+          const priceFormatted = formatPrice(itemPrice);
+          const totalFormatted = formatPrice(itemTotal);
+          let itemLine = `- ${item.name} x${item.quantity} - ${priceFormatted.bgn} лв (${priceFormatted.eur}€) | Общо: ${totalFormatted.bgn} лв (${totalFormatted.eur}€)`;
           // If side dish is stored separately, show it explicitly
           if (item.sideDishName && !item.name.includes(item.sideDishName)) {
             itemLine += `\n  Гарнитура: ${item.sideDishName}`;
@@ -69,10 +83,10 @@ ${orderData.special_notes}
 ` : ''}Начин на получаване: ${orderType === 'pickup' ? 'Вземане от ресторанта' : 'Доставка'}
 ${orderData.delivery_time && orderType === 'delivery' ? `Желан час за доставка: ${orderData.delivery_time}
 
-` : ''}Сума: ${subtotal.toFixed(2)} лв
-${pickupDiscount > 0 ? `Отстъпка за вземане (-10%): -${pickupDiscount.toFixed(2)} лв
-` : ''}${deliveryFee > 0 ? `Доставка: ${deliveryFee.toFixed(2)} лв
-` : ''}Общо: ${grandTotal.toFixed(2)} лв
+` : ''}Сума: ${formatPrice(subtotal).bgn} лв (${formatPrice(subtotal).eur}€)
+${pickupDiscount > 0 ? `Отстъпка за вземане (-10%): -${formatPrice(pickupDiscount).bgn} лв (-${formatPrice(pickupDiscount).eur}€)
+` : ''}${deliveryFee > 0 ? `Доставка: ${formatPrice(deliveryFee).bgn} лв (${formatPrice(deliveryFee).eur}€)
+` : ''}Общо: ${formatPrice(grandTotal).bgn} лв (${formatPrice(grandTotal).eur}€)
     `.trim();
 
     // Try to send email using nodemailer

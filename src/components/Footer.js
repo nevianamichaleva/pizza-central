@@ -65,6 +65,14 @@ const Footer = () => {
           <strong className="px-1 sitename">Централ</strong>{' '}
           <span>All Rights Reserved</span>
         </p>
+        <div className="credits" style={{ marginTop: '15px' }}>
+          <Link href="/privacy-policy" style={{ color: '#fff', textDecoration: 'none', marginRight: '20px' }}>
+            Политика за личните данни
+          </Link>
+          <Link href="/obshti-usloviya" style={{ color: '#fff', textDecoration: 'none' }}>
+            Общи условия
+          </Link>
+        </div>
         <div className="credits">
           Designed by{' '}
           <a href="https://bootstrapmade.com/" target="_blank" rel="noopener noreferrer">

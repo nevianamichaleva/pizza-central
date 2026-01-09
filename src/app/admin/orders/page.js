@@ -12,6 +12,16 @@ import { generateOrderNumber } from '../../../utils/orderNumberUtils';
 const AdminOrdersPage = () => {
     const { isAdmin } = useUser();
     const [orders, setOrders] = useState([]);
+    
+    // Currency conversion rate
+    const EUR_RATE = 1.95583;
+    
+    // Format price in BGN and EUR
+    const formatPrice = (priceInBGN) => {
+        const bgn = parseFloat(priceInBGN || 0);
+        const eur = (bgn / EUR_RATE).toFixed(2);
+        return { bgn: bgn.toFixed(2), eur };
+    };
     const [workingHours, setWorkingHours] = useState({ startHour: 10, endHour: 22 });
     const [editingHours, setEditingHours] = useState({ startHour: 10, endHour: 22 });
     const [isEditingHours, setIsEditingHours] = useState(false);
@@ -95,7 +105,10 @@ const AdminOrdersPage = () => {
             title: 'Общо',
             dataIndex: 'total',
             key: 'total',
-            render: (total) => total ? parseFloat(total).toFixed(2) : '0.00',
+            render: (total) => {
+                const price = formatPrice(total);
+                return total ? `${price.bgn} лв (${price.eur}€)` : '0.00 лв (0.00€)';
+            },
         },
         {
             title: 'Имейл на потребителя',
@@ -826,7 +839,7 @@ const AdminOrdersPage = () => {
                                                         borderBottom: '1px solid #f0f0f0'
                                                     }}>
                                                         <span><strong>{item.name}</strong> x{item.quantity}</span>
-                                                        <span>{parseFloat(item.value || 0).toFixed(2)} лв</span>
+                                                        <span>{formatPrice(parseFloat(item.value || 0) * item.quantity).bgn} лв ({formatPrice(parseFloat(item.value || 0) * item.quantity).eur}€)</span>
                                                     </div>
                                                 );
                                             })}
@@ -851,22 +864,27 @@ const AdminOrdersPage = () => {
                                             const pickupDiscount = parseFloat(selectedOrder.pickup_discount || 0);
                                             const subtotal = total - deliveryFee + pickupDiscount;
                                             
+                                            const subtotalFormatted = formatPrice(subtotal);
+                                            const pickupDiscountFormatted = formatPrice(pickupDiscount);
+                                            const deliveryFeeFormatted = formatPrice(deliveryFee);
+                                            const totalFormatted = formatPrice(total);
+                                            
                                             return (
                                                 <>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                                                         <span>Сума на продукти:</span>
-                                                        <span>{subtotal.toFixed(2)} лв</span>
+                                                        <span>{subtotalFormatted.bgn} лв ({subtotalFormatted.eur}€)</span>
                                                     </div>
                                                     {pickupDiscount > 0 && (
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: '#52c41a' }}>
                                                             <span>Отстъпка за вземане (10%):</span>
-                                                            <span>-{pickupDiscount.toFixed(2)} лв</span>
+                                                            <span>-{pickupDiscountFormatted.bgn} лв (-{pickupDiscountFormatted.eur}€)</span>
                                                         </div>
                                                     )}
                                                     {deliveryFee > 0 && (
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                                                             <span>Такса за доставка:</span>
-                                                            <span>{deliveryFee.toFixed(2)} лв</span>
+                                                            <span>{deliveryFeeFormatted.bgn} лв ({deliveryFeeFormatted.eur}€)</span>
                                                         </div>
                                                     )}
                                                     <div style={{ 
@@ -878,7 +896,7 @@ const AdminOrdersPage = () => {
                                                         paddingTop: '5px'
                                                     }}>
                                                         <span>Общо:</span>
-                                                        <span>{total.toFixed(2)} лв</span>
+                                                        <span>{totalFormatted.bgn} лв ({totalFormatted.eur}€)</span>
                                                     </div>
                                                 </>
                                             );

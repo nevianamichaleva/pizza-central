@@ -215,6 +215,18 @@ export default async function sitemap() {
       priority: 0.6,
     },
     {
+      url: `${baseUrl}/privacy-policy`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/obshti-usloviya`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
       url: `${baseUrl}/bg/central-menu`,
       lastModified: new Date(),
       changeFrequency: 'daily',

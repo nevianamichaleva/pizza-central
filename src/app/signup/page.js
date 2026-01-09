@@ -1,6 +1,7 @@
 "use client"
 
-import { Button, Form, Input } from "antd";
+import { Button, Checkbox, Form, Input } from "antd";
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { registerUserWithAdditionalData } from '../../../lib/auth';
@@ -88,6 +89,25 @@ const Register = () => {
                   rules={[{ required: true, message: "Моля, въведете вашия Адрес" }]}
                 >
                   <Input placeholder="Адрес" className="form-control"/>
+                </Form.Item>
+              </div>
+              <div className="col-md-12">
+                <Form.Item
+                  name="privacyPolicy"
+                  valuePropName="checked"
+                  rules={[
+                    {
+                      validator: (_, value) =>
+                        value ? Promise.resolve() : Promise.reject(new Error('Моля, потвърдете, че сте запознати с Политиката за личните данни')),
+                    },
+                  ]}
+                >
+                  <Checkbox>
+                    Запознат/а съм с{' '}
+                    <Link href="/privacy-policy" target="_blank" style={{ color: '#ce1212', textDecoration: 'underline' }}>
+                      Политиката за личните данни
+                    </Link>
+                  </Checkbox>
                 </Form.Item>
               </div>
               <div className="col-md-12 text-center">

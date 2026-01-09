@@ -31,7 +31,7 @@ export default function Order() {
   const [deliveryTime, setDeliveryTime] = useState("");
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [isEditingDeliveryTime, setIsEditingDeliveryTime] = useState(false);
-  const [orderType, setOrderType] = useState('pickup'); // 'pickup' or 'delivery'
+  const [orderType, setOrderType] = useState('delivery'); // 'pickup' or 'delivery'
   const [selectedHour, setSelectedHour] = useState(null);
   const [selectedMinute, setSelectedMinute] = useState(null);
 
@@ -117,8 +117,13 @@ export default function Order() {
       setSpecialNotes(orderData.special_notes || "");
       setDeliveryTime(orderData.delivery_time || "");
       setStatus(orderData.status || "");
-      // Load order type if it exists, otherwise default to pickup
-      setOrderType(orderData.order_type || 'pickup');
+      // Default to delivery for pending orders, or use saved order_type for completed orders
+      const orderStatus = orderData.status || "";
+      if (orderStatus === 'pending' || !orderStatus) {
+        setOrderType('delivery');
+      } else {
+        setOrderType(orderData.order_type || 'delivery');
+      }
       setLoading(false);
     });
 
@@ -596,11 +601,11 @@ export default function Order() {
                             <span>{item.quantity}</span>
                           </div>
                           <div className="col-md-2 price d-flex align-items-center justify-content-center">
-                            <span>{item.value ? parseFloat(item.value).toFixed(2) : "0.00"} лева</span>
+                            <span>{item.value ? formatPrice(parseFloat(item.value)).bgn : "0.00"} лв ({item.value ? formatPrice(parseFloat(item.value)).eur : "0.00"}€)</span>
                           </div>
                           <div className="col-md-2 total-price d-flex align-items-center justify-content-center">
                             <span>
-                              {Number.isFinite(item.value * item.quantity) ? (item.value * item.quantity).toFixed(2) : "0.00"} лева
+                              {Number.isFinite(item.value * item.quantity) ? formatPrice(item.value * item.quantity).bgn : "0.00"} лв ({Number.isFinite(item.value * item.quantity) ? formatPrice(item.value * item.quantity).eur : "0.00"}€)
                             </span>
                           </div>
                         </div>
@@ -658,10 +663,10 @@ export default function Order() {
                             />
                           </div>
                           <div className="col-md-2 price d-flex align-items-center justify-content-center">
-                            <span>{itemPrice.toFixed(2)} лева</span>
+                            <span>{originalPriceFormatted.bgn} лв ({originalPriceFormatted.eur}€)</span>
                           </div>
                           <div className="col-md-2 total-price d-flex align-items-center justify-content-center">
-                            <span>{originalTotal.toFixed(2)} лева</span>
+                            <span>{formatPrice(originalTotal).bgn} лв ({formatPrice(originalTotal).eur}€)</span>
                             {!orderCompleted &&
                               <FaTimes
                                 onClick={() => deleteItem(item.id)}
@@ -935,18 +940,18 @@ export default function Order() {
                   <h3>Обобщение</h3>
                   <div className="summary-item">
                     <span>Сума:</span>
-                    <span>{calculatedTotal.toFixed(2)} лева</span>
+                    <span>{formatPrice(calculatedTotal).bgn} лв ({formatPrice(calculatedTotal).eur}€)</span>
                   </div>
                   {orderType === 'pickup' && pickupDiscount > 0 && (
                     <div className="summary-item" style={{ color: "#ce1212" }}>
                       <span>Отстъпка за вземане (-10%):</span>
-                      <span>-{pickupDiscount.toFixed(2)} лева</span>
+                      <span>-{formatPrice(pickupDiscount).bgn} лв ({formatPrice(pickupDiscount).eur}€)</span>
                     </div>
                   )}
                   {orderType === 'delivery' && (
                     <div className="summary-item">
                       <span>Доставка:</span>
-                      <span>{deliveryFee.toFixed(2)} лева</span>
+                      <span>{formatPrice(deliveryFee).bgn} лв ({formatPrice(deliveryFee).eur}€)</span>
                     </div>
                   )}
                   <div className="summary-item" style={{ fontWeight: "bold", fontSize: "18px", borderTop: "2px solid #e0e0e0", paddingTop: "10px", marginTop: "10px" }}>
@@ -1033,7 +1038,7 @@ export default function Order() {
                           />
                           <div>
                             <div style={{ fontWeight: "600" }}>
-                              С доставка (3.00 лева)
+                              С доставка ({formatPrice(3.00).bgn} лв / {formatPrice(3.00).eur}€)
                             </div>
                           </div>
                         </label>
@@ -1042,6 +1047,16 @@ export default function Order() {
                   )}
                   {!orderCompleted &&
                     <>
+                      <div style={{ marginBottom: '15px', fontSize: '14px', textAlign: 'left', lineHeight: '1.6' }}>
+                        С потвърждаването на поръчката Вие се съгласявате с нашите{' '}
+                        <Link href="/obshti-usloviya" target="_blank" style={{ color: '#ce1212', textDecoration: 'underline' }}>
+                          Общи условия
+                        </Link>
+                        {' '}и{' '}
+                        <Link href="/privacy-policy" target="_blank" style={{ color: '#ce1212', textDecoration: 'underline' }}>
+                          Политика за личните данни
+                        </Link>
+                      </div>
                       <Tooltip title={
                         (!phone || !phone.trim()) 
                           ? "Въведете телефон като натиснете бутона Добави" 
@@ -1076,7 +1091,7 @@ export default function Order() {
                       {orderType === 'delivery' && calculatedTotal < 25 && (
                         <>
                         <p style={{ fontSize: '15px', textAlign: 'left', color: 'red' }}>
-                          Минимална сума за доставка 25 лв, добавете продукти за още {(25 - calculatedTotal).toFixed(2)} лева.
+                          Минимална сума за доставка {formatPrice(25).bgn} лв ({formatPrice(25).eur}€), добавете продукти за още {formatPrice(25 - calculatedTotal).bgn} лв ({formatPrice(25 - calculatedTotal).eur}€).
                         </p>
                         <Link href='/our-menu' className="btn btn-primary w-auto text-center py-1 px-3">Към меню</Link>
                         </>

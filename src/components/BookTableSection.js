@@ -291,6 +291,17 @@ const BookTableSection = () => {
                 <Input.TextArea rows={5} placeholder="Някакви специални изисквания, напишете ги тук" className="form-control" />
               </Form.Item>
 
+              <div style={{ marginBottom: '15px', fontSize: '14px', textAlign: 'center', lineHeight: '1.6' }}>
+                С потвърждаването на резервацията Вие се съгласявате с нашите{' '}
+                <a href="/obshti-usloviya" target="_blank" rel="noopener noreferrer" style={{ color: '#ce1212', textDecoration: 'underline' }}>
+                  Общи условия
+                </a>
+                {' '}и{' '}
+                <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" style={{ color: '#ce1212', textDecoration: 'underline' }}>
+                  Политика за личните данни
+                </a>
+              </div>
+
               <div className="text-center mt-3">
                 <Button type="primary" htmlType="submit" loading={submitting} disabled={submitting}>
                   Запази
