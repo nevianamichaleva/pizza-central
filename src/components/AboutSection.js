@@ -41,9 +41,27 @@ const AboutSection = () => {
               Превърнахме гостите си в приятели и с радост ви очакваме да станете част от нашата история! 🍕
               </p>
             </div>
-            <div className="book-a-table" style={{ marginTop: '10px' }}>
-              <Link href="/reservation"><h3>Резервирай маса</h3></Link>
-              <p>0895 516401 и 0893 315201</p>
+            <div style={{ marginTop: '30px' }}>
+              <Link href="/reservation">
+                <button 
+                  className="btn btn-primary"
+                  style={{
+                    padding: '12px 30px',
+                    fontSize: '16px',
+                    borderRadius: '5px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    backgroundColor: '#c41d7f',
+                    color: 'white',
+                    textDecoration: 'none',
+                    display: 'inline-block',
+                    marginBottom: '15px'
+                  }}
+                >
+                  Резервирай маса
+                </button>
+              </Link>
+              <p>Или се свържете с нас на телефон 0895 516401 и 0893 315201</p>
             </div>
           </div>
         </div>

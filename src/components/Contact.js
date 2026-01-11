@@ -111,16 +111,6 @@ const Contact = () => {
       </div>
 
       <div className="container" data-aos="fade-up" data-aos-delay="100">
-        <div className="mb-5">
-          <iframe
-            style={{ width: '100%', height: '400px' }}
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2890.7961952987803!2d27.824327076575123!3d43.56912965786365!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40a5169d3036e93b%3A0xc6b1ad1339889328!2z0JTQvtCx0YDQuNGHINCm0LXQvdGC0YrRgCwg0YPQuy4g4oCe0J3QtdC30LDQstC40YHQuNC80L7RgdGC4oCcIDQsIDkzMDAg0JTQvtCx0YDQuNGH!5e0!3m2!1sbg!2sbg!4v1734551388789!5m2!1sbg!2sbg"
-            frameBorder="0"
-            allowFullScreen
-            title="Location"
-          />
-        </div>
-
         <div className="row gy-4">
           <div className="col-md-6">
             <div className="info-item d-flex align-items-center" data-aos="fade-up" data-aos-delay="200">
@@ -226,6 +216,15 @@ const Contact = () => {
             </div>
           </div>
         </form>
+        <div className="mb-5">
+          <iframe
+            style={{ width: '100%', height: '400px' }}
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2890.7961952987803!2d27.824327076575123!3d43.56912965786365!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40a5169d3036e93b%3A0xc6b1ad1339889328!2z0JTQvtCx0YDQuNGHINCm0LXQvdGC0YrRgCwg0YPQuy4g4oCe0J3QtdC30LDQstC40YHQuNC80L7RgdGC4oCcIDQsIDkzMDAg0JTQvtCx0YDQuNGH!5e0!3m2!1sbg!2sbg!4v1734551388789!5m2!1sbg!2sbg"
+            frameBorder="0"
+            allowFullScreen
+            title="Location"
+          />
+        </div>
       </div>
     </section>
   );
