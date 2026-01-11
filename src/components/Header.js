@@ -225,9 +225,6 @@ const Header = () => {
             <li>
               <MenuLink href="/" className={pathname === '/' ? 'active' : ''}> Начало </MenuLink>
             </li>
-            <li>
-              <MenuLink href="/our-menu" className={pathname == '/our-menu' ? 'active' : ''}>Меню</MenuLink>
-            </li>
             {hasLaunchMenuToday && (
               <li>
                 <MenuLink href="/launch-menu" className={pathname == '/launch-menu' ? 'active' : ''}>Обедно меню</MenuLink>
@@ -280,10 +277,6 @@ const Header = () => {
                 </ul>
               )}
             </li> */}
-            <li>
-              <MenuLink href="/reservation" className={pathname == '/reservation' ? 'active' : ''}>Резервации</MenuLink>
-            </li>
-
             <li
               className="dropdown"
               onMouseEnter={handleForHomeMouseEnter}
@@ -298,7 +291,7 @@ const Header = () => {
                 }}
                 className={(pathname == '/for-home' || pathname?.startsWith('/for-home/')) ? 'active dropdown-toggle' : 'dropdown-toggle'}
               >
-                <span>Поръчай за вкъщи</span>
+                <span>Доставка</span>
               </a>
               {forHomeDropdownOpen && deliveryCategories.length > 0 && (
                 <ul key="for-home-categories">
@@ -322,6 +315,15 @@ const Header = () => {
                   ))}
                 </ul>
               )}
+            </li>
+            <li>
+              <MenuLink href="/reservation" className={pathname == '/reservation' ? 'active' : ''}>Резервации</MenuLink>
+            </li>
+            <li>
+              <MenuLink href="/our-menu" className={pathname == '/our-menu' ? 'active' : ''}>Меню</MenuLink>
+            </li>
+            <li>
+              <MenuLink href="/catering" className={pathname == '/catering' ? 'active' : ''}>Кетъринг</MenuLink>
             </li>
             <li
               className="dropdown"
@@ -364,9 +366,6 @@ const Header = () => {
                   </li>
                 </ul>
               )}
-            </li>
-            <li>
-              <MenuLink href="/catering" className={pathname == '/catering' ? 'active' : ''}>Кетъринг</MenuLink>
             </li>
             {isMobile && user && (
               <>
