@@ -564,7 +564,7 @@ const MenuSection = ({ categorySlug = null }) => {
               <div className="tab-header text-center">
                 <p>Меню</p>
                 <h3>{category.name.charAt(0).toUpperCase() + category.name.slice(1)}</h3>
-                {nextCategory && nextCategory.slug && nextCategory.id !== category.id && (
+                {categorySlug && nextCategory && nextCategory.slug && nextCategory.id !== category.id && (
                   <div style={{ marginTop: '15px' }}>
                     <Link 
                       href={`/for-home/${nextCategory.slug}`}
@@ -679,21 +679,6 @@ const MenuSection = ({ categorySlug = null }) => {
                     <h3 className="menu-mobile-category-title">
                       {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
                     </h3>
-                    {nextCategory && nextCategory.slug && nextCategory.id !== category.id && (
-                      <div style={{ marginTop: '10px', marginBottom: '15px', textAlign: 'center' }}>
-                        <Link 
-                          href={`/for-home/${nextCategory.slug}`}
-                          style={{ 
-                            color: '#c41d7f', 
-                            textDecoration: 'none',
-                            fontSize: '16px',
-                            fontWeight: '500'
-                          }}
-                        >
-                          → Виж нашите {nextCategory.name.charAt(0).toUpperCase() + nextCategory.name.slice(1)}
-                        </Link>
-                      </div>
-                    )}
                   <div className="menu-mobile-products-slider">
                     {categoryProducts.map((item, index) => (
                       <div key={index} className="menu-mobile-product-item">

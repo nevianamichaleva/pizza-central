@@ -25,7 +25,7 @@ const nextConfig = {
             value: 'mozzarella.bg',
           },
         ],
-        destination: 'https://pizza-central.bg/:path*',
+        destination: 'https://www.pizza-central.bg/:path*',
         permanent: true,
       },
       // Пренасочване на всичко от www.mozzarella.bg към pizza-central.bg
@@ -37,7 +37,19 @@ const nextConfig = {
             value: 'www.mozzarella.bg',
           },
         ],
-        destination: 'https://pizza-central.bg/:path*',
+        destination: 'https://www.pizza-central.bg/:path*',
+        permanent: true,
+      },
+      // Пренасочване на /shop към /for-home
+      {
+        source: '/shop',
+        destination: '/for-home',
+        permanent: true,
+      },
+      // Пренасочване на /category към /for-home
+      {
+        source: '/category',
+        destination: '/for-home',
         permanent: true,
       },
       // Пренасочване на всичко от dostavka.pizza-central.bg към начална страница
@@ -86,11 +98,6 @@ const nextConfig = {
       {
         source: '/menu-2',
         destination: '/our-menu',
-        permanent: true,
-      },
-      {
-        source: '/central-menu',
-        destination: '/bg/central-menu',
         permanent: true,
       },
       {

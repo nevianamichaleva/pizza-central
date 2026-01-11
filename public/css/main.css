@@ -277,6 +277,14 @@ h6 {
   font-family: var(--default-font);
 }
 
+.header .logo .sitename {
+  font-size: 30px;
+  margin: 0;
+  font-weight: 700;
+  color: var(--heading-color);
+  font-family: var(--default-font);
+}
+
 .header .logo span {
   color: var(--accent-color);
   font-size: 36px;

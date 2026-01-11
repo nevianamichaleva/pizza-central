@@ -34,7 +34,7 @@ const AboutSection = () => {
                 <li><i className="bi bi-check-circle-fill"></i> <span><strong>Автентични италиански пици</strong> – приготвени с български продукти по оригинални рецепти.</span></li>
                 <li><i className="bi bi-check-circle-fill"></i> <span><strong>Класическа българска скара</strong> – сочни меса, приготвени с майсторство.</span></li>
                 <li><i className="bi bi-check-circle-fill"></i> <span><strong>Уютна семейна обстановка</strong> – перфектно място за срещи с приятели и семейни вечери.</span></li>
-                <li><i className="bi bi-check-circle-fill"></i> <span><strong><Link href="/detski-kut" style={{ color: 'inherit', textDecoration: 'none' }}>Детски кът</Link></strong> – за да се забавляват децата, докато родителите се наслаждават на храната.</span></li>
+                <li><i className="bi bi-check-circle-fill"></i> <span><strong><Link href="/detski-kut" style={{ color: '#ce1212', textDecoration: 'underline' }}>Детски кът</Link></strong> – за да се забавляват децата, докато родителите се наслаждават на храната.</span></li>
                 <li><i className="bi bi-check-circle-fill"></i> <span><strong>Любезно обслужване</strong> – с усмивка и внимание към всеки гост.</span></li>
               </ul>
               <p style={{ fontSize: '18px' }}>

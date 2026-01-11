@@ -345,25 +345,28 @@ const Header = () => {
                     <MenuLink href="/about-us" className={pathname == '/about-us' ? 'active' : ''}>За ресторанта</MenuLink>
                   </li>
                   <li>
-                    <MenuLink href="/detski-kut" className={pathname == '/detski-kut' ? 'active' : ''}>Детски кът</MenuLink>
+                    <MenuLink href="/contact" className={pathname == '/contact' ? 'active' : ''}>Контакт</MenuLink>
                   </li>
                   <li>
+                    <MenuLink href="/detski-kut" className={pathname == '/detski-kut' ? 'active' : ''}>Детски кът</MenuLink>
+                  </li>
+                  {/* <li>
                     <MenuLink href="/new-dishes" className={pathname == '/new-dishes' ? 'active' : ''}>Нови предложения</MenuLink>
                   </li>
                   <li>
                     <MenuLink href="/events" className={pathname == '/events' ? 'active' : ''}>Събития</MenuLink>
+                  </li> */}
+                  <li>
+                    <MenuLink href="/blog" className={pathname == '/blog' ? 'active' : ''}>Любопитно от Централ</MenuLink>
                   </li>
                   <li>
                     <MenuLink href="/gallery" className={pathname == '/gallery' ? 'active' : ''}>Галерия</MenuLink>
-                  </li>
-                  <li>
-                    <MenuLink href="/blog" className={pathname == '/blog' ? 'active' : ''}>Любопитно от Централ</MenuLink>
                   </li>
                 </ul>
               )}
             </li>
             <li>
-              <MenuLink href="/contact" className={pathname == '/contact' ? 'active' : ''}>Контакт</MenuLink>
+              <MenuLink href="/catering" className={pathname == '/catering' ? 'active' : ''}>Кетъринг</MenuLink>
             </li>
             {isMobile && user && (
               <>
