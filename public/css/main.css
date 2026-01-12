@@ -158,19 +158,30 @@ h6 {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background: #fff;
+  background: #FFA500;
   border-radius: 50%;
   padding: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(255, 165, 0, 0.4), 0 2px 4px rgba(0,0,0,0.2);
   z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: bottom 0.3s ease;
+  transition: all 0.3s ease;
   width: 56px;
   height: 56px;
   min-width: 56px;
   min-height: 56px;
+  border: 2px solid #fff;
+}
+
+.cart-fab:hover {
+  background: #ff8c00;
+  box-shadow: 0 6px 16px rgba(255, 165, 0, 0.5), 0 4px 8px rgba(0,0,0,0.3);
+  transform: scale(1.05);
+}
+
+.cart-fab svg {
+  color: #fff;
 }
 
 /* Adjust cart icon position when cookie banner is visible */
@@ -183,18 +194,22 @@ body.cookie-banner-visible .cart-fab {
   .cart-fab {
     bottom: 100px !important;
     right: 20px !important;
-    width: 56px !important;
-    height: 56px !important;
-    min-width: 56px !important;
-    min-height: 56px !important;
+    width: 60px !important;
+    height: 60px !important;
+    min-width: 60px !important;
+    min-height: 60px !important;
     z-index: 10000 !important;
     display: flex !important;
     visibility: visible !important;
     opacity: 1 !important;
+    background: #FFA500 !important;
+    box-shadow: 0 4px 12px rgba(255, 165, 0, 0.5), 0 2px 4px rgba(0,0,0,0.3) !important;
+    border: 2px solid #fff !important;
   }
   
   .cart-fab svg {
-    font-size: 24px !important;
+    font-size: 26px !important;
+    color: #fff !important;
   }
   
   body.cookie-banner-visible .cart-fab {
