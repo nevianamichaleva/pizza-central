@@ -13,6 +13,10 @@ export default function CookieConsent() {
     const consent = localStorage.getItem('cookie-consent');
     if (!consent) {
       setShowBanner(true);
+      // Add class to body when banner is visible
+      if (typeof document !== 'undefined') {
+        document.body.classList.add('cookie-banner-visible');
+      }
     } else if (consent === 'granted') {
       setConsentGiven(true);
       // Изпращаме събитие към GTM dataLayer
@@ -30,6 +34,11 @@ export default function CookieConsent() {
     localStorage.setItem('cookie-consent', 'granted');
     setShowBanner(false);
     setConsentGiven(true);
+    
+    // Remove class from body when banner is hidden
+    if (typeof document !== 'undefined') {
+      document.body.classList.remove('cookie-banner-visible');
+    }
     
     // Обновяваме Consent Mode v2
     if (typeof window !== 'undefined' && window.gtag) {
@@ -52,6 +61,11 @@ export default function CookieConsent() {
   const handleReject = () => {
     localStorage.setItem('cookie-consent', 'denied');
     setShowBanner(false);
+    
+    // Remove class from body when banner is hidden
+    if (typeof document !== 'undefined') {
+      document.body.classList.remove('cookie-banner-visible');
+    }
     
     // Обновяваме Consent Mode v2
     if (typeof window !== 'undefined' && window.gtag) {
@@ -85,7 +99,7 @@ export default function CookieConsent() {
         backgroundColor: '#fff',
         padding: '20px',
         boxShadow: '0 -2px 10px rgba(0,0,0,0.1)',
-        zIndex: 9999,
+        zIndex: 9998,
         borderTop: '1px solid #e0e0e0'
       }}
     >

@@ -162,10 +162,44 @@ h6 {
   border-radius: 50%;
   padding: 12px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  z-index: 9999;
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: bottom 0.3s ease;
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  min-height: 56px;
+}
+
+/* Adjust cart icon position when cookie banner is visible */
+body.cookie-banner-visible .cart-fab {
+  bottom: 100px;
+}
+
+/* Ensure cart icon is visible on mobile */
+@media (max-width: 768px) {
+  .cart-fab {
+    bottom: 100px !important;
+    right: 20px !important;
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    min-height: 56px !important;
+    z-index: 10000 !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  .cart-fab svg {
+    font-size: 24px !important;
+  }
+  
+  body.cookie-banner-visible .cart-fab {
+    bottom: 180px !important;
+  }
 }
 
 .cart-fab .cart-count {
