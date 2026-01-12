@@ -832,7 +832,7 @@ section,
 .section {
   color: var(--default-color);
   background-color: var(--background-color);
-  padding: 60px 0;
+  padding: 10px 0;
   scroll-margin-top: 92px;
   overflow: clip;
 }
@@ -1316,6 +1316,7 @@ section,
   /* Products slider container */
   .menu-mobile-products-slider {
     display: flex;
+    align-items: stretch;
     overflow-x: auto;
     overflow-y: hidden;
     gap: 20px;
@@ -1343,6 +1344,8 @@ section,
   .menu-mobile-product-item {
     flex: 0 0 auto;
     width: 280px;
+    display: flex;
+    flex-direction: column;
     text-align: center;
     padding: 15px;
     background-color: var(--surface-color);
@@ -1378,6 +1381,11 @@ section,
     color: var(--accent-color);
     margin-bottom: 15px;
   }
+
+  /* Buttons container - push to bottom */
+  .menu-mobile-product-buttons {
+    margin-top: auto;
+  }
 }
 
 /* Desktop: Hide mobile categories */
@@ -1385,6 +1393,16 @@ section,
   .menu-mobile-categories {
     display: none;
   }
+}
+
+/* Reduce spacing between Menu and Catering sections */
+#menu.section {
+  padding-bottom: 10px;
+}
+
+#catering-preview.section,
+.catering-preview.section {
+  padding-top: 10px;
 }
 
 /*--------------------------------------------------------------

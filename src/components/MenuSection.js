@@ -750,55 +750,57 @@ const MenuSection = ({ categorySlug = null }) => {
                         <h4>{item.name}</h4>
                         {item.ingredients && (
                           <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
-                            {item.ingredients.length > 85 
-                              ? `${item.ingredients.substring(0, 85)}...` 
+                            {item.ingredients.length > 60 
+                              ? `${item.ingredients.substring(0, 60)}...` 
                               : item.ingredients}
                           </p>
                         )}
                         {item.description && (
                           <p className="ingredients" style={{ marginBottom: "8px" }}>
-                            {item.description.length > 100 
-                              ? `${item.description.substring(0, 100)}...` 
+                            {item.description.length > 60 
+                              ? `${item.description.substring(0, 60)}...` 
                               : item.description}
                           </p>
                         )}
                         {formatPrice(getDisplayPrice(item)) && (
                           <p className="price">{formatPrice(getDisplayPrice(item))}</p>
                         )}
-                        {item.slug && (
-                          <Link href={`/products/${item.slug}`} style={{ marginBottom: '8px', display: 'block' }}>
-                            <Button
-                              type="default"
-                              style={{
-                                width: '100%',
-                                borderRadius: '10px',
-                                padding: '10px 20px',
-                                fontSize: '16px',
-                              }}
-                              size="large"
-                            >
-                              Виж повече
-                            </Button>
-                          </Link>
-                        )}
-                        <Button
-                          type="primary"
-                          onClick={() => handleProductClick(item)}
-                          shape="circle"
-                          icon={<ShoppingCartOutlined />}
-                          style={{
-                            backgroundColor: '#FFA500',
-                            borderRadius: '10px',
-                            padding: '10px 20px',
-                            fontSize: '16px',
-                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                            transition: 'background-color 0.3s, transform 0.2s',
-                            width: '100%',
-                          }}
-                          size="large"
-                        >
-                          Добави
-                        </Button>
+                        <div className="menu-mobile-product-buttons">
+                          {item.slug && (
+                            <Link href={`/products/${item.slug}`} style={{ marginBottom: '8px', display: 'block' }}>
+                              <Button
+                                type="default"
+                                style={{
+                                  width: '100%',
+                                  borderRadius: '10px',
+                                  padding: '10px 20px',
+                                  fontSize: '16px',
+                                }}
+                                size="large"
+                              >
+                                Виж повече
+                              </Button>
+                            </Link>
+                          )}
+                          <Button
+                            type="primary"
+                            onClick={() => handleProductClick(item)}
+                            shape="circle"
+                            icon={<ShoppingCartOutlined />}
+                            style={{
+                              backgroundColor: '#FFA500',
+                              borderRadius: '10px',
+                              padding: '10px 20px',
+                              fontSize: '16px',
+                              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                              transition: 'background-color 0.3s, transform 0.2s',
+                              width: '100%',
+                            }}
+                            size="large"
+                          >
+                            Добави
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -871,55 +873,57 @@ const MenuSection = ({ categorySlug = null }) => {
                       <h4>{item.name}</h4>
                       {item.ingredients && (
                         <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
-                          {item.ingredients.length > 85 
-                            ? `${item.ingredients.substring(0, 85)}...` 
+                          {item.ingredients.length > 60 
+                            ? `${item.ingredients.substring(0, 60)}...` 
                             : item.ingredients}
                         </p>
                       )}
                       {item.description && (
                         <p className="ingredients" style={{ marginBottom: "8px" }}>
-                          {item.description.length > 100 
-                            ? `${item.description.substring(0, 100)}...` 
+                          {item.description.length > 60 
+                            ? `${item.description.substring(0, 60)}...` 
                             : item.description}
                         </p>
                       )}
                       {formatPrice(getDisplayPrice(item)) && (
                         <p className="price">{formatPrice(getDisplayPrice(item))}</p>
                       )}
-                      {item.slug && (
-                        <Link href={`/products/${item.slug}`} style={{ marginBottom: '8px', display: 'block' }}>
-                          <Button
-                            type="default"
-                            style={{
-                              width: '100%',
-                              borderRadius: '10px',
-                              padding: '10px 20px',
-                              fontSize: '16px',
-                            }}
-                            size="large"
-                          >
-                            Виж повече
-                          </Button>
-                        </Link>
-                      )}
-                      <Button
-                        type="primary"
-                        onClick={() => handleProductClick(item)}
-                        shape="circle"
-                        icon={<ShoppingCartOutlined />}
-                        style={{
-                          backgroundColor: '#FFA500',
-                          borderRadius: '10px',
-                          padding: '10px 20px',
-                          fontSize: '16px',
-                          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                          transition: 'background-color 0.3s, transform 0.2s',
-                          width: '100%',
-                        }}
-                        size="large"
-                      >
-                        Добави
-                      </Button>
+                      <div className="menu-mobile-product-buttons">
+                        {item.slug && (
+                          <Link href={`/products/${item.slug}`} style={{ marginBottom: '8px', display: 'block' }}>
+                            <Button
+                              type="default"
+                              style={{
+                                width: '100%',
+                                borderRadius: '10px',
+                                padding: '10px 20px',
+                                fontSize: '16px',
+                              }}
+                              size="large"
+                            >
+                              Виж повече
+                            </Button>
+                          </Link>
+                        )}
+                        <Button
+                          type="primary"
+                          onClick={() => handleProductClick(item)}
+                          shape="circle"
+                          icon={<ShoppingCartOutlined />}
+                          style={{
+                            backgroundColor: '#FFA500',
+                            borderRadius: '10px',
+                            padding: '10px 20px',
+                            fontSize: '16px',
+                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                            transition: 'background-color 0.3s, transform 0.2s',
+                            width: '100%',
+                          }}
+                          size="large"
+                        >
+                          Добави
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
