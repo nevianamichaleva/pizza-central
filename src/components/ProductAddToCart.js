@@ -49,10 +49,47 @@ const ProductAddToCart = ({ product }) => {
         }
       }
 
-      const productName = product.name;
-      const productPrice = parseFloat(product.price);
+      const productName = sideDish 
+        ? `${product.name} (с ${sideDish.name})`
+        : product.name;
+      const baseProductPrice = parseFloat(product.price);
       const productImage = product.image || "/images/no-image.png";
-      const itemKey = `${product.id}_${sideDish ? sideDish.id : 'no_side'}`;
+      const itemKey = sideDish ? `${product.id}_${sideDish.id}` : product.id;
+
+      // Fetch packaging items for this product
+      let packagingItems = [];
+      let packagingTotal = 0;
+      const packagingIds = product.packagingIds;
+      if (packagingIds) {
+        const idsArray = Array.isArray(packagingIds) ? packagingIds : [packagingIds];
+        if (idsArray.length > 0) {
+          try {
+            const packagingRef = ref(rtdb, 'packaging');
+            const packagingSnapshot = await get(packagingRef);
+            if (packagingSnapshot.exists()) {
+              const packagingData = packagingSnapshot.val();
+              packagingItems = idsArray
+                .map(packagingId => {
+                  const packaging = packagingData[packagingId];
+                  if (packaging) {
+                    packagingTotal += parseFloat(packaging.price) || 0;
+                    return {
+                      id: packagingId,
+                      ...packaging
+                    };
+                  }
+                  return null;
+                })
+                .filter(Boolean);
+            }
+          } catch (error) {
+            console.error("Error fetching packaging:", error);
+          }
+        }
+      }
+
+      // Total price includes packaging
+      const totalProductPrice = baseProductPrice + packagingTotal;
 
       const orderSnapshot = await get(ref(rtdb, `orders/${orderKey}`));
       
@@ -67,7 +104,7 @@ const ProductAddToCart = ({ product }) => {
           [itemKey]: {
             name: productName,
             quantity: 1,
-            value: productPrice,
+            value: totalProductPrice, // Include packaging price in product price
             image: productImage,
             productId: product.id,
             sideDishId: sideDish ? sideDish.id : null,
@@ -75,41 +112,29 @@ const ProductAddToCart = ({ product }) => {
           },
         };
 
-        // Add packaging items linked to this product
-        let packagingTotal = 0;
-        if (product.packagingIds && Array.isArray(product.packagingIds) && product.packagingIds.length > 0) {
-          const packagingRef = ref(rtdb, "packaging");
-          const packagingSnapshot = await get(packagingRef);
-          
-          if (packagingSnapshot.exists()) {
-            const packagingData = packagingSnapshot.val();
-            product.packagingIds.forEach((packagingId) => {
-              const packaging = packagingData[packagingId];
-              if (packaging) {
-                const packagingKey = `${itemKey}_packaging_${packagingId}`;
-                items[packagingKey] = {
-                  name: packaging.name,
-                  quantity: 1,
-                  value: parseFloat(packaging.price),
-                  image: "/images/no-image.png",
-                  productId: null,
-                  sideDishId: null,
-                  sideDishName: null,
-                  isPackaging: true,
-                  linkedToItemId: itemKey,
-                  packagingId: packagingId,
-                };
-                packagingTotal += parseFloat(packaging.price);
-              }
-            });
-          }
-        }
+        // Add packaging items linked to this product (hidden in cart but kept for email and admin)
+        packagingItems.forEach((packaging) => {
+          const packagingKey = `${itemKey}_packaging_${packaging.id}`;
+          items[packagingKey] = {
+            name: packaging.name,
+            quantity: 1,
+            value: parseFloat(packaging.price),
+            image: "/images/no-image.png",
+            productId: null,
+            sideDishId: null,
+            sideDishName: null,
+            isPackaging: true,
+            linkedToItemId: itemKey,
+            packagingId: packaging.id,
+            hiddenInCart: true, // Hide in cart but keep for email and admin
+          };
+        });
 
         const newOrder = {
           items: items,
           order_date: new Date().toLocaleString(),
           status: "pending",
-          total: productPrice + packagingTotal,
+          total: totalProductPrice, // Already includes packaging price
           user_id: user ? user.uid : null,
           user_email: user ? user.email : null,
           user_phone: userDetails ? userDetails.phone : null,
@@ -123,66 +148,65 @@ const ProductAddToCart = ({ product }) => {
         const orderData = orderSnapshot.val();
         const existingItems = orderData.items || {};
         
-        if (existingItems[itemKey]) {
-          existingItems[itemKey].quantity += 1;
-        } else {
-          existingItems[itemKey] = {
+        const existingItem = existingItems[itemKey];
+        const currentQuantity = Number(existingItem?.quantity) || 0;
+        
+        const updatedItems = {
+          ...existingItems,
+          [itemKey]: {
             name: productName,
-            quantity: 1,
-            value: productPrice,
+            quantity: currentQuantity + 1,
+            value: totalProductPrice, // Include packaging price in product price
             image: productImage,
             productId: product.id,
             sideDishId: sideDish ? sideDish.id : null,
             sideDishName: sideDish ? sideDish.name : null,
-          };
-        }
+          },
+        };
 
-        // Add or update packaging items linked to this product
-        if (product.packagingIds && Array.isArray(product.packagingIds) && product.packagingIds.length > 0) {
-          const packagingRef = ref(rtdb, "packaging");
-          const packagingSnapshot = await get(packagingRef);
+        // Add or update packaging items linked to this product (hidden in cart but kept for email and admin)
+        packagingItems.forEach((packaging) => {
+          const packagingKey = `${itemKey}_packaging_${packaging.id}`;
+          const existingPackaging = existingItems[packagingKey];
           
-          if (packagingSnapshot.exists()) {
-            const packagingData = packagingSnapshot.val();
-            product.packagingIds.forEach((packagingId) => {
-              const packaging = packagingData[packagingId];
-              if (packaging) {
-                const packagingKey = `${itemKey}_packaging_${packagingId}`;
-                const existingPackaging = existingItems[packagingKey];
-                
-                if (existingPackaging) {
-                  existingItems[packagingKey] = {
-                    ...existingPackaging,
-                    quantity: (Number(existingPackaging.quantity) || 0) + 1,
-                  };
-                } else {
-                  existingItems[packagingKey] = {
-                    name: packaging.name,
-                    quantity: 1,
-                    value: parseFloat(packaging.price),
-                    image: "/images/no-image.png",
-                    productId: null,
-                    sideDishId: null,
-                    sideDishName: null,
-                    isPackaging: true,
-                    linkedToItemId: itemKey,
-                    packagingId: packagingId,
-                  };
-                }
-              }
-            });
+          if (existingPackaging) {
+            updatedItems[packagingKey] = {
+              ...existingPackaging,
+              quantity: (Number(existingPackaging.quantity) || 0) + 1,
+              hiddenInCart: true, // Ensure it's marked as hidden
+            };
+          } else {
+            updatedItems[packagingKey] = {
+              name: packaging.name,
+              quantity: 1,
+              value: parseFloat(packaging.price),
+              image: "/images/no-image.png",
+              productId: null,
+              sideDishId: null,
+              sideDishName: null,
+              isPackaging: true,
+              linkedToItemId: itemKey,
+              packagingId: packaging.id,
+              hiddenInCart: true, // Hide in cart but keep for email and admin
+            };
           }
-        }
+        });
 
-        // Recalculate total
-        const newTotal = Object.values(existingItems).reduce((sum, item) => {
-          return sum + (item.quantity * parseFloat(item.value));
+        // Recalculate total - exclude packaging items that are hidden in cart
+        const updatedTotal = Object.values(updatedItems).reduce((total, item) => {
+          // Exclude packaging items that are hidden in cart (their price is already included in product price)
+          if (item.isPackaging && item.hiddenInCart) {
+            return total;
+          }
+          const basePrice = parseFloat(item.value) || 0;
+          const quantity = Number(item.quantity) || 0;
+          return total + basePrice * quantity;
         }, 0);
 
         await set(ref(rtdb, `orders/${orderKey}`), {
           ...orderData,
-          items: existingItems,
-          total: newTotal,
+          items: updatedItems,
+          total: updatedTotal,
         });
 
         showAToast("success", "Продуктът е добавен в количката");

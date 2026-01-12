@@ -56,6 +56,45 @@ async function getProduct(slug) {
   }
 }
 
+// Fetch packaging data from Firebase
+async function getPackagingData() {
+  try {
+    const packagingRef = ref(rtdb, 'packaging');
+    const packagingSnapshot = await get(packagingRef);
+    if (packagingSnapshot.exists()) {
+      return packagingSnapshot.val();
+    }
+    return {};
+  } catch (error) {
+    console.error("Error fetching packaging:", error);
+    return {};
+  }
+}
+
+// Calculate display price (product price + packaging price)
+function getDisplayPrice(product, packagingData) {
+  const basePrice = parseFloat(product.price);
+  if (isNaN(basePrice)) {
+    return null;
+  }
+
+  if (product.packagingIds && packagingData) {
+    const packagingIds = Array.isArray(product.packagingIds) ? product.packagingIds : [product.packagingIds];
+    let packagingTotal = 0;
+    
+    packagingIds.forEach(packagingId => {
+      const packaging = packagingData[packagingId];
+      if (packaging && packaging.price) {
+        packagingTotal += parseFloat(packaging.price) || 0;
+      }
+    });
+
+    return basePrice + packagingTotal;
+  }
+
+  return basePrice;
+}
+
 // Generate metadata for SEO
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
@@ -141,6 +180,10 @@ export default async function ProductDetailsPage({ params }) {
     notFound();
   }
 
+  // Fetch packaging data and calculate display price
+  const packagingData = await getPackagingData();
+  const displayPrice = getDisplayPrice(product, packagingData);
+
   // Generate Schema.org structured data for Product
   const productSchema = {
     "@context": "https://schema.org",
@@ -196,9 +239,9 @@ export default async function ProductDetailsPage({ params }) {
           <div className={styles.heroContent}>
             <h1>{product.name}</h1>
             
-            {product.price && (
+            {displayPrice !== null && (
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#c41d7f', marginBottom: '15px' }}>
-                {parseFloat(product.price).toFixed(2)} лв / {(parseFloat(product.price) / 1.95583).toFixed(2)} €
+                {displayPrice.toFixed(2)} лв / {(displayPrice / 1.95583).toFixed(2)} €
               </div>
             )}
             
