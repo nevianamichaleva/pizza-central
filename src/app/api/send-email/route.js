@@ -33,17 +33,57 @@ export async function POST(request) {
     };
 
     // Format order details
-    const itemsList = orderData.items 
-      ? Object.values(orderData.items).map(item => {
-          const itemPrice = parseFloat(item.value || 0);
-          const itemTotal = itemPrice * item.quantity;
-          const priceFormatted = formatPrice(itemPrice);
-          const totalFormatted = formatPrice(itemTotal);
-          let itemLine = `- ${item.name} x${item.quantity} - ${priceFormatted.bgn} лв (${priceFormatted.eur}€) | Общо: ${totalFormatted.bgn} лв (${totalFormatted.eur}€)`;
+    // Separate products from packaging items
+    const products = [];
+    const packagingItems = [];
+    
+    if (orderData.items) {
+      Object.entries(orderData.items).forEach(([itemKey, item]) => {
+        if (item.isPackaging && item.hiddenInCart) {
+          // This is a packaging item that was hidden in cart
+          packagingItems.push({ key: itemKey, ...item });
+        } else if (!item.isPackaging) {
+          // This is a regular product
+          products.push({ key: itemKey, ...item });
+        }
+      });
+    }
+    
+    // Build items list
+    const itemsList = products.length > 0 || packagingItems.length > 0
+      ? products.map(product => {
+          // Find packaging items linked to this product
+          const linkedPackaging = packagingItems.filter(pack => pack.linkedToItemId === product.key);
+          
+          // Calculate packaging total for this product
+          const packagingTotal = linkedPackaging.reduce((sum, pack) => {
+            return sum + (parseFloat(pack.value || 0) * pack.quantity);
+          }, 0);
+          
+          // Subtract packaging price from product price
+          const productPriceWithoutPackaging = parseFloat(product.value || 0) - packagingTotal;
+          const productTotal = productPriceWithoutPackaging * product.quantity;
+          const priceFormatted = formatPrice(productPriceWithoutPackaging);
+          const totalFormatted = formatPrice(productTotal);
+          
+          let itemLine = `- ${product.name} x${product.quantity} - ${priceFormatted.bgn} лв (${priceFormatted.eur}€) | Общо: ${totalFormatted.bgn} лв (${totalFormatted.eur}€)`;
+          
           // If side dish is stored separately, show it explicitly
-          if (item.sideDishName && !item.name.includes(item.sideDishName)) {
-            itemLine += `\n  Гарнитура: ${item.sideDishName}`;
+          if (product.sideDishName && !product.name.includes(product.sideDishName)) {
+            itemLine += `\n  Гарнитура: ${product.sideDishName}`;
           }
+          
+          // Add packaging items on separate lines
+          if (linkedPackaging.length > 0) {
+            linkedPackaging.forEach(pack => {
+              const packPrice = parseFloat(pack.value || 0);
+              const packTotal = packPrice * pack.quantity;
+              const packPriceFormatted = formatPrice(packPrice);
+              const packTotalFormatted = formatPrice(packTotal);
+              itemLine += `\n  └ ${pack.name} x${pack.quantity} - ${packPriceFormatted.bgn} лв (${packPriceFormatted.eur}€) | Общо: ${packTotalFormatted.bgn} лв (${packTotalFormatted.eur}€)`;
+            });
+          }
+          
           return itemLine;
         }).join('\n')
       : 'Няма артикули';

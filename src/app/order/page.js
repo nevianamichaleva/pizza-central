@@ -133,6 +133,10 @@ export default function Order() {
   const calculateTotal = (items) => {
     if (!items) return 0;
     return Object.values(items).reduce((total, item) => {
+      // Exclude packaging items that are hidden in cart (their price is already included in product price)
+      if (item.isPackaging && item.hiddenInCart) {
+        return total;
+      }
       return total + item.quantity * parseFloat(item.value);
     }, 0);
   };
@@ -488,11 +492,11 @@ export default function Order() {
     .filter(itemId => !order.items[itemId].isPackaging)
     .map((itemId) => {
       const item = order.items[itemId];
-      // Find packaging items linked to this item
+      // Find packaging items linked to this item (exclude hidden ones from cart display)
       const linkedPackaging = order && order.items ? Object.keys(order.items)
         .filter(packId => {
           const packItem = order.items[packId];
-          return packItem.isPackaging && packItem.linkedToItemId === itemId;
+          return packItem.isPackaging && packItem.linkedToItemId === itemId && !packItem.hiddenInCart;
         })
         .map(packId => ({
           id: packId,
@@ -513,24 +517,28 @@ export default function Order() {
       };
     }) : [];
 
-  // Combine regular items with their linked packaging items
+  // Combine regular items with their linked packaging items (exclude hidden ones)
   const dataSource = [];
   regularItems.forEach(item => {
     // Add the main item
     dataSource.push(item);
-    // Add linked packaging items right after the main item
+    // Add linked packaging items right after the main item (only if not hidden)
     if (item.linkedPackaging && item.linkedPackaging.length > 0) {
       item.linkedPackaging.forEach(pack => {
-        dataSource.push({
-          id: pack.id,
-          name: pack.name,
-          quantity: pack.quantity,
-          image: null,
-          value: pack.value,
-          sideDishName: null,
-          isPackaging: true,
-          linkedToItemId: item.id,
-        });
+        // Check if packaging is hidden in cart
+        const packItem = order && order.items ? order.items[pack.id] : null;
+        if (!packItem || !packItem.hiddenInCart) {
+          dataSource.push({
+            id: pack.id,
+            name: pack.name,
+            quantity: pack.quantity,
+            image: null,
+            value: pack.value,
+            sideDishName: null,
+            isPackaging: true,
+            linkedToItemId: item.id,
+          });
+        }
       });
     }
   });

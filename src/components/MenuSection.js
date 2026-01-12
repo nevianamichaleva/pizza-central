@@ -52,6 +52,7 @@ const MenuSection = ({ categorySlug = null }) => {
   const [sideDishModalVisible, setSideDishModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSideDish, setSelectedSideDish] = useState(null);
+  const [packagingData, setPackagingData] = useState({});
   const { products } = useProducts();
   const { categories } = useCategories();
   const { user, userDetails } = useUser();
@@ -101,6 +102,22 @@ const MenuSection = ({ categorySlug = null }) => {
     }
   }, [categories]);
 
+  // Fetch packaging data
+  useEffect(() => {
+    const fetchPackaging = async () => {
+      try {
+        const packagingRef = ref(rtdb, 'packaging');
+        const packagingSnapshot = await get(packagingRef);
+        if (packagingSnapshot.exists()) {
+          setPackagingData(packagingSnapshot.val());
+        }
+      } catch (error) {
+        console.error("Error fetching packaging:", error);
+      }
+    };
+    fetchPackaging();
+  }, []);
+
   const normalizePrice = (rawPrice) => {
     if (rawPrice === undefined || rawPrice === null) {
       return null;
@@ -132,6 +149,32 @@ const MenuSection = ({ categorySlug = null }) => {
     const priceInLv = normalized.toFixed(2);
     const priceInEuro = (normalized / 1.95583).toFixed(2);
     return `${priceInLv} лв. / ${priceInEuro} €`;
+  };
+
+  // Get display price (product price + packaging price for delivery items)
+  const getDisplayPrice = (product) => {
+    const basePrice = normalizePrice(product.price);
+    if (basePrice === null) {
+      return null;
+    }
+
+    // Only add packaging price for items that are delivered
+    // Since MenuSection only shows delivery items, we add packaging for all items shown here
+    if (product.packagingIds && packagingData) {
+      const packagingIds = Array.isArray(product.packagingIds) ? product.packagingIds : [product.packagingIds];
+      let packagingTotal = 0;
+      
+      packagingIds.forEach(packagingId => {
+        const packaging = packagingData[packagingId];
+        if (packaging && packaging.price) {
+          packagingTotal += parseFloat(packaging.price) || 0;
+        }
+      });
+
+      return basePrice + packagingTotal;
+    }
+
+    return basePrice;
   };
 
   const handleTabClick = (tab) => {
@@ -259,11 +302,18 @@ const MenuSection = ({ categorySlug = null }) => {
           ? `${product.name} (с ${sideDish.name})`
           : product.name;
 
+        // Calculate total price including packaging
+        let packagingTotal = 0;
+        packagingItems.forEach((packaging) => {
+          packagingTotal += parseFloat(packaging.price) || 0;
+        });
+        const totalProductPrice = productPrice + packagingTotal;
+
         const items = {
           [itemKey]: {
             name: itemName,
             quantity: 1,
-            value: productPrice,
+            value: totalProductPrice, // Include packaging price in product price
             image: productImage,
             productId: product.id,
             sideDishId: sideDish ? sideDish.id : null,
@@ -271,9 +321,8 @@ const MenuSection = ({ categorySlug = null }) => {
           },
         };
 
-        // Add packaging items linked to this product
-        let packagingTotal = 0;
-        packagingItems.forEach((packaging, index) => {
+        // Add packaging items linked to this product (hidden in cart but kept for email and admin)
+        packagingItems.forEach((packaging) => {
           const packagingKey = `${itemKey}_packaging_${packaging.id}`;
           items[packagingKey] = {
             name: packaging.name,
@@ -286,15 +335,15 @@ const MenuSection = ({ categorySlug = null }) => {
             isPackaging: true,
             linkedToItemId: itemKey,
             packagingId: packaging.id,
+            hiddenInCart: true, // Hide in cart but keep for email and admin
           };
-          packagingTotal += parseFloat(packaging.price);
         });
 
         const newOrder = {
           items: items,
           order_date: new Date().toLocaleString(),
           status: "pending",
-          total: productPrice + packagingTotal,
+          total: totalProductPrice, // Already includes packaging price
           user_id: user ? user.uid : null,
           user_email: user ? user.email : null,
           user_phone: userDetails ? userDetails.phone : null,
@@ -313,6 +362,13 @@ const MenuSection = ({ categorySlug = null }) => {
           ? `${product.name} (с ${sideDish.name})`
           : product.name;
 
+        // Calculate total price including packaging
+        let packagingTotal = 0;
+        packagingItems.forEach((packaging) => {
+          packagingTotal += parseFloat(packaging.price) || 0;
+        });
+        const totalProductPrice = productPrice + packagingTotal;
+
         const existingItem = currentItems[itemKey];
         const currentQuantity = Number(existingItem?.quantity) || 0;
         
@@ -321,7 +377,7 @@ const MenuSection = ({ categorySlug = null }) => {
           [itemKey]: {
             name: itemName,
             quantity: currentQuantity + 1,
-            value: productPrice,
+            value: totalProductPrice, // Include packaging price in product price
             image: productImage,
             productId: product.id,
             sideDishId: sideDish ? sideDish.id : null,
@@ -329,7 +385,7 @@ const MenuSection = ({ categorySlug = null }) => {
           },
         };
 
-        // Add or update packaging items linked to this product
+        // Add or update packaging items linked to this product (hidden in cart but kept for email and admin)
         packagingItems.forEach((packaging) => {
           const packagingKey = `${itemKey}_packaging_${packaging.id}`;
           const existingPackaging = currentItems[packagingKey];
@@ -338,6 +394,7 @@ const MenuSection = ({ categorySlug = null }) => {
             updatedItems[packagingKey] = {
               ...existingPackaging,
               quantity: (Number(existingPackaging.quantity) || 0) + 1,
+              hiddenInCart: true, // Ensure it's marked as hidden
             };
           } else {
             updatedItems[packagingKey] = {
@@ -351,11 +408,16 @@ const MenuSection = ({ categorySlug = null }) => {
               isPackaging: true,
               linkedToItemId: itemKey,
               packagingId: packaging.id,
+              hiddenInCart: true, // Hide in cart but keep for email and admin
             };
           }
         });
 
         const updatedTotal = Object.values(updatedItems).reduce((total, item) => {
+          // Exclude packaging items that are hidden in cart (their price is already included in product price)
+          if (item.isPackaging && item.hiddenInCart) {
+            return total;
+          }
           const basePrice = normalizePrice(item.value);
           const quantity = Number(item.quantity) || 0;
           if (!Number.isFinite(basePrice)) {
@@ -435,8 +497,8 @@ const MenuSection = ({ categorySlug = null }) => {
             </div>
           )}
           <div className="menu-card-footer">
-            {formatPrice(item.price) && (
-              <p className="menu-card-price">{formatPrice(item.price)}</p>
+            {formatPrice(getDisplayPrice(item)) && (
+              <p className="menu-card-price">{formatPrice(getDisplayPrice(item))}</p>
             )}
             <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
               {item.slug && (
@@ -700,8 +762,8 @@ const MenuSection = ({ categorySlug = null }) => {
                               : item.description}
                           </p>
                         )}
-                        {formatPrice(item.price) && (
-                          <p className="price">{formatPrice(item.price)}</p>
+                        {formatPrice(getDisplayPrice(item)) && (
+                          <p className="price">{formatPrice(getDisplayPrice(item))}</p>
                         )}
                         {item.slug && (
                           <Link href={`/products/${item.slug}`} style={{ marginBottom: '8px', display: 'block' }}>
@@ -746,7 +808,7 @@ const MenuSection = ({ categorySlug = null }) => {
             })()}
           </div>
         )}
-        
+
         {/* Mobile view for single category */}
         {categorySlug && selectedCategory && (() => {
           const filteredCategories = categories
@@ -821,8 +883,8 @@ const MenuSection = ({ categorySlug = null }) => {
                             : item.description}
                         </p>
                       )}
-                      {formatPrice(item.price) && (
-                        <p className="price">{formatPrice(item.price)}</p>
+                      {formatPrice(getDisplayPrice(item)) && (
+                        <p className="price">{formatPrice(getDisplayPrice(item))}</p>
                       )}
                       {item.slug && (
                         <Link href={`/products/${item.slug}`} style={{ marginBottom: '8px', display: 'block' }}>

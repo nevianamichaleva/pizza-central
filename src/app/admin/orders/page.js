@@ -829,20 +829,64 @@ const AdminOrdersPage = () => {
                                     <h3>Поръчани продукти</h3>
                                     {selectedOrder.items && Object.keys(selectedOrder.items).length > 0 ? (
                                         <div>
-                                            {Object.keys(selectedOrder.items).map(itemKey => {
-                                                const item = selectedOrder.items[itemKey];
-                                                return (
-                                                    <div key={itemKey} style={{ 
-                                                        display: 'flex', 
-                                                        justifyContent: 'space-between',
-                                                        padding: '8px 0',
-                                                        borderBottom: '1px solid #f0f0f0'
-                                                    }}>
-                                                        <span><strong>{item.name}</strong> x{item.quantity}</span>
-                                                        <span>{formatPrice(parseFloat(item.value || 0) * item.quantity).bgn} лв ({formatPrice(parseFloat(item.value || 0) * item.quantity).eur}€)</span>
-                                                    </div>
-                                                );
-                                            })}
+                                            {(() => {
+                                                // Separate products from packaging items
+                                                const products = [];
+                                                const packagingItems = [];
+                                                
+                                                Object.entries(selectedOrder.items).forEach(([itemKey, item]) => {
+                                                    if (item.isPackaging && item.hiddenInCart) {
+                                                        packagingItems.push({ key: itemKey, ...item });
+                                                    } else if (!item.isPackaging) {
+                                                        products.push({ key: itemKey, ...item });
+                                                    }
+                                                });
+                                                
+                                                return products.map(product => {
+                                                    // Find packaging items linked to this product
+                                                    const linkedPackaging = packagingItems.filter(pack => pack.linkedToItemId === product.key);
+                                                    
+                                                    // Calculate packaging total for this product
+                                                    const packagingTotal = linkedPackaging.reduce((sum, pack) => {
+                                                        return sum + (parseFloat(pack.value || 0) * pack.quantity);
+                                                    }, 0);
+                                                    
+                                                    // Subtract packaging price from product price
+                                                    const productPriceWithoutPackaging = parseFloat(product.value || 0) - packagingTotal;
+                                                    const productTotal = productPriceWithoutPackaging * product.quantity;
+                                                    
+                                                    return (
+                                                        <div key={product.key}>
+                                                            <div style={{ 
+                                                                display: 'flex', 
+                                                                justifyContent: 'space-between',
+                                                                padding: '8px 0',
+                                                                borderBottom: '1px solid #f0f0f0'
+                                                            }}>
+                                                                <span><strong>{product.name}</strong> x{product.quantity}</span>
+                                                                <span>{formatPrice(productTotal).bgn} лв ({formatPrice(productTotal).eur}€)</span>
+                                                            </div>
+                                                            {/* Show packaging items on separate lines */}
+                                                            {linkedPackaging.map(pack => {
+                                                                const packPrice = parseFloat(pack.value || 0);
+                                                                const packTotal = packPrice * pack.quantity;
+                                                                return (
+                                                                    <div key={pack.key} style={{ 
+                                                                        display: 'flex', 
+                                                                        justifyContent: 'space-between',
+                                                                        padding: '8px 0 8px 20px',
+                                                                        borderBottom: '1px solid #f0f0f0',
+                                                                        opacity: 0.8
+                                                                    }}>
+                                                                        <span>└ {pack.name} x{pack.quantity}</span>
+                                                                        <span>{formatPrice(packTotal).bgn} лв ({formatPrice(packTotal).eur}€)</span>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    );
+                                                });
+                                            })()}
                                         </div>
                                     ) : (
                                         <p>Няма продукти в поръчката</p>
