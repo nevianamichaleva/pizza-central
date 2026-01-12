@@ -13,12 +13,15 @@ const Hero = () => {
             <p data-aos="fade-up" data-aos-delay="100">
             Храна, приготвена с внимание и поднесена с отношение.
             </p>
-            <div className="d-flex" data-aos="fade-up" data-aos-delay="200">
+            <div className="d-flex flex-wrap" data-aos="fade-up" data-aos-delay="200" style={{ gap: "20px" }}>
               <a href="#book-a-table" className="btn-get-started">
                 Резервирай маса
               </a>
-              <a href="/our-menu" className="btn-get-started" style={{marginLeft: "20px"}}>
+              <a href="/our-menu" className="btn-get-started">
                 Поръчай
+              </a>
+              <a href="/catering/zaiavka" className="btn-get-started">
+                Заяви кетъринг
               </a>
               {/* <a
                 href="https://www.youtube.com/watch?v=Y7f98aduVJ8"

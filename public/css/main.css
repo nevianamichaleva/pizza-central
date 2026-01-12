@@ -285,6 +285,15 @@ h6 {
   font-family: var(--default-font);
 }
 
+/* Reduce sitename size on mobile to prevent overlap with buttons */
+@media (max-width: 768px) {
+  .header .logo .sitename {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+  }
+}
+
 .header .logo span {
   color: var(--accent-color);
   font-size: 36px;
@@ -1659,6 +1668,14 @@ section,
   min-height: 500px;
   background-size: cover;
   background-position: center;
+}
+
+/* Reduce image height on mobile for catering request page */
+@media (max-width: 768px) {
+  .book-a-table .reservation-img {
+    min-height: 250px;
+    max-height: 300px;
+  }
 }
 
 .book-a-table .reservation-form-bg {
