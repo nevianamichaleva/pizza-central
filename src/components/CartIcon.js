@@ -2,17 +2,81 @@ import { ShoppingCartOutlined } from "@ant-design/icons";
 import { get, onValue, ref } from "firebase/database";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { rtdb } from "../../lib/firebase";
 
 const CartIcon = ({ userId }) => {
   const [cartItemCount, setCartItemCount] = useState(0);
   const [cartId, setCartId] = useState(null);
+  const [position, setPosition] = useState({ x: null, y: null });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [cookieBannerVisible, setCookieBannerVisible] = useState(false);
+  const cartRef = useRef(null);
+  const positionRef = useRef({ x: null, y: null });
+  const startPositionRef = useRef({ x: 0, y: 0 });
+  const hasDraggedRef = useRef(false);
   const pathname = usePathname();
 
+  // Check if cookie banner is visible
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof document === "undefined") {
+      return;
+    }
+
+    const checkCookieBanner = () => {
+      const isVisible = document.body.classList.contains("cookie-banner-visible");
+      setCookieBannerVisible(isVisible);
+    };
+
+    // Initial check
+    checkCookieBanner();
+
+    // Watch for changes in body class
+    const observer = new MutationObserver(() => {
+      checkCookieBanner();
+    });
+
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    // Also check localStorage changes
+    const handleStorageChange = (e) => {
+      if (e.key === "cookie-consent" || e.key === null) {
+        // Small delay to allow body class to update
+        setTimeout(checkCookieBanner, 100);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    
+    // Also check periodically in case localStorage is changed in same tab
+    const interval = setInterval(checkCookieBanner, 500);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Load saved position from localStorage
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
+    }
+
+    const savedPosition = window.localStorage.getItem("cartIconPosition");
+    if (savedPosition) {
+      try {
+        const { x, y } = JSON.parse(savedPosition);
+        setPosition({ x, y });
+        positionRef.current = { x, y };
+      } catch (e) {
+        console.error("Error parsing saved cart position:", e);
+      }
     }
 
     const storedCartId = window.localStorage.getItem("cartId");
@@ -116,11 +180,169 @@ const CartIcon = ({ userId }) => {
     return () => unsubscribe();
   }, [cartId]);
 
+  // Helper function to get client coordinates from mouse or touch event
+  const getClientCoords = (e) => {
+    if (e.touches && e.touches.length > 0) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    return { x: e.clientX, y: e.clientY };
+  };
+
+  // Drag handlers
+  const handleStart = (e) => {
+    if (e.type === "mousedown" && e.button !== 0) return; // Only handle left mouse button
+    
+    if (cartRef.current) {
+      // Prevent default on touch to avoid triggering click immediately
+      if (e.type === "touchstart") {
+        e.preventDefault();
+      }
+      
+      const coords = getClientCoords(e);
+      const rect = cartRef.current.getBoundingClientRect();
+      let currentX, currentY;
+      
+      if (position.x !== null && position.y !== null) {
+        currentX = position.x;
+        currentY = position.y;
+      } else {
+        // Calculate default position
+        currentX = window.innerWidth - rect.width - 20;
+        const bottomOffset = cookieBannerVisible ? 120 : 20;
+        currentY = window.innerHeight - rect.height - bottomOffset;
+      }
+      
+      startPositionRef.current = { x: coords.x, y: coords.y };
+      setDragOffset({
+        x: coords.x - currentX,
+        y: coords.y - currentY,
+      });
+      setIsDragging(true);
+      hasDraggedRef.current = false;
+    }
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMove = (e) => {
+      if (!isDragging) return;
+
+      // Prevent default to stop scrolling on touch devices
+      if (e.type === "touchmove") {
+        e.preventDefault();
+      }
+
+      const coords = getClientCoords(e);
+      
+      // Check if pointer has moved significantly (more than 5px)
+      const moveDistance = Math.sqrt(
+        Math.pow(coords.x - startPositionRef.current.x, 2) +
+        Math.pow(coords.y - startPositionRef.current.y, 2)
+      );
+
+      if (moveDistance > 5) {
+        hasDraggedRef.current = true;
+      }
+
+      const newX = coords.x - dragOffset.x;
+      const newY = coords.y - dragOffset.y;
+
+      // Constrain to viewport
+      const maxX = window.innerWidth - 56; // 56px is the width of cart-fab
+      const maxY = window.innerHeight - 56; // 56px is the height of cart-fab
+
+      const constrainedX = Math.max(0, Math.min(newX, maxX));
+      const constrainedY = Math.max(0, Math.min(newY, maxY));
+
+      const newPosition = { x: constrainedX, y: constrainedY };
+      setPosition(newPosition);
+      positionRef.current = newPosition;
+    };
+
+    const handleEnd = () => {
+      const wasDragging = hasDraggedRef.current;
+      setIsDragging(false);
+      
+      // Save position to localStorage if we actually dragged
+      if (wasDragging && positionRef.current.x !== null && positionRef.current.y !== null) {
+        window.localStorage.setItem(
+          "cartIconPosition",
+          JSON.stringify({ x: positionRef.current.x, y: positionRef.current.y })
+        );
+      }
+      
+      // Reset hasDragged after a short delay to allow click to work
+      setTimeout(() => {
+        hasDraggedRef.current = false;
+      }, 100);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleEnd);
+    window.addEventListener("touchmove", handleMove, { passive: false });
+    window.addEventListener("touchend", handleEnd);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleEnd);
+      window.removeEventListener("touchmove", handleMove);
+      window.removeEventListener("touchend", handleEnd);
+    };
+  }, [isDragging, dragOffset]);
+
+  // Calculate position style
+  const getPositionStyle = () => {
+    const baseStyle = {
+      cursor: isDragging ? "grabbing" : "grab",
+      userSelect: "none",
+      WebkitUserSelect: "none",
+    };
+
+    if (position.x !== null && position.y !== null) {
+      return {
+        ...baseStyle,
+        position: "fixed",
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        bottom: "auto",
+        right: "auto",
+      };
+    }
+    
+    // Default position - above cookie banner if visible, otherwise bottom right
+    const bottomOffset = cookieBannerVisible ? "120px" : "20px";
+    
+    return {
+      ...baseStyle,
+      position: "fixed",
+      bottom: bottomOffset,
+      right: "20px",
+    };
+  };
+
+  const handleClick = (e) => {
+    // Prevent navigation if we just finished dragging
+    if (hasDraggedRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   return (
     <>
       {pathname !== "/order" && (
-        <Link href="/order" className="cart-fab">
-          <ShoppingCartOutlined style={{ fontSize: "24px" }} />
+        <Link
+          href="/order"
+          className="cart-fab"
+          ref={cartRef}
+          style={getPositionStyle()}
+          onMouseDown={handleStart}
+          onTouchStart={handleStart}
+          onClick={handleClick}
+          draggable={false}
+        >
+          <ShoppingCartOutlined style={{ fontSize: "24px", pointerEvents: "none" }} />
           {cartItemCount > 0 && (
             <span className="cart-count">{cartItemCount}</span>
           )}

@@ -2,7 +2,7 @@
 
 import { useUser } from "@/context/UserContext";
 import { CheckOutlined } from "@ant-design/icons";
-import { Button, Input, message, Tooltip } from "antd";
+import { Button, Input, message, Select, Tooltip } from "antd";
 import { get, onValue, ref, update } from "firebase/database";
 import Image from "next/image";
 import Link from "next/link";
@@ -580,6 +580,9 @@ export default function Order() {
             <p>
               <span className="description-title">Детайли на поръчката</span>
             </p>
+            <Link href="/our-menu" className="btn btn-primary w-auto text-center py-1 px-3" style={{ marginBottom: "20px" }}>
+              Към меню
+            </Link>
             <div className="content box">
               <div className="row">
                 <div className="col-lg-8 items-section">
