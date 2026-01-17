@@ -17,7 +17,7 @@ const Hero = () => {
               <a href="#book-a-table" className="btn-get-started">
                 Резервирай маса
               </a>
-              <a href="/our-menu" className="btn-get-started">
+              <a href="/for-home" className="btn-get-started">
                 Поръчай
               </a>
               <a href="/catering/zaiavka" className="btn-get-started">

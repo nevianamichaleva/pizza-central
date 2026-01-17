@@ -208,7 +208,7 @@ const Header = () => {
             alignItems: 'flex-end',
             order: 2
           }}>
-            <Link href="/our-menu" className="btn-getstarted">
+            <Link href="/for-home" className="btn-getstarted">
               Поръчай
             </Link>
             <Link href="/reservation" className="btn-getstarted">

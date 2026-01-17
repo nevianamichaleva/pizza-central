@@ -4,12 +4,13 @@ import { useCategories } from '@/context/CategoriesContext';
 import { useProducts } from '@/context/ProductsContext';
 import { useUser } from '@/context/UserContext';
 import { ShoppingCartOutlined } from '@ant-design/icons';
-import { Button, Modal, Radio } from "antd";
+import { Button, Input, Modal, Radio } from "antd";
 import { get, push, ref, set, update } from "firebase/database";
 import Link from "next/link";
 import { useEffect, useState } from 'react';
 import { rtdb } from "../../lib/firebase";
 import showAToast from "../components/common/showAToast";
+const { Search } = Input;
 
 // 14 основни алергена според ЕС регулациите
 const allergens = [
@@ -53,6 +54,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSideDish, setSelectedSideDish] = useState(null);
   const [packagingData, setPackagingData] = useState({});
+  const [activeSearchQuery, setActiveSearchQuery] = useState('');
   const { products } = useProducts();
   const { categories } = useCategories();
   const { user, userDetails } = useUser();
@@ -79,6 +81,38 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
     return product.category === categoryId;
   };
 
+  // Filter products by search query (name, category, ingredients)
+  const filterProductsBySearch = (productList, query) => {
+    if (!query || query.trim() === '') {
+      return productList;
+    }
+
+    const searchTerm = query.toLowerCase().trim();
+    
+    return productList.filter((item) => {
+      // Search by name
+      const nameMatch = item.name && item.name.toLowerCase().includes(searchTerm);
+      
+      // Search by ingredients
+      const ingredientsMatch = item.ingredients && item.ingredients.toLowerCase().includes(searchTerm);
+      
+      // Search by category name
+      let categoryMatch = false;
+      const categoryIds = item.categories && Array.isArray(item.categories) && item.categories.length > 0
+        ? item.categories
+        : (item.category ? [item.category] : []);
+      
+      categoryIds.forEach(categoryId => {
+        const category = categories.find(cat => cat.id === categoryId);
+        if (category && category.name && category.name.toLowerCase().includes(searchTerm)) {
+          categoryMatch = true;
+        }
+      });
+      
+      return nameMatch || ingredientsMatch || categoryMatch;
+    });
+  };
+
   // Validate and set active tab when categories are loaded
   useEffect(() => {
     if (categories && categories.length > 0) {
@@ -101,6 +135,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
       }
     }
   }, [categories]);
+
 
   // Fetch packaging data
   useEffect(() => {
@@ -558,8 +593,21 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
       )}
 
       <div className="container">
-        {/* Desktop Tab Navigation - Hide if single category */}
-        {!categorySlug && (
+        {/* Search Bar */}
+        <div style={{ marginBottom: '30px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }} data-aos="fade-up">
+          <Search
+            placeholder="Въведете за търсене в менюто"
+            allowClear
+            enterButton="Търси"
+            size="large"
+            onSearch={(value) => {
+              setActiveSearchQuery(value.trim());
+            }}
+          />
+        </div>
+
+        {/* Desktop Tab Navigation - Hide if single category or when searching (min 3 chars) */}
+        {!categorySlug && (!activeSearchQuery || activeSearchQuery.trim().length < 3) && (
           <ul className="nav nav-tabs d-flex justify-content-center menu-desktop-tabs" data-aos="fade-up" data-aos-delay="100">
           {categories
             .filter((category) => {
@@ -593,6 +641,37 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
         {/* Desktop Tab Content */}
         <div className="tab-content menu-desktop-content" data-aos="fade-up" data-aos-delay="200">
           {(() => {
+            // If searching (at least 3 characters), show all products from all categories
+            if (activeSearchQuery && activeSearchQuery.trim().length >= 3) {
+              const allFilteredProducts = filterProductsBySearch(products.filter((item) => {
+                if (item.isSideDish) return false;
+                // If both fields are missing, show the product in both menus
+                const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
+                const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
+                if (!hasDeliveryField && !hasRestaurantField) {
+                  return true;
+                }
+                // Show if forDelivery is true
+                return item.forDelivery === true;
+              }), activeSearchQuery);
+
+              return (
+                <div className="tab-pane fade active show">
+                  <div className="tab-header text-center">
+                    <p>Меню</p>
+                    <h3 style={{ fontSize: '24px', fontWeight: '500' }}>Резултати от търсенето: "{activeSearchQuery}"</h3>
+                    <p style={{ fontSize: '16px', color: '#666', marginTop: '10px', marginBottom: '20px' }}>
+                      Намерени {allFilteredProducts.length} {allFilteredProducts.length === 1 ? 'продукт' : 'продукта'}
+                    </p>
+                  </div>
+                  <div className="row gy-5">
+                    {allFilteredProducts.map((item, index) => renderProductCard(item, index))}
+                  </div>
+                </div>
+              );
+            }
+
+            // Normal category-based display
             const filteredCategories = categories.filter((category) => {
               // If both fields are missing, show the category in both menus
               const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
@@ -662,7 +741,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
               <div className="row gy-5">
                 {subcategoryActiveTab ?
                   <>
-                    {products.filter((item) => {
+                    {filterProductsBySearch(products.filter((item) => {
                       // Check if product belongs to the parent category of this subcategory
                       const parentCategory = categories.find(cat => cat.id === subcategory.parent || cat.children?.some(child => child.id === subcategory.id));
                       if (!parentCategory || !productBelongsToCategory(item, parentCategory.id)) return false;
@@ -675,11 +754,11 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                       }
                       // Show if forDelivery is true
                       return item.forDelivery === true;
-                    }).map((item, index) => renderProductCard(item, index))}
+                    }), activeSearchQuery).map((item, index) => renderProductCard(item, index))}
                   </>
                   :
                   <>
-                    {products.filter((item) => {
+                    {filterProductsBySearch(products.filter((item) => {
                       if (!productBelongsToCategory(item, category.id) || item.isSideDish) return false;
                       // If both fields are missing, show the product in both menus
                       const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
@@ -689,7 +768,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                       }
                       // Show if forDelivery is true
                       return item.forDelivery === true;
-                    }).map((item, index) => renderProductCard(item, index))}
+                    }), activeSearchQuery).map((item, index) => renderProductCard(item, index))}
                   </>
                 }
               </div>
@@ -699,10 +778,193 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
           })()}
         </div>
 
+        {/* Mobile Search Results - Show when searching with categorySlug */}
+        {categorySlug && (
+          <div className="menu-mobile-categories">
+            {(() => {
+              // If searching (at least 3 characters), show all products from all categories
+              if (activeSearchQuery && activeSearchQuery.trim().length >= 3) {
+                const allFilteredProducts = filterProductsBySearch(products.filter((item) => {
+                  if (item.isSideDish) return false;
+                  // If both fields are missing, show the product in both menus
+                  const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
+                  const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
+                  if (!hasDeliveryField && !hasRestaurantField) {
+                    return true;
+                  }
+                  // Show if forDelivery is true
+                  return item.forDelivery === true;
+                }), activeSearchQuery);
+
+                return (
+                  <div className="menu-mobile-category-section">
+                    <h3 className="menu-mobile-category-title" style={{ fontSize: '18px' }}>
+                      Резултати от търсенето: "{activeSearchQuery}"
+                    </h3>
+                    <p style={{ fontSize: '14px', color: '#666', marginBottom: '15px', textAlign: 'center' }}>
+                      Намерени {allFilteredProducts.length} {allFilteredProducts.length === 1 ? 'продукт' : 'продукта'}
+                    </p>
+                    <div className="menu-mobile-products-slider">
+                      {allFilteredProducts.map((item, index) => (
+                        <div key={index} className="menu-mobile-product-item">
+                          <a href={item.url || item.image || "#"} className="glightbox">
+                            <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
+                          </a>
+                          <h4>{item.name}</h4>
+                          {item.ingredients && (
+                            <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
+                              {item.ingredients.length > 60 
+                                ? `${item.ingredients.substring(0, 60)}...` 
+                                : item.ingredients}
+                            </p>
+                          )}
+                          {item.description && (
+                            <p className="ingredients" style={{ marginBottom: "8px" }}>
+                              {item.description.length > 60 
+                                ? `${item.description.substring(0, 60)}...` 
+                                : item.description}
+                            </p>
+                          )}
+                          {formatPrice(getDisplayPrice(item)) && (
+                            <p className="price">{formatPrice(getDisplayPrice(item))}</p>
+                          )}
+                          <div className="menu-mobile-product-buttons">
+                            {item.slug && (
+                              <Link href={`/products/${item.slug}`} style={{ marginBottom: '8px', display: 'block' }}>
+                                <Button
+                                  type="default"
+                                  style={{
+                                    width: '100%',
+                                    borderRadius: '10px',
+                                    padding: '10px 20px',
+                                    fontSize: '16px',
+                                    height: 'auto'
+                                  }}
+                                >
+                                  Виж повече
+                                </Button>
+                              </Link>
+                            )}
+                            <Button
+                              type="primary"
+                              onClick={() => handleProductClick(item)}
+                              icon={<ShoppingCartOutlined />}
+                              style={{
+                                width: '100%',
+                                borderRadius: '10px',
+                                padding: '10px 20px',
+                                fontSize: '16px',
+                                height: 'auto',
+                                backgroundColor: '#c41d7f',
+                                borderColor: '#c41d7f'
+                              }}
+                            >
+                              Добави
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+          </div>
+        )}
+
         {/* Mobile Category List with Sliders - Hide if single category */}
         {!categorySlug && (
           <div className="menu-mobile-categories">
             {(() => {
+              // If searching (at least 3 characters), show all products from all categories
+              if (activeSearchQuery && activeSearchQuery.trim().length >= 3) {
+                const allFilteredProducts = filterProductsBySearch(products.filter((item) => {
+                  if (item.isSideDish) return false;
+                  // If both fields are missing, show the product in both menus
+                  const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
+                  const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
+                  if (!hasDeliveryField && !hasRestaurantField) {
+                    return true;
+                  }
+                  // Show if forDelivery is true
+                  return item.forDelivery === true;
+                }), activeSearchQuery);
+
+                return (
+                  <div className="menu-mobile-category-section">
+                    <h3 className="menu-mobile-category-title" style={{ fontSize: '18px' }}>
+                      Резултати от търсенето: "{activeSearchQuery}"
+                    </h3>
+                    <p style={{ fontSize: '14px', color: '#666', marginBottom: '15px', textAlign: 'center' }}>
+                      Намерени {allFilteredProducts.length} {allFilteredProducts.length === 1 ? 'продукт' : 'продукта'}
+                    </p>
+                    <div className="menu-mobile-products-slider">
+                      {allFilteredProducts.map((item, index) => (
+                        <div key={index} className="menu-mobile-product-item">
+                          <a href={item.url || item.image || "#"} className="glightbox">
+                            <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
+                          </a>
+                          <h4>{item.name}</h4>
+                          {item.ingredients && (
+                            <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
+                              {item.ingredients.length > 60 
+                                ? `${item.ingredients.substring(0, 60)}...` 
+                                : item.ingredients}
+                            </p>
+                          )}
+                          {item.description && (
+                            <p className="ingredients" style={{ marginBottom: "8px" }}>
+                              {item.description.length > 60 
+                                ? `${item.description.substring(0, 60)}...` 
+                                : item.description}
+                            </p>
+                          )}
+                          {formatPrice(getDisplayPrice(item)) && (
+                            <p className="price">{formatPrice(getDisplayPrice(item))}</p>
+                          )}
+                          <div className="menu-mobile-product-buttons">
+                            {item.slug && (
+                              <Link href={`/products/${item.slug}`} style={{ marginBottom: '8px', display: 'block' }}>
+                                <Button
+                                  type="default"
+                                  style={{
+                                    width: '100%',
+                                    borderRadius: '10px',
+                                    padding: '10px 20px',
+                                    fontSize: '16px',
+                                    height: 'auto'
+                                  }}
+                                >
+                                  Виж повече
+                                </Button>
+                              </Link>
+                            )}
+                            <Button
+                              type="primary"
+                              onClick={() => handleProductClick(item)}
+                              icon={<ShoppingCartOutlined />}
+                              style={{
+                                width: '100%',
+                                borderRadius: '10px',
+                                padding: '10px 20px',
+                                fontSize: '16px',
+                                height: 'auto',
+                                backgroundColor: '#c41d7f',
+                                borderColor: '#c41d7f'
+                              }}
+                            >
+                              Добави
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+
+              // Normal category-based display
               const filteredCategories = categories
                 .filter((category) => {
                   // If both fields are missing, show the category in both menus
@@ -721,7 +983,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                 });
 
               return filteredCategories.map((category, index) => {
-                const categoryProducts = products.filter((item) => {
+                const categoryProducts = filterProductsBySearch(products.filter((item) => {
                   if (!productBelongsToCategory(item, category.id) || item.isSideDish) return false;
                   // If both fields are missing, show the product in both menus
                   const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
@@ -731,7 +993,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                   }
                   // Show if forDelivery is true
                   return item.forDelivery === true;
-                });
+                }), activeSearchQuery);
 
                 // Find next category in the filtered list
                 const nextCategory = index < filteredCategories.length - 1
