@@ -1,5 +1,6 @@
 "use client";
 
+import { useCategories } from '@/context/CategoriesContext';
 import { useProducts } from '@/context/ProductsContext';
 import { useUser } from '@/context/UserContext';
 import { ShoppingCartOutlined } from '@ant-design/icons';
@@ -12,6 +13,7 @@ import showAToast from "./common/showAToast";
 
 const MenuPreview = () => {
   const { products } = useProducts();
+  const { categories } = useCategories();
   const { user, userDetails } = useUser();
   const [packagingData, setPackagingData] = useState({});
   const [sideDishModalVisible, setSideDishModalVisible] = useState(false);
@@ -34,12 +36,33 @@ const MenuPreview = () => {
     fetchPackaging();
   }, []);
 
+  // Helper function to check if product belongs to a category
+  // Supports both old format (category) and new format (categories array)
+  const productBelongsToCategory = (product, categoryId) => {
+    if (product.categories && Array.isArray(product.categories) && product.categories.length > 0) {
+      return product.categories.includes(categoryId);
+    }
+    // Fallback to old format
+    return product.category === categoryId;
+  };
+
   // Get random products with images (always 6 items)
   const randomProducts = useMemo(() => {
+    // Find "Сосове" category
+    const saucesCategory = categories.find(cat => 
+      cat.name && (cat.name.toLowerCase() === 'сосове' || cat.name.toLowerCase() === 'sauces')
+    );
+    const saucesCategoryId = saucesCategory?.id;
+
     // Filter products that have images and are for delivery
     const productsWithImages = products.filter((item) => {
       if (item.isSideDish) return false;
       if (!item.image || item.image === '/images/no-image.png') return false;
+      
+      // Exclude products from "Сосове" category
+      if (saucesCategoryId && productBelongsToCategory(item, saucesCategoryId)) {
+        return false;
+      }
       
       // If both fields are missing, show the product in both menus
       const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
@@ -55,7 +78,7 @@ const MenuPreview = () => {
     const shuffled = [...productsWithImages].sort(() => Math.random() - 0.5);
     const count = Math.min(6, shuffled.length);
     return shuffled.slice(0, count);
-  }, [products]);
+  }, [products, categories]);
 
   const normalizePrice = (rawPrice) => {
     if (rawPrice === undefined || rawPrice === null) {

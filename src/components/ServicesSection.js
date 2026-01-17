@@ -17,37 +17,7 @@ const ServicesSection = () => {
               </p>
             </div>
             
-            <div className="row gy-4 justify-content-center">
-              <div className="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                <Link href="/detski-kut" style={{ textDecoration: 'none', display: 'block' }}>
-                  <div className="text-center" style={{
-                    padding: '40px 30px',
-                    backgroundColor: '#fff',
-                    borderRadius: '12px',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-                    transition: 'transform 0.3s, box-shadow 0.3s',
-                    height: '100%',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-5px)';
-                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(206, 18, 18, 0.2)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
-                  }}>
-                    <i className="bi bi-heart-fill" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '20px', display: 'block' }}></i>
-                    <h4 style={{ fontSize: '22px', color: 'var(--heading-color)', marginBottom: '15px', fontFamily: 'var(--heading-font)' }}>
-                      <Link href="/detski-kut" style={{ color: 'inherit', textDecoration: 'none' }}>Детски кът</Link>
-                    </h4>
-                    <p style={{ fontSize: '16px', color: '#666', lineHeight: '1.6' }}>
-                      Безопасно място за игра, където децата ви ще се забавляват, докато вие се наслаждавате на вкусна храна
-                    </p>
-                  </div>
-                </Link>
-              </div>
-              
+            <div className="row gy-4 justify-content-center">            
               <div className="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
                 <Link href="/reservation" style={{ textDecoration: 'none', display: 'block' }} aria-label="Резервирай маса в ресторанта">
                   <div className="text-center" style={{
@@ -133,6 +103,36 @@ const ServicesSection = () => {
                     </h4>
                     <p style={{ fontSize: '16px', color: '#666', lineHeight: '1.6' }}>
                       Професионален кетъринг за фирмени и лични събития с индивидуален подход и внимание към детайла
+                    </p>
+                  </div>
+                </Link>
+              </div>
+
+              <div className="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <Link href="/detski-kut" style={{ textDecoration: 'none', display: 'block' }}>
+                  <div className="text-center" style={{
+                    padding: '40px 30px',
+                    backgroundColor: '#fff',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                    transition: 'transform 0.3s, box-shadow 0.3s',
+                    height: '100%',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-5px)';
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(206, 18, 18, 0.2)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
+                  }}>
+                    <i className="bi bi-heart-fill" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '20px', display: 'block' }}></i>
+                    <h4 style={{ fontSize: '22px', color: 'var(--heading-color)', marginBottom: '15px', fontFamily: 'var(--heading-font)' }}>
+                      <Link href="/detski-kut" style={{ color: 'inherit', textDecoration: 'none' }}>Детски кът</Link>
+                    </h4>
+                    <p style={{ fontSize: '16px', color: '#666', lineHeight: '1.6' }}>
+                      Безопасно място за игра, където децата ви ще се забавляват, докато вие се наслаждавате на вкусна храна
                     </p>
                   </div>
                 </Link>

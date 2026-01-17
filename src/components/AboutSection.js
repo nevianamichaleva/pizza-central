@@ -41,8 +41,8 @@ const AboutSection = () => {
               Превърнахме гостите си в приятели и с радост ви очакваме да станете част от нашата история! 🍕
               </p>
             </div>
-            <div style={{ marginTop: '30px' }}>
-              <Link href="/reservation">
+            <div style={{ marginTop: '30px', textAlign: 'center' }}>
+              <Link href="/reservation" style={{ marginRight: '15px', display: 'inline-block' }}>
                 <button 
                   className="btn btn-primary"
                   style={{
@@ -59,6 +59,25 @@ const AboutSection = () => {
                   }}
                 >
                   Резервирай маса
+                </button>
+              </Link>
+              <Link href="/catering/zaiavka" style={{ display: 'inline-block' }}>
+                <button 
+                  className="btn btn-primary"
+                  style={{
+                    padding: '12px 30px',
+                    fontSize: '16px',
+                    borderRadius: '5px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    backgroundColor: '#c41d7f',
+                    color: 'white',
+                    textDecoration: 'none',
+                    display: 'inline-block',
+                    marginBottom: '15px'
+                  }}
+                >
+                  Заявете кетъринг
                 </button>
               </Link>
               <p>Или се свържете с нас на телефон 0895 516401 и 0893 315201</p>

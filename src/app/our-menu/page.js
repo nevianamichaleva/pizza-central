@@ -1,12 +1,13 @@
 'use client';
 
-import MenuSection from "@/components/MenuSection";
+import CentralMenuPage from "../[lang]/central-menu/page";
 
 export default function Products() {
 
   return (
     <>
-      <MenuSection />
+      {/* <MenuSection /> */}
+      <CentralMenuPage />
     </>
   );
 }
