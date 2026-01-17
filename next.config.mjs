@@ -125,6 +125,11 @@ const nextConfig = {
         destination: '/new-dishes/novo-pizza-s-burata',
         permanent: true,
       },
+      {
+        source: '/blog/central-dostavka',
+        destination: '/for-home',
+        permanent: true,
+      },
     ];
   },
 };

@@ -943,9 +943,20 @@ section,
   color: var(--accent-color);
 }
 
+.section-title h1 {
+  color: var(--heading-color);
+  margin: 10px 0;
+  font-size: 36px;
+  font-weight: 500;
+  font-family: var(--heading-font);
+}
+
 @media (max-width: 768px) {
   .section-title p {
     font-size: 28px;
+  }
+  .section-title h1 {
+    font-size: 24px;
   }
 }
 

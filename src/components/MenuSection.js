@@ -34,7 +34,7 @@ const getAllergenLabel = (allergenValue) => {
   return allergen ? allergen.label : allergenValue;
 };
 
-const MenuSection = ({ categorySlug = null }) => {
+const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
   const STORAGE_KEY = 'menuActiveTab';
   const DEFAULT_TAB = "menu-Пици";
   
@@ -535,25 +535,27 @@ const MenuSection = ({ categorySlug = null }) => {
 
   return (
     <section id="menu" className="menu section">
-      <div className="container section-title" data-aos="fade-up">
-        <h2>
-          {selectedCategory 
-            ? selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1)
-            : 'Ресторант-пицария Централ град Добрич'
-          }
-        </h2>
-        <p>
-          <span>
-            {selectedCategory ? 'Нашите' : 'Нашето'}
-          </span>{' '}
-          <span className="description-title">
+      {!hideTitle && (
+        <div className="container section-title" data-aos="fade-up">
+          <h2>
             {selectedCategory 
-              ? selectedCategory.name.toLowerCase()
-              : 'меню'
+              ? selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1)
+              : 'Ресторант-пицария Централ град Добрич'
             }
-          </span>
-        </p>
-      </div>
+          </h2>
+          <p>
+            <span>
+              {selectedCategory ? 'Нашите' : 'Нашето'}
+            </span>{' '}
+            <span className="description-title">
+              {selectedCategory 
+                ? selectedCategory.name.toLowerCase()
+                : 'меню'
+              }
+            </span>
+          </p>
+        </div>
+      )}
 
       <div className="container">
         {/* Desktop Tab Navigation - Hide if single category */}
