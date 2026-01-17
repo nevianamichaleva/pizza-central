@@ -42,7 +42,7 @@ const Hero = () => {
           >
             <div style={{ width: '100%', maxWidth: '500px', aspectRatio: '1', margin: '0 auto', borderRadius: '50%', overflow: 'hidden' }}>
               <Image
-                src="/images/gallery/gallery-winter.jpg"
+                src="/images/dinner-3.jpg"
                 alt="Вкусни ястия от ресторант-пицария Централ Добрич"
                 width={500}
                 height={500}

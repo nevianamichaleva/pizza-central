@@ -225,12 +225,7 @@ const Header = () => {
             <li>
               <MenuLink href="/" className={pathname === '/' ? 'active' : ''}> Начало </MenuLink>
             </li>
-            {hasLaunchMenuToday && (
-              <li>
-                <MenuLink href="/launch-menu" className={pathname == '/launch-menu' ? 'active' : ''}>Обедно меню</MenuLink>
-              </li>
-            )}
-            {/* <li
+                   {/* <li
               className="dropdown"
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
@@ -323,6 +318,9 @@ const Header = () => {
             </li>
             <li>
               <MenuLink href="/our-menu" className={pathname == '/our-menu' ? 'active' : ''}>Меню</MenuLink>
+            </li>
+            <li>
+              <MenuLink href={hasLaunchMenuToday ? "/launch-menu" : "/obedno-menu"} className={pathname == '/launch-menu' || pathname == '/obedno-menu' ? 'active' : ''}>Обедно меню</MenuLink>
             </li>
             <li>
               <MenuLink href="/catering" className={pathname == '/catering' ? 'active' : ''}>Кетъринг</MenuLink>
