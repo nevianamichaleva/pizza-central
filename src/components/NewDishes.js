@@ -76,22 +76,22 @@ const NewDishes = () => {
                   <img src={chef.img} className="img-fluid" alt={chef.name} />
                   <div className="social">
                     {chef.social.twitter && (
-                      <a href={chef.social.twitter}>
+                      <a href={chef.social.twitter} aria-label={`Последвайте ${chef.name} в Twitter`} target="_blank" rel="noopener noreferrer">
                         <i className="bi bi-twitter-x"></i>
                       </a>
                     )}
                     {chef.social.facebook && (
-                      <a href={chef.social.facebook}>
+                      <a href={chef.social.facebook} aria-label={`Последвайте ${chef.name} в Facebook`} target="_blank" rel="noopener noreferrer">
                         <i className="bi bi-facebook"></i>
                       </a>
                     )}
                     {chef.social.instagram && (
-                      <a href={chef.social.instagram}>
+                      <a href={chef.social.instagram} aria-label={`Последвайте ${chef.name} в Instagram`} target="_blank" rel="noopener noreferrer">
                         <i className="bi bi-instagram"></i>
                       </a>
                     )}
                     {chef.social.linkedin && (
-                      <a href={chef.social.linkedin}>
+                      <a href={chef.social.linkedin} aria-label={`Последвайте ${chef.name} в LinkedIn`} target="_blank" rel="noopener noreferrer">
                         <i className="bi bi-linkedin"></i>
                       </a>
                     )}

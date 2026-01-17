@@ -29,11 +29,11 @@
 
 /* Nav Menu Colors - The following color variables are used specifically for the navigation menu. They are separate from the global colors to allow for more customization options */
 :root {
-  --nav-color: #7f7f90;  /* The default color of the main navmenu links */
+  --nav-color: #4a4a5a;  /* The default color of the main navmenu links - improved contrast for accessibility */
   --nav-hover-color: #ce1212; /* Applied to main navmenu links when they are hovered over or active */
   --nav-mobile-background-color: #ffffff; /* Used as the background color for mobile navigation menu */
   --nav-dropdown-background-color: #ffffff; /* Used as the background color for dropdown items that appear when hovering over primary navigation items */
-  --nav-dropdown-color: #7f7f90; /* Used for navigation links of the dropdown items in the navigation menu. */
+  --nav-dropdown-color: #4a4a5a; /* Used for navigation links of the dropdown items in the navigation menu. - improved contrast for accessibility */
   --nav-dropdown-hover-color: #ce1212; /* Similar to --nav-hover-color, this color is applied to dropdown navigation links when they are hovered over. */
 }
 
@@ -1339,7 +1339,7 @@ section,
 
 .menu .tab-content .menu-item .ingredients {
   font-family: var(--nav-font);
-  color: color-mix(in srgb, var(--default-color), transparent 50%);
+  color: color-mix(in srgb, var(--default-color), transparent 20%);
   margin-bottom: 5px;
 }
 
@@ -1437,7 +1437,7 @@ section,
 
   .menu-mobile-product-item .ingredients {
     font-family: var(--nav-font);
-    color: color-mix(in srgb, var(--default-color), transparent 50%);
+    color: color-mix(in srgb, var(--default-color), transparent 20%);
     margin-bottom: 8px;
     font-size: 14px;
   }

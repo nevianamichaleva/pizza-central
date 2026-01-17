@@ -55,7 +55,7 @@ const AboutUsPage = () => {
                 </div>
                 
                 <div className="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                  <Link href="/reservation" style={{ textDecoration: 'none', display: 'block' }}>
+                  <Link href="/reservation" style={{ textDecoration: 'none', display: 'block' }} aria-label="Резервирай маса в ресторанта">
                     <div className="text-center" style={{
                       padding: '40px 30px',
                       backgroundColor: '#fff',
@@ -85,7 +85,7 @@ const AboutUsPage = () => {
                 </div>
                 
                 <div className="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                  <Link href="/for-home" style={{ textDecoration: 'none', display: 'block' }}>
+                  <Link href="/for-home" style={{ textDecoration: 'none', display: 'block' }} aria-label="Поръчай за доставка до дома">
                     <div className="text-center" style={{
                       padding: '40px 30px',
                       backgroundColor: '#fff',

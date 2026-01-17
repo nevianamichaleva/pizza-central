@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { rtdb } from '../../../../lib/firebase';
 import styles from "./page.module.css";
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-central.bg';
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
 
 // 14 основни алергена според ЕС регулациите
 const allergens = [
@@ -222,7 +222,7 @@ export default async function ProductDetailsPage({ params }) {
       />
       <section className="section">
         <div className="container">
-          <Link className={styles.backLink} href="/our-menu">
+          <Link className={styles.backLink} href="/our-menu" aria-label="Назад към менюто">
             &larr; Назад към менюто
           </Link>
         <div className={styles.hero}>

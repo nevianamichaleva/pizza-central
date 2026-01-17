@@ -208,10 +208,10 @@ const Header = () => {
             alignItems: 'flex-end',
             order: 2
           }}>
-            <Link href="/for-home" className="btn-getstarted">
+            <Link href="/for-home" className="btn-getstarted" aria-label="Поръчай за доставка до дома">
               Поръчай
             </Link>
-            <Link href="/reservation" className="btn-getstarted">
+            <Link href="/reservation" className="btn-getstarted" aria-label="Резервирай маса">
               Резервирай
             </Link>
           </div>
@@ -282,9 +282,11 @@ const Header = () => {
               onMouseEnter={handleForHomeMouseEnter}
               onMouseLeave={handleForHomeMouseLeave}
             >
-              <a
-                href="#"
-                style={{fontSize: '18px'}}
+              <button
+                type="button"
+                aria-expanded={forHomeDropdownOpen}
+                aria-haspopup="true"
+                style={{fontSize: '18px', background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--nav-color)', width: '100%', textAlign: 'left'}}
                 onClick={(e) => {
                   e.preventDefault();
                   toggleForHomeDropdown();
@@ -292,7 +294,7 @@ const Header = () => {
                 className={(pathname == '/for-home' || pathname?.startsWith('/for-home/')) ? 'active dropdown-toggle' : 'dropdown-toggle'}
               >
                 <span>Доставка</span>
-              </a>
+              </button>
               {forHomeDropdownOpen && deliveryCategories.length > 0 && (
                 <ul key="for-home-categories">
                   <li>
@@ -330,9 +332,11 @@ const Header = () => {
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
             >
-              <a
-                href="#"
-                style={{fontSize: '18px'}}
+              <button
+                type="button"
+                aria-expanded={deepDropdownOpen}
+                aria-haspopup="true"
+                style={{fontSize: '18px', background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--nav-color)', width: '100%', textAlign: 'left'}}
                 onClick={(e) => {
                   e.preventDefault();
                   toggleDeepDropdown();
@@ -340,7 +344,7 @@ const Header = () => {
                 className={(pathname == '/about-us' || pathname == '/detski-kut' || pathname == '/new-dishes' || pathname == '/events' || pathname == '/gallery' || pathname == '/blog') ? 'active dropdown-toggle' : 'dropdown-toggle'}
               >
                 <span>За нас</span>
-              </a>
+              </button>
               {deepDropdownOpen && (
                 <ul key="cat1">
                   <li>
@@ -380,8 +384,15 @@ const Header = () => {
                     <MenuLink href="/admin" >Административен панел</MenuLink>
                   </li>
                 )}
-                <li onClick={() => { logoutUser(); }}>
-                  <MenuLink href="#"  >Изход</MenuLink>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => { logoutUser(); }}
+                    style={{fontSize: '18px', background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--nav-color)', width: '100%', textAlign: 'left'}}
+                    className="menu-link-button"
+                  >
+                    Изход
+                  </button>
                 </li>
               </>
             )}
@@ -391,9 +402,13 @@ const Header = () => {
               </li>
             )}
           </ul>
-          <i
+          <button
+            type="button"
             className={`mobile-nav-toggle d-xl-none bi ${isMenuOpen ? 'bi-x' : 'bi-list'}`}
             onClick={toggleMenu}
+            aria-label={isMenuOpen ? "Затвори меню" : "Отвори меню"}
+            aria-expanded={isMenuOpen}
+            aria-controls="navmenu"
           />
         </nav>
         {!isMobile && user ? (
@@ -402,7 +417,7 @@ const Header = () => {
               <Space>
                 <UserOutlined style={{ fontSize: '18px' }} />
                 {user.name}
-                <CaretDownOutlined style={{ fontSize: '10px', color: 'black' }} />
+                <CaretDownOutlined style={{ fontSize: '10px', color: 'var(--default-color)' }} />
               </Space>
             </a>
           </Dropdown>
@@ -413,7 +428,7 @@ const Header = () => {
               display: 'flex',
               alignItems: 'center',
               cursor: 'pointer',
-              color: 'red', 
+              color: 'var(--accent-color)', 
               gap: '6px',
             }}
             title="Вход"
@@ -435,10 +450,10 @@ const Header = () => {
             gap: '10px',
             alignItems: 'flex-end'
           }}>
-            <Link href="/our-menu" className="btn-getstarted">
+            <Link href="/our-menu" className="btn-getstarted" aria-label="Поръчай от менюто">
               Поръчай
             </Link>
-            <Link href="/reservation" className="btn-getstarted">
+            <Link href="/reservation" className="btn-getstarted" aria-label="Резервирай маса">
               Резервирай
             </Link>
           </div>

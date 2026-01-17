@@ -14,13 +14,13 @@ const Hero = () => {
             Храна, приготвена с внимание и поднесена с отношение.
             </p>
             <div className="d-flex flex-wrap" data-aos="fade-up" data-aos-delay="200" style={{ gap: "20px" }}>
-              <a href="#book-a-table" className="btn-get-started">
+              <a href="#book-a-table" className="btn-get-started" aria-label="Резервирай маса в ресторанта">
                 Резервирай маса
               </a>
-              <a href="/for-home" className="btn-get-started">
+              <a href="/for-home" className="btn-get-started" aria-label="Поръчай за доставка до дома">
                 Поръчай
               </a>
-              <a href="/catering/zaiavka" className="btn-get-started">
+              <a href="/catering/zaiavka" className="btn-get-started" aria-label="Заяви кетъринг услуги">
                 Заяви кетъринг
               </a>
               {/* <a

@@ -504,7 +504,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
           </div>
         </div>
         <div className="menu-card-content">
-          <h4 className="menu-card-title">{item.name}</h4>
+          <div className="menu-card-title" style={{ fontSize: '20px', fontWeight: 600, marginBottom: '10px', fontFamily: 'var(--heading-font)' }}>{item.name}</div>
           {(item.ingredients || item.description) && (
             <div style={{ marginBottom: "16px" }}>
               {item.ingredients && (
@@ -608,7 +608,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
 
         {/* Desktop Tab Navigation - Hide if single category or when searching (min 3 chars) */}
         {!categorySlug && (!activeSearchQuery || activeSearchQuery.trim().length < 3) && (
-          <ul className="nav nav-tabs d-flex justify-content-center menu-desktop-tabs" data-aos="fade-up" data-aos-delay="100">
+          <ul className="nav nav-tabs d-flex justify-content-center menu-desktop-tabs" role="tablist" data-aos="fade-up" data-aos-delay="100">
           {categories
             .filter((category) => {
               // If both fields are missing, show the category in both menus
@@ -625,16 +625,25 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
               const orderB = b.order !== undefined ? b.order : 0;
               return orderA - orderB;
             })
-            .map((category) => (
-              <li key={category.id} className="nav-item">
-                <a
-                  className={`nav-link ${activeTab === `menu-${category.name}` ? 'active show' : ''}`}
-                  onClick={() => handleTabClick(`menu-${category.name}`)}
+            .map((category) => {
+              const tabId = `menu-${category.name}`;
+              const isActive = activeTab === tabId;
+              return (
+              <li key={category.id} className="nav-item" role="presentation">
+                <button
+                  type="button"
+                  role="tab"
+                  id={`tab-${category.id}`}
+                  aria-selected={isActive}
+                  aria-controls={`menu-${category.name}`}
+                  className={`nav-link ${isActive ? 'active show' : ''}`}
+                  onClick={() => handleTabClick(tabId)}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', width: '100%', textAlign: 'left' }}
                 >
-                  <h4>{category.name.charAt(0).toUpperCase() + category.name.slice(1)}</h4>
-                </a>
+                  <span style={{ fontSize: '18px', fontWeight: 400, fontFamily: 'var(--default-font)' }}>{category.name.charAt(0).toUpperCase() + category.name.slice(1)}</span>
+                </button>
               </li>
-            ))}
+            )})}
           </ul>
         )}
 
@@ -660,7 +669,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                   <div className="tab-header text-center">
                     <p>Меню</p>
                     <h3 style={{ fontSize: '24px', fontWeight: '500' }}>Резултати от търсенето: "{activeSearchQuery}"</h3>
-                    <p style={{ fontSize: '16px', color: '#666', marginTop: '10px', marginBottom: '20px' }}>
+                    <p style={{ fontSize: '16px', color: '#4a4a4a', marginTop: '10px', marginBottom: '20px' }}>
                       Намерени {allFilteredProducts.length} {allFilteredProducts.length === 1 ? 'продукт' : 'продукта'}
                     </p>
                   </div>
@@ -701,6 +710,8 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
               return (
             <div
               key={category.id}
+              role="tabpanel"
+              aria-labelledby={`tab-${category.id}`}
               className={`tab-pane fade ${(categorySlug && selectedCategory) || activeTab === `menu-${category.name}` ? 'active show' : ''}`}
               id={`menu-${category.name}`}
             >
@@ -724,18 +735,25 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                 )}
               </div>
               {category?.children && category.children?.length &&
-                <ul className="nav nav-tabs d-flex justify-content-center" data-aos="fade-up" data-aos-delay="100">
-                  {category.children.map((subcategory) => (
-                    <li key={subcategory.id} className="nav-item">
-                      <a
-                        href="#"
-                        className={`nav-link ${subcategoryActiveTab === `menu-${subcategory.name}` ? 'active show' : ''}`}
+                <ul className="nav nav-tabs d-flex justify-content-center" role="tablist" data-aos="fade-up" data-aos-delay="100">
+                  {category.children.map((subcategory) => {
+                    const subTabId = `menu-${subcategory.name}`;
+                    const isSubActive = subcategoryActiveTab === subTabId;
+                    return (
+                    <li key={subcategory.id} className="nav-item" role="presentation">
+                      <button
+                        type="button"
+                        role="tab"
+                        id={`subtab-${subcategory.id}`}
+                        aria-selected={isSubActive}
+                        className={`nav-link ${isSubActive ? 'active show' : ''}`}
                         onClick={() => handleSubcategoryClick(subcategory)}
+                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', width: '100%', textAlign: 'left' }}
                       >
-                        <h4>{subcategory.name.charAt(0).toUpperCase() + subcategory.name.slice(1)}</h4>
-                      </a>
+                        <span style={{ fontSize: '18px', fontWeight: 400, fontFamily: 'var(--default-font)' }}>{subcategory.name.charAt(0).toUpperCase() + subcategory.name.slice(1)}</span>
+                      </button>
                     </li>
-                  ))}
+                  )})}
                 </ul>
               }
               <div className="row gy-5">
@@ -801,7 +819,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                     <h3 className="menu-mobile-category-title" style={{ fontSize: '18px' }}>
                       Резултати от търсенето: "{activeSearchQuery}"
                     </h3>
-                    <p style={{ fontSize: '14px', color: '#666', marginBottom: '15px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '14px', color: '#4a4a4a', marginBottom: '15px', textAlign: 'center' }}>
                       Намерени {allFilteredProducts.length} {allFilteredProducts.length === 1 ? 'продукт' : 'продукта'}
                     </p>
                     <div className="menu-mobile-products-slider">
@@ -810,7 +828,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                           <a href={item.url || item.image || "#"} className="glightbox">
                             <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
                           </a>
-                          <h4>{item.name}</h4>
+                          <div style={{ fontSize: '20px', fontWeight: 400, marginBottom: '8px', fontFamily: 'var(--default-font)' }}>{item.name}</div>
                           {item.ingredients && (
                             <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
                               {item.ingredients.length > 60 
@@ -855,8 +873,9 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                                 padding: '10px 20px',
                                 fontSize: '16px',
                                 height: 'auto',
-                                backgroundColor: '#c41d7f',
-                                borderColor: '#c41d7f'
+                                backgroundColor: '#b01a6b',
+                                borderColor: '#b01a6b',
+                                color: '#ffffff'
                               }}
                             >
                               Добави
@@ -896,7 +915,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                     <h3 className="menu-mobile-category-title" style={{ fontSize: '18px' }}>
                       Резултати от търсенето: "{activeSearchQuery}"
                     </h3>
-                    <p style={{ fontSize: '14px', color: '#666', marginBottom: '15px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '14px', color: '#4a4a4a', marginBottom: '15px', textAlign: 'center' }}>
                       Намерени {allFilteredProducts.length} {allFilteredProducts.length === 1 ? 'продукт' : 'продукта'}
                     </p>
                     <div className="menu-mobile-products-slider">
@@ -905,7 +924,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                           <a href={item.url || item.image || "#"} className="glightbox">
                             <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
                           </a>
-                          <h4>{item.name}</h4>
+                          <div style={{ fontSize: '20px', fontWeight: 400, marginBottom: '8px', fontFamily: 'var(--default-font)' }}>{item.name}</div>
                           {item.ingredients && (
                             <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
                               {item.ingredients.length > 60 
@@ -950,8 +969,9 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                                 padding: '10px 20px',
                                 fontSize: '16px',
                                 height: 'auto',
-                                backgroundColor: '#c41d7f',
-                                borderColor: '#c41d7f'
+                                backgroundColor: '#b01a6b',
+                                borderColor: '#b01a6b',
+                                color: '#ffffff'
                               }}
                             >
                               Добави
@@ -1052,7 +1072,8 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                             shape="circle"
                             icon={<ShoppingCartOutlined />}
                             style={{
-                              backgroundColor: '#FFA500',
+                              backgroundColor: '#FF8C00',
+                              color: '#ffffff',
                               borderRadius: '10px',
                               padding: '10px 20px',
                               fontSize: '16px',
@@ -1211,7 +1232,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
       >
         <div style={{ marginBottom: '16px' }}>
           <p><strong>{selectedProduct?.name}</strong></p>
-          <p style={{ color: '#666', fontSize: '14px' }}>Моля, изберете гарнитура:</p>
+          <p style={{ color: '#4a4a4a', fontSize: '14px' }}>Моля, изберете гарнитура:</p>
         </div>
         <Radio.Group
           value={selectedSideDish?.id}
@@ -1229,7 +1250,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
             ))}
           </div>
         </Radio.Group>
-        <p style={{ marginTop: '12px', fontSize: '12px', color: '#999' }}>
+        <p style={{ marginTop: '12px', fontSize: '12px', color: '#666' }}>
           * Гарнитурата е включена в цената на ястието
         </p>
       </Modal>

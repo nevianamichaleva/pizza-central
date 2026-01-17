@@ -28,7 +28,7 @@ export const metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-central.bg'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg'),
   alternates: {
     canonical: '/',
   },
@@ -84,7 +84,9 @@ export default function RootLayout({ children }) {
             <ProductsProvider>
               <TranslationsProvider>
                 <Header />
-                {children}
+                <main>
+                  {children}
+                </main>
                 <Footer />
                 <ToastContainer />
               </TranslationsProvider>

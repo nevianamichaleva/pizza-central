@@ -293,10 +293,11 @@ const CartIcon = ({ userId }) => {
           onTouchStart={handleStart}
           onClick={handleClick}
           draggable={false}
+          aria-label={cartItemCount > 0 ? `Количка с ${cartItemCount} ${cartItemCount === 1 ? 'продукт' : 'продукта'}` : "Количка"}
         >
           <ShoppingCartOutlined style={{ fontSize: "24px", pointerEvents: "none" }} />
           {cartItemCount > 0 && (
-            <span className="cart-count">{cartItemCount}</span>
+            <span className="cart-count" aria-hidden="true">{cartItemCount}</span>
           )}
         </Link>
       )}

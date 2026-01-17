@@ -112,7 +112,7 @@ const BlogPage = () => {
                   </div>
                   <div className="member-info" style={{ padding: '20px 0' }}>
                     <h4 style={{ marginBottom: '10px', fontSize: '20px', fontWeight: '600' }}>{post.title}</h4>
-                    <div style={{ display: 'flex', gap: '15px', marginBottom: '10px', color: '#999', fontSize: '14px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: '15px', marginBottom: '10px', color: '#666', fontSize: '14px', flexWrap: 'wrap' }}>
                       {post.published_at && (
                         <span>
                           {moment(post.published_at).format('DD.MM.YYYY')}

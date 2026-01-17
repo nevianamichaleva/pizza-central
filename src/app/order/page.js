@@ -478,7 +478,7 @@ export default function Order() {
             <p>
               <span className="description-title">Вашата количка е празна</span>
             </p>
-            <Link href="/our-menu" className="btn btn-primary w-auto text-center py-1 px-3">
+            <Link href="/our-menu" className="btn btn-primary w-auto text-center py-1 px-3" aria-label="Към менюто за поръчка">
               Към меню
             </Link>
           </div>

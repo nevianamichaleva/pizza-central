@@ -1,4 +1,4 @@
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-central.bg';
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
 
 // Valid language codes
 const validLanguages = ['bg', 'en', 'ro', 'de'];

@@ -282,16 +282,18 @@ a {
   border-color: #ff8c00 !important;
 }
 
-/* Override Bootstrap btn-primary color */
+/* Override Bootstrap btn-primary color - improved contrast for accessibility */
 .btn-primary {
-  background-color: #FFA500 !important;
-  border-color: #FFA500 !important;
+  background-color: #FF8C00 !important;
+  border-color: #FF8C00 !important;
+  color: #ffffff !important;
 }
 
 .btn-primary:hover,
 .btn-primary:focus {
-  background-color: #ff8c00 !important;
-  border-color: #ff8c00 !important;
+  background-color: #e67e00 !important;
+  border-color: #e67e00 !important;
+  color: #ffffff !important;
 }
 
 /*--------------------------------------------------------------

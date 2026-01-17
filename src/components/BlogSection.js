@@ -147,8 +147,8 @@ const BlogSection = () => {
                 borderRadius: '5px',
                 border: 'none',
                 cursor: 'pointer',
-                backgroundColor: '#c41d7f',
-                color: 'white',
+                backgroundColor: '#b01a6b',
+                color: '#ffffff',
                 textDecoration: 'none',
                 display: 'inline-block'
               }}

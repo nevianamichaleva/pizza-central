@@ -1,13 +1,13 @@
+import BlogViewCounter from '@/components/BlogViewCounter';
 import { get, ref } from 'firebase/database';
 import moment from 'moment';
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { rtdb } from '../../../../lib/firebase';
-import BlogViewCounter from '@/components/BlogViewCounter';
 import styles from "./page.module.css";
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-central.bg';
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
 
 // Fetch blog post from Firebase
 async function getBlogPost(slug) {

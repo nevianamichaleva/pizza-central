@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { rtdb } from '../../../../lib/firebase';
 import styles from "./page.module.css";
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-central.bg';
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
 
 // Fetch new dish from Firebase
 async function getNewDish(slug) {

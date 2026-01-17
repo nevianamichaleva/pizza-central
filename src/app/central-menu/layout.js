@@ -1,4 +1,4 @@
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-central.bg';
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
 
 export const metadata = {
   title: 'Меню на Ресторант-пицария Централ град Добрич | Ресторант-пицария Централ Добрич',

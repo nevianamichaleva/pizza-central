@@ -3,7 +3,7 @@ import { get, ref } from 'firebase/database';
 import { notFound } from 'next/navigation';
 import { rtdb } from '../../../../lib/firebase';
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pizza-central.bg';
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
 
 // Fetch category by slug
 async function getCategoryBySlug(slug) {
