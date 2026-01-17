@@ -209,7 +209,7 @@ const Header = () => {
             order: 2
           }}>
             <Link href="/for-home" className="btn-getstarted" aria-label="Поръчай за доставка до дома">
-              Поръчай
+              Доставка
             </Link>
             <Link href="/reservation" className="btn-getstarted" aria-label="Резервирай маса">
               Резервирай
@@ -451,7 +451,7 @@ const Header = () => {
             alignItems: 'flex-end'
           }}>
             <Link href="/our-menu" className="btn-getstarted" aria-label="Поръчай от менюто">
-              Поръчай
+              Доставка
             </Link>
             <Link href="/reservation" className="btn-getstarted" aria-label="Резервирай маса">
               Резервирай
