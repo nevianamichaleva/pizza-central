@@ -11,56 +11,11 @@ const CartIcon = ({ userId }) => {
   const [position, setPosition] = useState({ x: null, y: null });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [cookieBannerVisible, setCookieBannerVisible] = useState(false);
   const cartRef = useRef(null);
   const positionRef = useRef({ x: null, y: null });
   const startPositionRef = useRef({ x: 0, y: 0 });
   const hasDraggedRef = useRef(false);
   const pathname = usePathname();
-
-  // Check if cookie banner is visible
-  useEffect(() => {
-    if (typeof window === "undefined" || typeof document === "undefined") {
-      return;
-    }
-
-    const checkCookieBanner = () => {
-      const isVisible = document.body.classList.contains("cookie-banner-visible");
-      setCookieBannerVisible(isVisible);
-    };
-
-    // Initial check
-    checkCookieBanner();
-
-    // Watch for changes in body class
-    const observer = new MutationObserver(() => {
-      checkCookieBanner();
-    });
-
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    // Also check localStorage changes
-    const handleStorageChange = (e) => {
-      if (e.key === "cookie-consent" || e.key === null) {
-        // Small delay to allow body class to update
-        setTimeout(checkCookieBanner, 100);
-      }
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    
-    // Also check periodically in case localStorage is changed in same tab
-    const interval = setInterval(checkCookieBanner, 500);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("storage", handleStorageChange);
-      clearInterval(interval);
-    };
-  }, []);
 
   // Load saved position from localStorage
   useEffect(() => {
@@ -208,8 +163,7 @@ const CartIcon = ({ userId }) => {
       } else {
         // Calculate default position
         currentX = window.innerWidth - rect.width - 20;
-        const bottomOffset = cookieBannerVisible ? 120 : 20;
-        currentY = window.innerHeight - rect.height - bottomOffset;
+        currentY = window.innerHeight - rect.height - 20;
       }
       
       startPositionRef.current = { x: coords.x, y: coords.y };
@@ -310,13 +264,11 @@ const CartIcon = ({ userId }) => {
       };
     }
     
-    // Default position - above cookie banner if visible, otherwise bottom right
-    const bottomOffset = cookieBannerVisible ? "120px" : "20px";
-    
+    // Default position - bottom right
     return {
       ...baseStyle,
       position: "fixed",
-      bottom: bottomOffset,
+      bottom: "20px",
       right: "20px",
     };
   };

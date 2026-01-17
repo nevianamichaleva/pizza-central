@@ -4,9 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../public/css/main.css';
-import CookieConsent from '../components/CookieConsent';
 import Footer from '../components/Footer';
-import GoogleTagManager, { GoogleTagManagerNoscript } from '../components/GoogleTagManager';
 import Header from '../components/Header';
 import './globals.css';
 
@@ -81,8 +79,6 @@ export default function RootLayout({ children }) {
   return (
     <html lang="bg">
       <body className="index-page">
-        <GoogleTagManager />
-        <GoogleTagManagerNoscript />
         <UserProvider>
           <CategoriesProvider>
             <ProductsProvider>
@@ -91,7 +87,6 @@ export default function RootLayout({ children }) {
                 {children}
                 <Footer />
                 <ToastContainer />
-                <CookieConsent />
               </TranslationsProvider>
             </ProductsProvider>
           </CategoriesProvider>

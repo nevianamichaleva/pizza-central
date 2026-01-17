@@ -191,11 +191,6 @@ h6 {
   color: #fff;
 }
 
-/* Adjust cart icon position when cookie banner is visible */
-body.cookie-banner-visible .cart-fab {
-  bottom: 100px;
-}
-
 /* Ensure cart icon is visible on mobile */
 @media (max-width: 768px) {
   .cart-fab {
@@ -217,10 +212,6 @@ body.cookie-banner-visible .cart-fab {
   .cart-fab svg {
     font-size: 26px !important;
     color: #fff !important;
-  }
-  
-  body.cookie-banner-visible .cart-fab {
-    bottom: 180px !important;
   }
 }
 
@@ -915,7 +906,7 @@ section,
 --------------------------------------------------------------*/
 .section-title {
   text-align: center;
-  padding-bottom: 60px;
+  padding-bottom: 10px;
   position: relative;
 }
 

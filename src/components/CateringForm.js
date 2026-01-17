@@ -48,14 +48,6 @@ const CateringForm = () => {
 
       await set(newCateringRef, cateringData);
 
-      // Track catering submission in GTM/GA4
-      if (typeof window !== 'undefined' && window.dataLayer) {
-        window.dataLayer.push({
-          event: 'catering_submit',
-          event_type: cateringData.eventType,
-        });
-      }
-
       // Send email notifications
       try {
         // Get SMTP config from Firebase settings

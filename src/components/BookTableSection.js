@@ -49,14 +49,6 @@ const BookTableSection = () => {
 
       await set(newBookingRef, bookingData);
 
-      // Track reservation submission in GTM/GA4
-      if (typeof window !== 'undefined' && window.dataLayer) {
-        window.dataLayer.push({
-          event: 'reservation_submit',
-          reservation_type: 'table',
-        });
-      }
-
       // Send email notifications
       try {
         // Get SMTP config from Firebase settings
