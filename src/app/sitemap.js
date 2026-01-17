@@ -185,6 +185,12 @@ export default async function sitemap() {
       priority: 0.8,
     },
     {
+      url: `${baseUrl}/obedno-menu`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
+    {
       url: `${baseUrl}/gallery`,
       lastModified: new Date(),
       changeFrequency: 'weekly',

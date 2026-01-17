@@ -30,7 +30,7 @@ export const metadata = {
   },
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg'),
   alternates: {
-    canonical: '/',
+    canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg',
   },
     openGraph: {
     type: 'website',
