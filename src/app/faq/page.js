@@ -178,7 +178,7 @@ export default function FAQPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <section className="section" style={{ paddingTop: '60px', paddingBottom: '60px' }} itemScope itemType="https://schema.org/FAQPage">
+      <section className="section" style={{ paddingTop: '60px', paddingBottom: '60px' }}>
         <div className="container">
           <div className="row">
             <div className="col-lg-10 col-lg-offset-1" style={{ margin: '0 auto' }}>
@@ -206,7 +206,7 @@ export default function FAQPage() {
                   color: '#333'
                 }}>
                   {faqCategories.map((category, categoryIndex) => (
-                    <section key={categoryIndex} style={{ marginBottom: '30px' }} itemScope itemType="https://schema.org/ItemList">
+                    <section key={categoryIndex} style={{ marginBottom: '30px' }}>
                       <h2 style={{
                         fontSize: '26px',
                         fontWeight: '700',
@@ -225,8 +225,6 @@ export default function FAQPage() {
                         return (
                           <article
                             key={questionIndex}
-                            itemScope
-                            itemType="https://schema.org/Question"
                             style={{
                               marginBottom: '15px',
                               borderBottom: '1px solid #e0e0e0',
@@ -257,7 +255,7 @@ export default function FAQPage() {
                               id={questionId}
                               aria-label={`${item.question}. Натиснете за ${isOpen ? 'затваряне' : 'отваряне'} на отговора.`}
                             >
-                              <span itemProp="name">{item.question}</span>
+                              <span>{item.question}</span>
                               <span
                                 style={{
                                   fontSize: '24px',
@@ -278,8 +276,6 @@ export default function FAQPage() {
                               id={answerId}
                               role="region"
                               aria-labelledby={questionId}
-                              itemScope
-                              itemType="https://schema.org/Answer"
                               style={{
                                 maxHeight: isOpen ? '1000px' : '0',
                                 overflow: 'hidden',
@@ -291,7 +287,6 @@ export default function FAQPage() {
                               }}
                             >
                               <div 
-                                itemProp="text"
                                 style={{
                                   paddingLeft: '0',
                                   paddingRight: '0',
