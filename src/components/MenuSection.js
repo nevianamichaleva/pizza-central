@@ -505,6 +505,11 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
         </div>
         <div className="menu-card-content">
           <div className="menu-card-title" style={{ fontSize: '20px', fontWeight: 600, marginBottom: '10px', fontFamily: 'var(--heading-font)' }}>{item.name}</div>
+          {item.weight && (
+            <p style={{ fontSize: '14px', color: '#666', marginBottom: '10px' }}>
+              <strong>Грамаж:</strong> {item.weight} г.
+            </p>
+          )}
           {(item.ingredients || item.description) && (
             <div style={{ marginBottom: "16px" }}>
               {item.ingredients && (
@@ -570,7 +575,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
 
   return (
     <section id="menu" className="menu section">
-      {!hideTitle && (
+      {!hideTitle && !categorySlug && (
         <div className="container section-title" data-aos="fade-up">
           <h2>
             {selectedCategory 
@@ -594,7 +599,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
 
       <div className="container">
         {/* Search Bar */}
-        <div style={{ marginBottom: '30px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }} data-aos="fade-up">
+        <div style={{ marginBottom: '0px', marginTop: '0px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }} data-aos="fade-up">
           <Search
             placeholder="Въведете за търсене в менюто"
             allowClear
@@ -716,23 +721,56 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
               id={`menu-${category.name}`}
             >
               <div className="tab-header text-center">
-                <p>Меню</p>
-                <h3>{category.name.charAt(0).toUpperCase() + category.name.slice(1)}</h3>
-                {categorySlug && nextCategory && nextCategory.slug && nextCategory.id !== category.id && (
-                  <div style={{ marginTop: '15px' }}>
-                    <Link 
-                      href={`/for-home/${nextCategory.slug}`}
-                      style={{ 
-                        color: '#c41d7f', 
-                        textDecoration: 'none',
-                        fontSize: '22px',
-                        fontWeight: '500'
-                      }}
-                    >
-                      → Виж нашите {nextCategory.name.charAt(0).toUpperCase() + nextCategory.name.slice(1)}
-                    </Link>
-                  </div>
+                {!categorySlug && (
+                  <>
+                    <p>Меню</p>
+                    <h3>{category.name.charAt(0).toUpperCase() + category.name.slice(1)}</h3>
+                  </>
                 )}
+                    {categorySlug && category.menuDescription && (
+                      <p style={{ 
+                        fontSize: '18px', 
+                        color: '#666', 
+                        fontStyle: 'italic',
+                        marginTop: '15px',
+                        marginBottom: '15px',
+                        maxWidth: '800px',
+                        marginLeft: 'auto',
+                        marginRight: 'auto',
+                        lineHeight: '1.6',
+                        textTransform: 'none'
+                      }}>
+                        {category.menuDescription}
+                      </p>
+                    )}
+                    <div style={{ marginTop: '15px', display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                      {categorySlug && nextCategory && nextCategory.slug && nextCategory.id !== category.id && (
+                        <Link
+                          href={`/for-home/${nextCategory.slug}`}
+                          style={{
+                            color: '#FF8C00',
+                            textDecoration: 'none',
+                            fontSize: '22px',
+                            fontWeight: '500'
+                          }}
+                        >
+                          → Виж нашите {nextCategory.name.charAt(0).toUpperCase() + nextCategory.name.slice(1)}
+                        </Link>
+                      )}
+                      {categorySlug && (
+                        <Link
+                          href={`/for-home`}
+                          style={{
+                            color: '#FF8C00',
+                            textDecoration: 'none',
+                            fontSize: '22px',
+                            fontWeight: '500'
+                          }}
+                        >
+                          → Виж всички за доставка
+                        </Link>
+                      )}
+                    </div>
               </div>
               {category?.children && category.children?.length &&
                 <ul className="nav nav-tabs d-flex justify-content-center" role="tablist" data-aos="fade-up" data-aos-delay="100">
@@ -829,6 +867,11 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                             <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
                           </a>
                           <div style={{ fontSize: '20px', fontWeight: 400, marginBottom: '8px', fontFamily: 'var(--default-font)' }}>{item.name}</div>
+                          {item.weight && (
+                            <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
+                              <strong>Грамаж:</strong> {item.weight} г.
+                            </p>
+                          )}
                           {item.ingredients && (
                             <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
                               {item.ingredients.length > 60 
@@ -925,6 +968,11 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                             <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
                           </a>
                           <div style={{ fontSize: '20px', fontWeight: 400, marginBottom: '8px', fontFamily: 'var(--default-font)' }}>{item.name}</div>
+                          {item.weight && (
+                            <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
+                              <strong>Грамаж:</strong> {item.weight} г.
+                            </p>
+                          )}
                           {item.ingredients && (
                             <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
                               {item.ingredients.length > 60 
@@ -1121,15 +1169,27 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
           return (
             <div className="menu-mobile-categories">
               <div className="menu-mobile-category-section">
-                <h3 className="menu-mobile-category-title">
-                  {selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1)}
-                </h3>
+                {selectedCategory.menuDescription && (
+                  <p style={{ 
+                    fontSize: '16px', 
+                    color: '#666', 
+                    fontStyle: 'italic',
+                    marginTop: '10px',
+                    marginBottom: '15px',
+                    textAlign: 'center',
+                    padding: '0 15px',
+                    lineHeight: '1.6',
+                    textTransform: 'none'
+                  }}>
+                    {selectedCategory.menuDescription}
+                  </p>
+                )}
                 {nextCategory && nextCategory.slug && nextCategory.id !== selectedCategory.id && (
                   <div style={{ marginTop: '10px', marginBottom: '15px', textAlign: 'center' }}>
                     <Link 
                       href={`/for-home/${nextCategory.slug}`}
                       style={{ 
-                        color: '#c41d7f', 
+                        color: '#FF8C00', 
                         textDecoration: 'none',
                         fontSize: '16px',
                         fontWeight: '500'
@@ -1139,6 +1199,19 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                     </Link>
                   </div>
                 )}
+                <div style={{ marginTop: '10px', marginBottom: '15px', textAlign: 'center' }}>
+                  <Link 
+                    href={`/for-home`}
+                    style={{ 
+                      color: '#FF8C00', 
+                      textDecoration: 'none',
+                      fontSize: '16px',
+                      fontWeight: '500'
+                    }}
+                  >
+                    → Виж всички за доставка
+                  </Link>
+                </div>
                 <div className="menu-mobile-products-slider">
                 {products
                   .filter((item) => {
@@ -1156,6 +1229,11 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                         <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
                       </a>
                       <h4>{item.name}</h4>
+                      {item.weight && (
+                        <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
+                          <strong>Грамаж:</strong> {item.weight} г.
+                        </p>
+                      )}
                       {item.ingredients && (
                         <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
                           {item.ingredients.length > 60 

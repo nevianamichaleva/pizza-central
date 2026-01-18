@@ -440,6 +440,11 @@ const MenuPreview = () => {
                   <div className="menu-card-title" style={{ fontSize: '20px', fontWeight: 600, marginBottom: '10px', fontFamily: 'var(--heading-font)' }}>
                     {item.name}
                   </div>
+                  {item.weight && (
+                    <p style={{ fontSize: '14px', color: '#666', marginBottom: '10px' }}>
+                      <strong>Грамаж:</strong> {item.weight} г.
+                    </p>
+                  )}
                   {(item.ingredients || item.description) && (
                     <div style={{ marginBottom: "16px" }}>
                       {item.ingredients && (
@@ -500,6 +505,11 @@ const MenuPreview = () => {
                   <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
                 </a>
                 <div style={{ fontSize: '20px', fontWeight: 400, marginBottom: '8px', fontFamily: 'var(--default-font)' }}>{item.name}</div>
+                {item.weight && (
+                  <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
+                    <strong>Грамаж:</strong> {item.weight} г.
+                  </p>
+                )}
                 {item.ingredients && (
                   <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
                     {item.ingredients.length > 60 

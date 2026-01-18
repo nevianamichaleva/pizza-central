@@ -50,19 +50,21 @@ export async function generateMetadata({ params }) {
   }
 
   const categoryName = category.name.charAt(0).toUpperCase() + category.name.slice(1);
-  const title = `${categoryName} | Ресторант-пицария Централ Добрич`;
-  const description = `Разгледайте нашите ${categoryName.toLowerCase()} за доставка. Вкусна храна от Ресторант-пицария Централ в Добрич. Поръчайте онлайн!`;
+  
+  // Use custom SEO fields if available, otherwise generate defaults
+  const seoTitle = category.seoTitle || `${categoryName} | Ресторант-пицария Централ Добрич`;
+  const seoDescription = category.seoDescription || `Разгледайте нашите ${categoryName.toLowerCase()} за доставка. Вкусна храна от Ресторант-пицария Централ в Добрич. Поръчайте онлайн!`;
   const url = `${baseUrl}/for-home/${slug}`;
 
   return {
-    title,
-    description,
+    title: seoTitle,
+    description: seoDescription,
     alternates: {
       canonical: url,
     },
     openGraph: {
-      title: categoryName,
-      description,
+      title: seoTitle,
+      description: seoDescription,
       url,
       siteName: 'Ресторант-пицария Централ Добрич',
       locale: 'bg_BG',
@@ -78,8 +80,8 @@ export async function generateMetadata({ params }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: categoryName,
-      description,
+      title: seoTitle,
+      description: seoDescription,
       images: [`${baseUrl}/images/pizza-central-delivery.png`],
     },
     robots: {
@@ -137,8 +139,53 @@ export default async function CategoryPage({ params }) {
     notFound();
   }
 
+  // Generate H1 title - use custom h1Title if available, otherwise generate from name
+  const h1Title = category.h1Title || `Доставка на ${category.name.toLowerCase()}`;
+  const seoContent = category.seoContent || null;
+
   return (
-    <MenuSection categorySlug={slug} />
+    <>
+      {/* SEO Content Section */}
+      <section className="container">
+        <div className="row">
+          {/* <div className="col-lg-10 offset-lg-1">
+            <h1 style={{ 
+              fontSize: '32px', 
+              fontWeight: '600', 
+              marginBottom: '20px',
+              color: '#333',
+              textAlign: 'center'
+            }}>
+              {h1Title}
+            </h1>
+            
+            {seoContent && (
+              <div 
+                style={{ 
+                  fontSize: '16px', 
+                  lineHeight: '1.8',
+                  color: '#555',
+                  textAlign: 'justify',
+                  marginBottom: '30px'
+                }}
+                dangerouslySetInnerHTML={{ __html: seoContent }}
+              />
+            )}
+          </div> */}
+          <div className="container section-title" data-aos="fade-up">
+            <h2>{category.name.charAt(0).toUpperCase() + category.name.slice(1)}</h2>
+            <h1>
+              <span style={{ fontSize: '32px'}}>{h1Title}</span> 
+              <br />
+              <span className="description-title" style={{ color: '#ce1212', fontSize: '32px' }}>от Ресторант-пицария Централ</span>
+            </h1>
+          </div>
+        </div>
+      </section>
+
+      {/* Menu Section */}
+      <MenuSection categorySlug={slug} />
+    </>
   );
 }
 

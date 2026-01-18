@@ -1,12 +1,14 @@
-import { CloseOutlined, DeleteOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
-import { Input, Select, Space, Switch, Table, Tag } from "antd";
+import { CloseOutlined, DeleteOutlined, EditOutlined, SaveOutlined, GlobalOutlined } from "@ant-design/icons";
+import { Button, Drawer, Input, Select, Space, Switch, Table, Tag } from "antd";
 import { useState } from "react";
 
 const { Option } = Select;
 
 const EditableTable = ({ data, categories, onSave, onDelete }) => {
   const [editingId, setEditingId] = useState(null); 
-  const [editingRecord, setEditingRecord] = useState({}); 
+  const [editingRecord, setEditingRecord] = useState({});
+  const [seoDrawerVisible, setSeoDrawerVisible] = useState(false);
+  const [seoEditingRecord, setSeoEditingRecord] = useState({}); 
 
   const editRow = (record) => {
     setEditingId(record.id);
@@ -23,6 +25,25 @@ const EditableTable = ({ data, categories, onSave, onDelete }) => {
 
   const cancelEdit = () => {
     setEditingId(null); 
+  };
+
+  const openSeoDrawer = (record) => {
+    setSeoEditingRecord({ ...record });
+    setSeoDrawerVisible(true);
+  };
+
+  const closeSeoDrawer = () => {
+    setSeoDrawerVisible(false);
+    setSeoEditingRecord({});
+  };
+
+  const saveSeoFields = () => {
+    onSave(seoEditingRecord);
+    closeSeoDrawer();
+  };
+
+  const handleSeoChange = (key, value) => {
+    setSeoEditingRecord((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleChange = (key, value) => {
@@ -62,6 +83,9 @@ const EditableTable = ({ data, categories, onSave, onDelete }) => {
               <>
                 <a onClick={() => editRow(record)}>
                   <EditOutlined />
+                </a>
+                <a onClick={() => openSeoDrawer(record)} title="SEO настройки">
+                  <GlobalOutlined />
                 </a>
                 <a>
                   <DeleteOutlined onClick={() => onDelete(record.id)}/>
@@ -208,9 +232,92 @@ const EditableTable = ({ data, categories, onSave, onDelete }) => {
   ];
 
   return (
-    <div style={{ overflowX: 'auto', width: '100%' }}>
-      <Table columns={columns} dataSource={data} rowKey="id" />
-    </div>
+    <>
+      <div style={{ overflowX: 'auto', width: '100%' }}>
+        <Table columns={columns} dataSource={data} rowKey="id" />
+      </div>
+      
+      <Drawer
+        title={`SEO Настройки - ${seoEditingRecord.name || ''}`}
+        placement="right"
+        width={700}
+        onClose={closeSeoDrawer}
+        open={seoDrawerVisible}
+        extra={
+          <Space>
+            <Button onClick={closeSeoDrawer}>Отказ</Button>
+            <Button type="primary" onClick={saveSeoFields}>
+              Запази
+            </Button>
+          </Space>
+        }
+      >
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
+            H1 Заглавие:
+          </label>
+          <Input
+            placeholder="Напр: Доставка на пица от Ресторант-пицария Централ"
+            value={seoEditingRecord.h1Title || ''}
+            onChange={(e) => handleSeoChange("h1Title", e.target.value)}
+            style={{ marginBottom: "16px" }}
+          />
+        </div>
+        
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
+            Meta Title (SEO):
+          </label>
+          <Input
+            placeholder="Напр: Доставка на пица Добрич | Ресторант-пицария Централ"
+            value={seoEditingRecord.seoTitle || ''}
+            onChange={(e) => handleSeoChange("seoTitle", e.target.value)}
+            style={{ marginBottom: "16px" }}
+          />
+        </div>
+        
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
+            Meta Description (SEO):
+          </label>
+          <Input.TextArea
+            placeholder="Кратко описание за търсачките (150-160 символа)"
+            value={seoEditingRecord.seoDescription || ''}
+            onChange={(e) => handleSeoChange("seoDescription", e.target.value)}
+            rows={3}
+            style={{ marginBottom: "16px" }}
+            maxLength={160}
+            showCount
+          />
+        </div>
+        
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
+            SEO Текст (200-300 думи):
+          </label>
+          <Input.TextArea
+            placeholder="Дълъг SEO текст за страницата. Може да съдържа HTML."
+            value={seoEditingRecord.seoContent || ''}
+            onChange={(e) => handleSeoChange("seoContent", e.target.value)}
+            rows={10}
+            style={{ marginBottom: "16px" }}
+          />
+        </div>
+        
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", marginBottom: "8px", fontWeight: "bold" }}>
+            Описание в менюто:
+          </label>
+          <Input.TextArea
+            placeholder="Напр: Тънко и хрупкаво тесто, с топящ се кашкавал..."
+            value={seoEditingRecord.menuDescription || ''}
+            onChange={(e) => handleSeoChange("menuDescription", e.target.value)}
+            rows={3}
+            style={{ marginBottom: "16px" }}
+          />
+        </div>
+      </Drawer>
+    </>
   );
 };
 

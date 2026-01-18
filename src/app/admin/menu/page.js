@@ -32,6 +32,12 @@ const AddCategory = () => {
   const [uploadStatus, setUploadStatus] = useState("");
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [menuDrawerVisible, setMenuDrawerVisible] = useState(false);
+  // SEO fields
+  const [h1Title, setH1Title] = useState('');
+  const [seoTitle, setSeoTitle] = useState('');
+  const [seoDescription, setSeoDescription] = useState('');
+  const [seoContent, setSeoContent] = useState('');
+  const [menuDescription, setMenuDescription] = useState('');
 
   useEffect(() => {
     fetchCategories();
@@ -54,6 +60,11 @@ const AddCategory = () => {
     setForRestaurant(true);
     setOrder(0);
     setStatus('active');
+    setH1Title('');
+    setSeoTitle('');
+    setSeoDescription('');
+    setSeoContent('');
+    setMenuDescription('');
     setMenuDrawerVisible(false);
   };
 
@@ -95,7 +106,7 @@ const AddCategory = () => {
     const catRef = ref(rtdb, 'category');
 
     const newCatRef = push(catRef);
-    set(newCatRef, {
+    const categoryData = {
       name: catName,
       slug: slug || '',
       parent: parent,
@@ -103,7 +114,16 @@ const AddCategory = () => {
       forRestaurant: forRestaurant !== false,
       order: order || 0,
       status: status || 'active'
-    })
+    };
+    
+    // Add SEO fields if they have values
+    if (h1Title && h1Title.trim()) categoryData.h1Title = h1Title.trim();
+    if (seoTitle && seoTitle.trim()) categoryData.seoTitle = seoTitle.trim();
+    if (seoDescription && seoDescription.trim()) categoryData.seoDescription = seoDescription.trim();
+    if (seoContent && seoContent.trim()) categoryData.seoContent = seoContent.trim();
+    if (menuDescription && menuDescription.trim()) categoryData.menuDescription = menuDescription.trim();
+    
+    set(newCatRef, categoryData)
       .then(() => {
         fetchCategories();
         console.log('Category added successfully');
@@ -196,9 +216,26 @@ const AddCategory = () => {
       status: updatedRecord.status || 'active'
     };
     
-    // Remove any undefined values that might have slipped through
+    // Add SEO fields if they exist in the record
+    if (updatedRecord.h1Title !== undefined) {
+      updatedData.h1Title = updatedRecord.h1Title && updatedRecord.h1Title.trim() ? updatedRecord.h1Title.trim() : null;
+    }
+    if (updatedRecord.seoTitle !== undefined) {
+      updatedData.seoTitle = updatedRecord.seoTitle && updatedRecord.seoTitle.trim() ? updatedRecord.seoTitle.trim() : null;
+    }
+    if (updatedRecord.seoDescription !== undefined) {
+      updatedData.seoDescription = updatedRecord.seoDescription && updatedRecord.seoDescription.trim() ? updatedRecord.seoDescription.trim() : null;
+    }
+    if (updatedRecord.seoContent !== undefined) {
+      updatedData.seoContent = updatedRecord.seoContent && updatedRecord.seoContent.trim() ? updatedRecord.seoContent.trim() : null;
+    }
+    if (updatedRecord.menuDescription !== undefined) {
+      updatedData.menuDescription = updatedRecord.menuDescription && updatedRecord.menuDescription.trim() ? updatedRecord.menuDescription.trim() : null;
+    }
+    
+    // Remove any undefined or null values that might have slipped through
     Object.keys(updatedData).forEach(key => {
-      if (updatedData[key] === undefined) {
+      if (updatedData[key] === undefined || updatedData[key] === null || updatedData[key] === '') {
         delete updatedData[key];
       }
     });
@@ -384,7 +421,7 @@ const AddCategory = () => {
             placement="right"
             onClose={closeMenuDrawer}
             open={menuDrawerVisible}
-            width={700}
+            width={800}
           >
             <form onSubmit={handleAddCategory} className="php-email-form">
               <div className="row gy-4">
@@ -457,6 +494,69 @@ const AddCategory = () => {
                     <Option value="inactive">Неактивна</Option>
                     <Option value="archived">Архивирана</Option>
                   </Select>
+                </div>
+                <div className="col-md-12" style={{ marginTop: "20px", borderTop: "1px solid #e8e8e8", paddingTop: "20px" }}>
+                  <h3 style={{ marginBottom: "16px" }}>SEO Настройки</h3>
+                </div>
+                <div className="col-md-12">
+                  <label style={{ display: "block", marginBottom: "8px" }}>
+                    <strong>H1 Заглавие:</strong>
+                  </label>
+                  <Input
+                    placeholder="Напр: Доставка на пица от Ресторант-пицария Централ"
+                    value={h1Title}
+                    onChange={(e) => setH1Title(e.target.value)}
+                    style={{ marginBottom: "16px" }}
+                  />
+                </div>
+                <div className="col-md-12">
+                  <label style={{ display: "block", marginBottom: "8px" }}>
+                    <strong>Meta Title (SEO):</strong>
+                  </label>
+                  <Input
+                    placeholder="Напр: Доставка на пица Добрич | Ресторант-пицария Централ"
+                    value={seoTitle}
+                    onChange={(e) => setSeoTitle(e.target.value)}
+                    style={{ marginBottom: "16px" }}
+                  />
+                </div>
+                <div className="col-md-12">
+                  <label style={{ display: "block", marginBottom: "8px" }}>
+                    <strong>Meta Description (SEO):</strong>
+                  </label>
+                  <Input.TextArea
+                    placeholder="Кратко описание за търсачките (150-160 символа)"
+                    value={seoDescription}
+                    onChange={(e) => setSeoDescription(e.target.value)}
+                    rows={3}
+                    style={{ marginBottom: "16px" }}
+                    maxLength={160}
+                    showCount
+                  />
+                </div>
+                <div className="col-md-12">
+                  <label style={{ display: "block", marginBottom: "8px" }}>
+                    <strong>SEO Текст (200-300 думи):</strong>
+                  </label>
+                  <Input.TextArea
+                    placeholder="Дълъг SEO текст за страницата. Може да съдържа HTML."
+                    value={seoContent}
+                    onChange={(e) => setSeoContent(e.target.value)}
+                    rows={8}
+                    style={{ marginBottom: "16px" }}
+                  />
+                </div>
+                <div className="col-md-12">
+                  <label style={{ display: "block", marginBottom: "8px" }}>
+                    <strong>Описание в менюто:</strong>
+                  </label>
+                  <Input.TextArea
+                    placeholder="Напр: Тънко и хрупкаво тесто, с топящ се кашкавал..."
+                    value={menuDescription}
+                    onChange={(e) => setMenuDescription(e.target.value)}
+                    rows={3}
+                    style={{ marginBottom: "16px" }}
+                  />
                 </div>
                 <div className="col-md-5 text-center">
                   <Button type="primary" htmlType="submit" block>

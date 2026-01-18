@@ -18,6 +18,7 @@ const AddProduct = () => {
   const [description, setDescription] = useState('');
   const [ingredients, setIngredients] = useState('');
   const [price, setPrice] = useState('');
+  const [weight, setWeight] = useState('');
   const [slug, setSlug] = useState('');
   const [category, setCategory] = useState('');
   const [categories, setCategories] = useState([]);
@@ -121,6 +122,12 @@ const AddProduct = () => {
       key: "price",
     },
     {
+      title: "Грамаж",
+      dataIndex: "weight",
+      key: "weight",
+      render: (weight) => <span>{weight || <span style={{ color: "#999" }}>Няма</span>}</span>,
+    },
+    {
       title: "Съставки",
       dataIndex: "ingredients",
       key: "ingredients",
@@ -207,6 +214,7 @@ const AddProduct = () => {
     setSelectedPackaging([]);
     setSelectedCategories([]);
     setSelectedAllergens([]);
+    setWeight('');
     setSlug('');
     setDrawerVisible(false);
   }
@@ -219,7 +227,7 @@ const AddProduct = () => {
 
     const newProductRef = push(productsRef);
     const productSlug = slug || generateSlug(name);
-    set(newProductRef, {
+    const newProductData = {
       name: name,
       price: price,
       description: description,
@@ -234,7 +242,14 @@ const AddProduct = () => {
       forRestaurant: forRestaurant !== false,
       packagingIds: selectedPackaging && selectedPackaging.length > 0 ? selectedPackaging : [],
       allergens: selectedAllergens && selectedAllergens.length > 0 ? selectedAllergens : []
-    })
+    };
+    
+    // Add weight if provided
+    if (weight && weight.trim()) {
+      newProductData.weight = weight.trim();
+    }
+    
+    set(newProductRef, newProductData)
       .then(() => {
         closeDrawer();
         showAToast('success', "Добавен успешно продукт!");
@@ -383,6 +398,7 @@ const AddProduct = () => {
       price: price,
       description: description,
       ingredients: ingredients,
+      weight: weight && weight.trim() ? weight.trim() : null,
       slug: productSlug,
       categories: selectedCategories && selectedCategories.length > 0 ? selectedCategories : [],
       subcategory: subcategory,
@@ -394,6 +410,13 @@ const AddProduct = () => {
       packagingIds: selectedPackaging && selectedPackaging.length > 0 ? selectedPackaging : [],
       allergens: selectedAllergens && selectedAllergens.length > 0 ? selectedAllergens : []
     };
+    
+    // Remove null values
+    Object.keys(updatedData).forEach(key => {
+      if (updatedData[key] === null || updatedData[key] === '') {
+        delete updatedData[key];
+      }
+    });
 
     try {
       const recordRef = ref(rtdb, `products/${product}`);
@@ -414,6 +437,7 @@ const AddProduct = () => {
       price = null,
       description = null,
       ingredients = null,
+      weight = null,
       slug = null,
       category = null,
       categories = null,
@@ -431,6 +455,7 @@ const AddProduct = () => {
     setPrice(price);
     setDescription(description);
     setIngredients(ingredients);
+    setWeight(weight || '');
     setSlug(slug || '');
     // Support both old format (category) and new format (categories array)
     if (categories && Array.isArray(categories) && categories.length > 0) {
@@ -690,6 +715,14 @@ const AddProduct = () => {
                     placeholder="Price"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
+                    style={{ marginBottom: "16px" }}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <Input
+                    placeholder="Грамаж (напр. 400)"
+                    value={weight}
+                    onChange={(e) => setWeight(e.target.value)}
                     style={{ marginBottom: "16px" }}
                   />
                 </div>
