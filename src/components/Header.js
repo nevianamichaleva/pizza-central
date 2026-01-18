@@ -339,7 +339,7 @@ const Header = () => {
                   e.preventDefault();
                   toggleDeepDropdown();
                 }}
-                className={(pathname == '/about-us' || pathname == '/detski-kut' || pathname == '/new-dishes' || pathname == '/events' || pathname == '/gallery' || pathname == '/blog') ? 'active dropdown-toggle' : 'dropdown-toggle'}
+                className={(pathname == '/about-us' || pathname == '/detski-kut' || pathname == '/faq' || pathname == '/new-dishes' || pathname == '/events' || pathname == '/gallery' || pathname == '/blog') ? 'active dropdown-toggle' : 'dropdown-toggle'}
               >
                 <span>За нас</span>
               </button>
@@ -353,6 +353,9 @@ const Header = () => {
                   </li>
                   <li>
                     <MenuLink href="/detski-kut" className={pathname == '/detski-kut' ? 'active' : ''}>Детски кът</MenuLink>
+                  </li>
+                  <li>
+                    <MenuLink href="/faq" className={pathname == '/faq' ? 'active' : ''}>Често задавани въпроси</MenuLink>
                   </li>
                   {/* <li>
                     <MenuLink href="/new-dishes" className={pathname == '/new-dishes' ? 'active' : ''}>Нови предложения</MenuLink>
