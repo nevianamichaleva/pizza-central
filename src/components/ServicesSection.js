@@ -129,7 +129,7 @@ const ServicesSection = () => {
                   }}>
                     <i className="bi bi-heart-fill" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '20px', display: 'block' }}></i>
                     <h4 style={{ fontSize: '22px', color: 'var(--heading-color)', marginBottom: '15px', fontFamily: 'var(--heading-font)' }}>
-                      <Link href="/detski-kut" style={{ color: 'inherit', textDecoration: 'none' }}>Детски кът</Link>
+                      Детски кът
                     </h4>
                     <p style={{ fontSize: '16px', color: '#666', lineHeight: '1.6' }}>
                       Безопасно място за игра, където децата ви ще се забавляват, докато вие се наслаждавате на вкусна храна

@@ -65,12 +65,13 @@ const PageViewTracker = () => {
   };
 
   useEffect(() => {
+    // Reset the increment flag when pathname changes
+    hasIncremented.current = false;
+    
     // Skip tracking for admin pages and API routes
     if (!pathname || pathname.startsWith('/admin') || pathname.startsWith('/api')) {
       return;
     }
-
-    if (hasIncremented.current) return;
 
     // Use sessionStorage to prevent double counting
     const storageKey = `page_view_${pathname}`;
