@@ -88,16 +88,41 @@ const PageViewTracker = () => {
     // Get today's date in YYYY-MM-DD format
     const today = new Date().toISOString().split('T')[0];
     
+    // Normalize pathname: replace / with _root_ for root path, or remove leading slash
+    let normalizedPath = pathname;
+    if (normalizedPath === '/') {
+      normalizedPath = '_root_';
+    } else {
+      // Remove leading slash and replace other slashes with underscores for Firebase key compatibility
+      normalizedPath = normalizedPath.replace(/^\//, '').replace(/\//g, '_');
+    }
+    
     // Track page view: page_views/{date}/{pagePath}
-    const pageViewRef = ref(rtdb, `page_views/${today}/${pathname}`);
+    const pageViewRef = ref(rtdb, `page_views/${today}/${normalizedPath}`);
+    
+    console.log('Tracking page view:', { pathname, normalizedPath, today, firebasePath: `page_views/${today}/${normalizedPath}` });
     
     runTransaction(pageViewRef, (currentCount) => {
-      return (currentCount || 0) + 1;
-    }).then(() => {
+      if (currentCount === null || currentCount === undefined) {
+        console.log('First visit to this page today');
+        return 1;
+      }
+      const newCount = currentCount + 1;
+      console.log('Page view incremented:', { normalizedPath, oldCount: currentCount, newCount });
+      return newCount;
+    }).then((result) => {
+      console.log('Page view tracked successfully:', result);
       // Clean up old data (older than 7 days) - run this occasionally
       cleanupOldData();
     }).catch((error) => {
       console.error("Error incrementing page view count:", error);
+      console.error("Error details:", {
+        code: error.code,
+        message: error.message,
+        pathname,
+        normalizedPath,
+        firebasePath: `page_views/${today}/${normalizedPath}`
+      });
       // Remove from sessionStorage on error so it can retry
       sessionStorage.removeItem(storageKey);
       hasIncremented.current = false;

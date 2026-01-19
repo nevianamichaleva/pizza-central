@@ -82,11 +82,20 @@ const PageViewsPage = () => {
                     Object.keys(dateData).forEach(pagePath => {
                         const views = dateData[pagePath] || 0;
                         if (views > 0) {
+                            // Convert normalized path back to URL format
+                            let urlPath = pagePath;
+                            if (pagePath === '_root_') {
+                                urlPath = '/';
+                            } else {
+                                // Convert underscores back to slashes and add leading slash
+                                urlPath = '/' + pagePath.replace(/_/g, '/');
+                            }
+                            
                             details.push({
                                 date: dateStr,
                                 dateFormatted: moment(dateStr).format('DD.MM.YYYY'),
-                                page: pagePath === '/' ? 'Начална страница' : pagePath,
-                                pagePath: pagePath,
+                                page: urlPath === '/' ? 'Начална страница' : urlPath,
+                                pagePath: urlPath,
                                 views: views
                             });
                         }
