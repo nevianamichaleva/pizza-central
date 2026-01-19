@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import '../../public/css/main.css';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
+import PageViewTracker from '../components/PageViewTracker';
 import './globals.css';
 
 import { CategoriesProvider } from '@/context/CategoriesContext';
@@ -83,6 +84,7 @@ export default function RootLayout({ children }) {
           <CategoriesProvider>
             <ProductsProvider>
               <TranslationsProvider>
+                <PageViewTracker />
                 <Header />
                 <main>
                   {children}

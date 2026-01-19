@@ -674,6 +674,38 @@ const AdministrationPage = () => {
                             >
                                 Управление на блог статии
                             </Link>
+                            <Link 
+                                href='/admin/page-views' 
+                                style={{ 
+                                    textDecoration: 'none',
+                                    display: 'block',
+                                    padding: '12px 16px',
+                                    color: pathname === '/admin/page-views' ? '#ce1212' : '#333',
+                                    fontSize: '15px',
+                                    fontWeight: '500',
+                                    borderLeft: `3px solid ${pathname === '/admin/page-views' ? '#ce1212' : 'transparent'}`,
+                                    backgroundColor: pathname === '/admin/page-views' ? '#f5f5f5' : 'transparent',
+                                    transition: 'all 0.3s',
+                                    marginBottom: '4px',
+                                    borderRadius: '4px'
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (pathname !== '/admin/page-views') {
+                                        e.currentTarget.style.backgroundColor = '#f5f5f5';
+                                        e.currentTarget.style.borderLeftColor = '#ce1212';
+                                        e.currentTarget.style.color = '#ce1212';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (pathname !== '/admin/page-views') {
+                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                        e.currentTarget.style.borderLeftColor = 'transparent';
+                                        e.currentTarget.style.color = '#333';
+                                    }
+                                }}
+                            >
+                                Виж какво правят потребителите
+                            </Link>
                         </nav>
                     </div>
 
