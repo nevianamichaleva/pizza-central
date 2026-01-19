@@ -1,8 +1,8 @@
 'use client';
 
-import { ref, runTransaction, get, remove } from 'firebase/database';
-import { useEffect, useRef } from 'react';
+import { get, ref, remove, runTransaction } from 'firebase/database';
 import { usePathname } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import { rtdb } from '../../lib/firebase';
 
 const PageViewTracker = () => {

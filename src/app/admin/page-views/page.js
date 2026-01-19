@@ -254,8 +254,15 @@ const PageViewsPage = () => {
                                     <th style={{ 
                                         padding: '12px',
                                         textAlign: 'left',
-                                        fontWeight: '600'
+                                        fontWeight: '600',
+                                        borderRight: '1px solid #f0f0f0'
                                     }}>Дата</th>
+                                    <th style={{ 
+                                        padding: '12px',
+                                        textAlign: 'left',
+                                        fontWeight: '600',
+                                        borderRight: '1px solid #f0f0f0'
+                                    }}>URL</th>
                                     <th style={{ 
                                         padding: '12px',
                                         textAlign: 'right',
@@ -264,31 +271,48 @@ const PageViewsPage = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {pageViewsData.length > 0 ? (
-                                    pageViewsData.map((item, index) => (
+                                {pageViewsDetails.length > 0 ? (
+                                    pageViewsDetails.map((item, index) => (
                                         <tr 
                                             key={index}
                                             style={{ 
-                                                borderBottom: '1px solid #f0f0f0'
+                                                borderBottom: '1px solid #f0f0f0',
+                                                transition: 'background-color 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.backgroundColor = '#fafafa';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.backgroundColor = 'transparent';
                                             }}
                                         >
-                                            <td style={{ padding: '12px' }}>
-                                                {item.date}
+                                            <td style={{ 
+                                                padding: '12px',
+                                                borderRight: '1px solid #f0f0f0',
+                                                fontWeight: '500'
+                                            }}>
+                                                {item.dateFormatted}
+                                            </td>
+                                            <td style={{ 
+                                                padding: '12px',
+                                                borderRight: '1px solid #f0f0f0'
+                                            }}>
+                                                {item.pagePath}
                                             </td>
                                             <td style={{ 
                                                 padding: '12px',
                                                 textAlign: 'right',
-                                                fontWeight: '500',
+                                                fontWeight: '600',
                                                 color: '#fa8c16'
                                             }}>
-                                                {item.count.toLocaleString('bg-BG')}
+                                                {item.views.toLocaleString('bg-BG')}
                                             </td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
                                         <td 
-                                            colSpan="2" 
+                                            colSpan="3" 
                                             style={{ 
                                                 padding: '20px',
                                                 textAlign: 'center',
@@ -300,6 +324,29 @@ const PageViewsPage = () => {
                                     </tr>
                                 )}
                             </tbody>
+                            <tfoot>
+                                <tr style={{ 
+                                    background: '#fafafa',
+                                    borderTop: '2px solid #f0f0f0'
+                                }}>
+                                    <td style={{ 
+                                        padding: '12px',
+                                        fontWeight: '600',
+                                        borderRight: '1px solid #f0f0f0'
+                                    }} colSpan="2">
+                                        Общо:
+                                    </td>
+                                    <td style={{ 
+                                        padding: '12px',
+                                        textAlign: 'right',
+                                        fontWeight: '600',
+                                        color: '#fa8c16',
+                                        fontSize: '16px'
+                                    }}>
+                                        {pageViewsDetails.reduce((sum, item) => sum + item.views, 0).toLocaleString('bg-BG')}
+                                    </td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>
