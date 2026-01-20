@@ -55,10 +55,16 @@ export default function CateringPage() {
         }
       ]
     },
-    "areaServed": {
-      "@type": "City",
-      "name": "Добрич"
-    }
+    "areaServed": [
+      {
+        "@type": "City",
+        "name": "Добрич"
+      },
+      {
+        "@type": "City",
+        "name": "Варна"
+      }
+    ]
   };
   const cateringImages = [
     '/images/catering/1000032298.jpg',
@@ -99,6 +105,18 @@ export default function CateringPage() {
               <p className="lead" style={{ fontSize: '22px', lineHeight: '1.8' }}>
                 Ресторант-пицария <strong>„Централ"</strong> предлага професионален кетъринг за фирмени и лични събития, създаден с внимание към детайла, вкуса и визията. Подхождаме индивидуално към всяка поръчка, за да отговорим напълно на вашите изисквания, повод и предпочитания.
               </p>
+              <div style={{ 
+                marginTop: '25px', 
+                padding: '20px', 
+                backgroundColor: 'var(--surface-color)', 
+                borderRadius: '8px',
+                border: '2px solid #ce1212'
+              }}>
+                <p style={{ fontSize: '20px', margin: 0, fontWeight: '600', color: 'var(--heading-color)' }}>
+                  <i className="bi bi-geo-alt-fill" style={{ color: '#ce1212', marginRight: '8px' }}></i>
+                  Изпълняваме поръчки за <strong>гр. Добрич и Добричка област</strong>, както и за <strong>гр. Варна и Варненска област</strong>
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -151,25 +169,29 @@ export default function CateringPage() {
         <div className="row gy-4 mb-5">
           <div className="col-lg-6" data-aos="fade-up" data-aos-delay="200">
             <div className="content">
-              <h3 style={{ fontSize: '24px', color: 'var(--heading-color)', marginBottom: '20px', fontFamily: 'var(--heading-font)' }}>
+              <h3 style={{ fontSize: '32px', color: 'var(--heading-color)', marginBottom: '20px', fontFamily: 'var(--heading-font)' }}>
                 Как работим
               </h3>
               <ul style={{ listStyle: 'none', padding: 0 }}>
                 <li style={{ marginBottom: '15px' }}>
                   <i className="bi bi-check-circle-fill" style={{ color: '#ce1212', marginRight: '10px' }}></i>
-                  <span style={{ fontSize: '18px' }}><strong>С предварителна заявка</strong> – всяко кетъринг предложение се изготвя специално за вас</span>
+                  <span style={{ fontSize: '22px' }}><strong>С предварителна заявка</strong> – всяко кетъринг предложение се изготвя специално за вас</span>
                 </li>
                 <li style={{ marginBottom: '15px' }}>
                   <i className="bi bi-check-circle-fill" style={{ color: '#ce1212', marginRight: '10px' }}></i>
-                  <span style={{ fontSize: '18px' }}><strong>Индивидуална консултация за меню</strong> – съобразяване с броя гости, повода и бюджета</span>
+                  <span style={{ fontSize: '22px' }}><strong>Индивидуална консултация за меню</strong> – съобразяване с броя гости, повода и бюджета</span>
                 </li>
                 <li style={{ marginBottom: '15px' }}>
                   <i className="bi bi-check-circle-fill" style={{ color: '#ce1212', marginRight: '10px' }}></i>
-                  <span style={{ fontSize: '18px' }}><strong>Възможност за комбиниране</strong> – различни плата и хапки според вашите предпочитания</span>
+                  <span style={{ fontSize: '22px' }}><strong>Възможност за комбиниране</strong> – различни плата и хапки според вашите предпочитания</span>
                 </li>
                 <li style={{ marginBottom: '15px' }}>
                   <i className="bi bi-check-circle-fill" style={{ color: '#ce1212', marginRight: '10px' }}></i>
-                  <span style={{ fontSize: '18px' }}><strong>Професионално обслужване</strong> – внимание към детайла, вкуса и визията</span>
+                  <span style={{ fontSize: '22px' }}><strong>Професионално обслужване</strong> – внимание към детайла, вкуса и визията</span>
+                </li>
+                <li style={{ marginBottom: '15px' }}>
+                  <i className="bi bi-check-circle-fill" style={{ color: '#ce1212', marginRight: '10px' }}></i>
+                  <span style={{ fontSize: '22px' }}>Изпълняваме поръчки за <strong>гр. Варна и Варненска област</strong>, както и за <strong>гр. Добрич и Добричка област</strong></span>
                 </li>
               </ul>
             </div>

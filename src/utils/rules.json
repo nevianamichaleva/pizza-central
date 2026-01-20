@@ -20,6 +20,11 @@
           ".read": "$orderId === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin'",  // User can read their own orders or admin can read all
           ".write": "$orderId === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin'"  // User can write their own orders, or admin can write
         }
+      },
+      
+      "page_views": {
+        ".read": true,  // Public read access for page views
+        ".write": true  // Public write access for page views (anyone can track page visits)
       }
     }
   }
