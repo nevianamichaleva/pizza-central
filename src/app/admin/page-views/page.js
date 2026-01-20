@@ -5,7 +5,7 @@ import { get, ref, remove } from 'firebase/database';
 import moment from 'moment';
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { rtdb } from '../../../../lib/firebase';
 
 const PageViewsPage = () => {
@@ -219,148 +219,26 @@ const PageViewsPage = () => {
                         Посещения на страници - Последна седмица
                     </h3>
                     <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={pageViewsData}>
+                        <LineChart data={pageViewsData}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="date" />
                             <YAxis allowDecimals={false} />
                             <Tooltip />
                             <Legend />
-                            <Bar 
+                            <Line 
+                                type="monotone"
                                 dataKey="count" 
-                                fill="#fa8c16" 
+                                stroke="#fa8c16" 
+                                strokeWidth={2}
                                 name="Брой посещения"
+                                dot={{ r: 5 }}
+                                activeDot={{ r: 7 }}
                             />
-                        </BarChart>
+                        </LineChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* Page Views by Day Table */}
-                <div style={{ 
-                    background: '#fff', 
-                    padding: '24px', 
-                    borderRadius: '8px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                    marginBottom: '20px'
-                }}>
-                    <h3 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: '600' }}>
-                        Посещения по дни - Последна седмица
-                    </h3>
-                    <div style={{ 
-                        overflowX: 'auto',
-                        border: '1px solid #f0f0f0',
-                        borderRadius: '4px'
-                    }}>
-                        <table style={{ 
-                            width: '100%', 
-                            borderCollapse: 'collapse',
-                            fontSize: '14px'
-                        }}>
-                            <thead>
-                                <tr style={{ 
-                                    background: '#fafafa',
-                                    borderBottom: '2px solid #f0f0f0'
-                                }}>
-                                    <th style={{ 
-                                        padding: '12px',
-                                        textAlign: 'left',
-                                        fontWeight: '600',
-                                        borderRight: '1px solid #f0f0f0'
-                                    }}>Дата</th>
-                                    <th style={{ 
-                                        padding: '12px',
-                                        textAlign: 'left',
-                                        fontWeight: '600',
-                                        borderRight: '1px solid #f0f0f0'
-                                    }}>URL</th>
-                                    <th style={{ 
-                                        padding: '12px',
-                                        textAlign: 'right',
-                                        fontWeight: '600'
-                                    }}>Брой посещения</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {pageViewsDetails.length > 0 ? (
-                                    pageViewsDetails.map((item, index) => (
-                                        <tr 
-                                            key={index}
-                                            style={{ 
-                                                borderBottom: '1px solid #f0f0f0',
-                                                transition: 'background-color 0.2s'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.backgroundColor = '#fafafa';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.backgroundColor = 'transparent';
-                                            }}
-                                        >
-                                            <td style={{ 
-                                                padding: '12px',
-                                                borderRight: '1px solid #f0f0f0',
-                                                fontWeight: '500'
-                                            }}>
-                                                {item.dateFormatted}
-                                            </td>
-                                            <td style={{ 
-                                                padding: '12px',
-                                                borderRight: '1px solid #f0f0f0'
-                                            }}>
-                                                {item.pagePath}
-                                            </td>
-                                            <td style={{ 
-                                                padding: '12px',
-                                                textAlign: 'right',
-                                                fontWeight: '600',
-                                                color: '#fa8c16'
-                                            }}>
-                                                {item.views.toLocaleString('bg-BG')}
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td 
-                                            colSpan="3" 
-                                            style={{ 
-                                                padding: '20px',
-                                                textAlign: 'center',
-                                                color: '#999'
-                                            }}
-                                        >
-                                            Няма данни за последната седмица
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                            <tfoot>
-                                <tr style={{ 
-                                    background: '#fafafa',
-                                    borderTop: '2px solid #f0f0f0'
-                                }}>
-                                    <td style={{ 
-                                        padding: '12px',
-                                        fontWeight: '600',
-                                        borderRight: '1px solid #f0f0f0'
-                                    }} colSpan="2">
-                                        Общо:
-                                    </td>
-                                    <td style={{ 
-                                        padding: '12px',
-                                        textAlign: 'right',
-                                        fontWeight: '600',
-                                        color: '#fa8c16',
-                                        fontSize: '16px'
-                                    }}>
-                                        {pageViewsDetails.reduce((sum, item) => sum + item.views, 0).toLocaleString('bg-BG')}
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-
-                {/* Search Filters */}
+            {/* Search Filters */}
                 <div style={{ 
                     background: '#fff', 
                     padding: '20px', 
