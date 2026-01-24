@@ -67,8 +67,14 @@ export const metadata = {
     },
   },
   icons: {
-    icon: '/images/favicon.ico',
-    apple: '/images/apple-touch-icon.png',
+    icon: [
+      { url: '/images/favicon.ico', sizes: 'any' },
+      { url: '/images/favicon.png', type: 'image/png', sizes: '32x32' },
+    ],
+    apple: [
+      { url: '/images/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    shortcut: '/images/favicon.ico',
   },
   verification: {
     google: 'vnY1LkfeFWmqka-8vSVYvovLtVjN30rrzLRFiz0qMbA',
