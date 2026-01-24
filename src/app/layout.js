@@ -68,13 +68,13 @@ export const metadata = {
   },
   icons: {
     icon: [
-      { url: '/images/favicon.ico', sizes: 'any' },
-      { url: '/images/favicon.png', type: 'image/png', sizes: '32x32' },
+      { url: '/images/favicon.ico?v=2', sizes: 'any' },
+      { url: '/images/favicon.png?v=2', type: 'image/png', sizes: '32x32' },
     ],
     apple: [
-      { url: '/images/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/images/apple-touch-icon.png?v=2', sizes: '180x180', type: 'image/png' },
     ],
-    shortcut: '/images/favicon.ico',
+    shortcut: '/images/favicon.ico?v=2',
   },
   verification: {
     google: 'vnY1LkfeFWmqka-8vSVYvovLtVjN30rrzLRFiz0qMbA',

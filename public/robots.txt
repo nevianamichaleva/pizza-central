@@ -1,35 +1,7 @@
 User-agent: *
-Allow: /
+Disallow:
 
-# Disallow admin pages
-Disallow: /admin/
-Disallow: /login
-Disallow: /signup
-Disallow: /profile
-
-# Sitemap
 Sitemap: https://www.pizza-central.bg/sitemap.xml
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# Favicon location
+# https://www.pizza-central.bg/images/favicon.ico
