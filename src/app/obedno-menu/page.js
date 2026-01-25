@@ -60,7 +60,7 @@ const ObednoMenuPage = () => {
       />
       <section id="obedno-menu" className="obedno-menu section">
       {/* Section Title */}
-      <div className="container section-title" data-aos="fade-up">
+      <div className="container section-title">
         <h2>Обедно меню</h2>
         <p>
           <span>Вкусни ястия</span> <span className="description-title">на достъпни цени</span>
@@ -71,7 +71,7 @@ const ObednoMenuPage = () => {
       <div className="container">
         {/* Introduction Section */}
         <div className="row gy-4 mb-5">
-          <div className="col-lg-12" data-aos="fade-up" data-aos-delay="100">
+          <div className="col-lg-12">
             <div className="content text-center">
               <p className="lead" style={{ fontSize: '22px', lineHeight: '1.8' }}>
                 В ресторант-пицария <strong>„Централ"</strong> предлагаме разнообразно <strong>обедно меню</strong>, което ще задоволи всеки вкус. Нашите ястия се приготвят с внимание към качеството и вкуса, като предлагаме баланс между традиционна българска кухня и модерни кулинарни решения.
@@ -110,7 +110,7 @@ const ObednoMenuPage = () => {
 
         {/* Main Image */}
         <div className="row gy-4 mb-5">
-          <div className="col-lg-12" data-aos="fade-up" data-aos-delay="150">
+          <div className="col-lg-12">
             <div className="text-center" style={{ borderRadius: '8px', overflow: 'hidden' }}>
               <Image 
                 src="/images/launch/launch1.jpg" 
@@ -130,7 +130,7 @@ const ObednoMenuPage = () => {
 
         {/* Features Section */}
         <div className="row gy-4 mb-5">
-          <div className="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+          <div className="col-lg-6">
             <div className="content">
               <h3 style={{ fontSize: '24px', color: 'var(--heading-color)', marginBottom: '20px', fontFamily: 'var(--heading-font)' }}>
                 Какво предлага нашето обедно меню?
@@ -177,7 +177,7 @@ const ObednoMenuPage = () => {
               </ul>
             </div>
           </div>
-          <div className="col-lg-6" data-aos="fade-up" data-aos-delay="250">
+          <div className="col-lg-6">
             {/* Image 1 */}
             <div className="text-center" style={{ borderRadius: '8px', overflow: 'hidden', marginBottom: '20px' }}>
               <Image 
@@ -213,27 +213,27 @@ const ObednoMenuPage = () => {
 
         {/* Menu Options Section */}
         <div className="row gy-4 mb-5">
-          <div className="col-lg-12" data-aos="fade-up" data-aos-delay="300">
+          <div className="col-lg-12">
             <div className="content text-center" style={{ padding: '30px', backgroundColor: 'var(--surface-color)', borderRadius: '8px' }}>
               <h3 style={{ fontSize: '32px', color: 'var(--heading-color)', marginBottom: '20px', fontFamily: 'var(--heading-font)' }}>
                 Нашите обедни предложения
               </h3>
               <div className="row gy-4 mt-4">
-                <div className="col-md-4" data-aos="fade-up" data-aos-delay="350">
+                <div className="col-md-4">
                   <div style={{ padding: '20px' }}>
                     <i className="bi bi-egg-fried" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '15px', display: 'block' }}></i>
                     <h4 style={{ fontSize: '24px', fontFamily: 'var(--heading-font)', marginBottom: '10px' }}>Основни ястия</h4>
                     <p style={{ fontSize: '22px' }}>Традиционни български ястия, приготвени с майсторство и внимание към детайла.</p>
                   </div>
                 </div>
-                <div className="col-md-4" data-aos="fade-up" data-aos-delay="400">
+                <div className="col-md-4">
                   <div style={{ padding: '20px' }}>
                     <i className="bi bi-cup-hot-fill" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '15px', display: 'block' }}></i>
                     <h4 style={{ fontSize: '24px', fontFamily: 'var(--heading-font)', marginBottom: '10px' }}>Супи</h4>
                     <p style={{ fontSize: '22px' }}>Топли и питателни супи, които ще ви сгреят и задоволят вкуса ви.</p>
                   </div>
                 </div>
-                <div className="col-md-4" data-aos="fade-up" data-aos-delay="450">
+                <div className="col-md-4">
                   <div style={{ padding: '20px' }}>
                     <i className="bi bi-cake2-fill" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '15px', display: 'block' }}></i>
                     <h4 style={{ fontSize: '24px', fontFamily: 'var(--heading-font)', marginBottom: '10px' }}>Десерти</h4>
@@ -247,27 +247,27 @@ const ObednoMenuPage = () => {
 
         {/* Benefits Section */}
         <div className="row gy-4 mb-5">
-          <div className="col-lg-12" data-aos="fade-up" data-aos-delay="500">
+          <div className="col-lg-12">
             <div className="content">
               <h3 style={{ fontSize: '32px', color: 'var(--heading-color)', marginBottom: '20px', fontFamily: 'var(--heading-font)', textAlign: 'center' }}>
                 Защо да изберете нашето обедно меню?
               </h3>
               <div className="row gy-4">
-                <div className="col-md-4" data-aos="fade-up" data-aos-delay="550">
+                <div className="col-md-4">
                   <div className="text-center" style={{ padding: '20px' }}>
                     <i className="bi bi-clock-fill" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '15px', display: 'block' }}></i>
                     <h4 style={{ fontSize: '24px', fontFamily: 'var(--heading-font)', marginBottom: '10px' }}>Бързо обслужване</h4>
                     <p style={{ fontSize: '22px' }}>Идеално за обедна почивка – получавате вкусна храна бързо и ефективно.</p>
                   </div>
                 </div>
-                <div className="col-md-4" data-aos="fade-up" data-aos-delay="600">
+                <div className="col-md-4">
                   <div className="text-center" style={{ padding: '20px' }}>
                     <i className="bi bi-currency-exchange" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '15px', display: 'block' }}></i>
                     <h4 style={{ fontSize: '24px', fontFamily: 'var(--heading-font)', marginBottom: '10px' }}>Достъпни цени</h4>
                     <p style={{ fontSize: '22px' }}>Качествена храна на разумни цени, която всеки може да си позволи.</p>
                   </div>
                 </div>
-                <div className="col-md-4" data-aos="fade-up" data-aos-delay="650">
+                <div className="col-md-4">
                   <div className="text-center" style={{ padding: '20px' }}>
                     <i className="bi bi-heart-fill" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '15px', display: 'block' }}></i>
                     <h4 style={{ fontSize: '24px', fontFamily: 'var(--heading-font)', marginBottom: '10px' }}>Домашна храна</h4>
@@ -281,13 +281,13 @@ const ObednoMenuPage = () => {
 
         {/* Gallery Section */}
         <div className="row gy-4">
-          <div className="col-lg-12" data-aos="fade-up" data-aos-delay="700">
+          <div className="col-lg-12">
             <h3 style={{ fontSize: '32px', color: 'var(--heading-color)', marginBottom: '30px', fontFamily: 'var(--heading-font)', textAlign: 'center' }}>
               Галерия от нашето обедно меню
             </h3>
           </div>
           {launchImages.slice(3, 9).map((img, idx) => (
-            <div key={idx} className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay={750 + idx * 50}>
+            <div key={idx} className="col-lg-4 col-md-6">
               <div className="text-center" style={{ borderRadius: '8px', overflow: 'hidden' }}>
                 <Image 
                   src={img} 
@@ -308,7 +308,7 @@ const ObednoMenuPage = () => {
 
         {/* Call to Action */}
         <div className="row gy-4 mt-5">
-          <div className="col-lg-12" data-aos="fade-up" data-aos-delay="1050">
+          <div className="col-lg-12">
             <div className="content text-center" style={{ padding: '40px', backgroundColor: 'var(--surface-color)', borderRadius: '8px' }}>
               <h3 style={{ fontSize: '24px', color: 'var(--heading-color)', marginBottom: '20px', fontFamily: 'var(--heading-font)' }}>
                 Посетете ни за обяд!

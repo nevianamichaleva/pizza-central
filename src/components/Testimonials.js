@@ -42,13 +42,13 @@ const Testimonials = () => {
   return (
     <section id="testimonials" className="testimonials section light-background">
       {/* Section Title */}
-      <div className="container section-title" data-aos="fade-up">
+      <div className="container section-title">
         <h2>TESTIMONIALS</h2>
         <p>What Are They <span className="description-title">Saying About Us</span></p>
       </div>
       {/* End Section Title */}
 
-      <div className="container" data-aos="fade-up" data-aos-delay="100">
+      <div className="container">
         <div className="swiper-container">
           <div className="swiper-wrapper">
             {/* Testimonial 1 */}

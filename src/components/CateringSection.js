@@ -7,7 +7,7 @@ const CateringSection = () => {
   return (
     <section id="catering-preview" className="catering-preview section">
       {/* Section Title */}
-      <div className="container section-title" data-aos="fade-up">
+      <div className="container section-title">
         <h2>Кетъринг услуги</h2>
         <p>
           <span>Професионален</span> <span className="description-title">кетъринг</span>
@@ -17,7 +17,7 @@ const CateringSection = () => {
 
       <div className="container">
         <div className="row gy-4">
-          <div className="col-lg-7" data-aos="fade-up" data-aos-delay="100">
+          <div className="col-lg-7">
             <Image 
               src="/images/catering/1000032309.jpg" 
               alt="Кетъринг услуги - Ресторант-пицария Централ Добрич" 
@@ -26,7 +26,7 @@ const CateringSection = () => {
               className="img-fluid mb-2"
             />
           </div>
-          <div className="col-lg-5" data-aos="fade-up" data-aos-delay="250">
+          <div className="col-lg-5">
             <div className="content ps-0 ps-lg-5" style={{ fontSize: '18px', padding: '0px!important' }}>
               <p style={{ fontSize: '20px', marginBottom: '30px', lineHeight: '1.5', fontStyle: 'italic' }}>
                 Професионален <strong>кетъринг за фирмени и лични събития</strong> в Добрич. Приготвяме вкусни плата, солени хапки и сладки изкушения за вашето специално събитие.

@@ -55,6 +55,24 @@ const Hero = () => {
           </div>
         </div>
       </div>
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .hero {
+            padding-top: 0 !important;
+            padding-bottom: 40px !important;
+          }
+          .hero .container {
+            padding-top: 0 !important;
+          }
+          .hero .row {
+            margin-top: 0 !important;
+          }
+          .hero-img {
+            margin-top: 5px !important;
+            padding-top: 0 !important;
+          }
+        }
+      `}</style>
     </section>
   );
 };

@@ -1,18 +1,16 @@
-import 'aos/dist/aos.css';
 import Link from 'next/link';
 import { useEffect } from 'react';
 
 const WhyUsSection = () => {
   useEffect(() => {
     const AOS = require('aos');
-    AOS.init();
   }, []);
 
   return (
     <section id="why-us" className="why-us section light-background">
       <div className="container">
         <div className="row gy-4">
-          <div className="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+          <div className="col-lg-4">
             <div className="why-box">
               <h3>Защо да изберете вкуса на „Централ“?</h3>
               <p> 🍕 <strong>Истински вкус</strong> – приготвяме пиците си по италиански рецепти, но с най-добрите български продукти. </p>
@@ -25,7 +23,7 @@ const WhyUsSection = () => {
             </div>
           </div>
           <div className="col-lg-8 d-flex align-items-stretch">
-            <div className="row gy-4" data-aos="fade-up" data-aos-delay="200">
+            <div className="row gy-4">
               <div className="col-xl-4">
                 <div className="icon-box d-flex flex-column justify-content-center align-items-center">
                   <i className="bi-house-door "></i>
@@ -33,14 +31,14 @@ const WhyUsSection = () => {
                   <p>семейна атмосфера, в която храната е удоволствие, а времето спира</p>
                 </div>
               </div>
-              <div className="col-xl-4" data-aos="fade-up" data-aos-delay="300">
+              <div className="col-xl-4">
                 <div className="icon-box d-flex flex-column justify-content-center align-items-center">
                   <i className="bi-heart"></i>
                   <h4>За цялото семейство </h4>
                   <p>докато вие се наслаждавате, децата могат да се забавляват в специалния ни детски кът</p>
                 </div>
               </div>
-              <div className="col-xl-4" data-aos="fade-up" data-aos-delay="400">
+              <div className="col-xl-4">
                 <div className="icon-box d-flex flex-column justify-content-center align-items-center">
                   <i className="bi-emoji-heart-eyes"></i>
                   <h4>Обслужване с усмивка</h4>

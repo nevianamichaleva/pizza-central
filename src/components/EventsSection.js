@@ -1,6 +1,5 @@
 'use client';
 
-import "aos/dist/aos.css";
 import { get, ref } from 'firebase/database';
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -10,16 +9,6 @@ const EventsSection = () => {
   const [eventsData, setEventsData] = useState([]);
 
   useEffect(() => {
-    const initAOS = async () => {
-      if (typeof window === "undefined") {
-        return;
-      }
-
-      const { default: AOS } = await import("aos");
-      AOS.init();
-    };
-
-    initAOS();
   }, []);
 
   useEffect(() => {
@@ -54,7 +43,7 @@ const EventsSection = () => {
 
   return (
     <section id="events" className="chefs section">
-      <div className="container section-title" data-aos="fade-up">
+      <div className="container section-title">
         <h2>Незабравими моменти</h2>
         <p>
           <span>Нашите</span>{" "}
@@ -67,8 +56,8 @@ const EventsSection = () => {
           {eventsData.map((event, index) => (
             <div
               className="col-lg-4 d-flex align-items-stretch"
-              data-aos="fade-up"
-              data-aos-delay={(index + 1) * 100}
+             
+             
               key={`${event.title}-${index}`}
             >
               <Link href={`/events/${event.slug}`} className="team-member">

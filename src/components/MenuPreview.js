@@ -386,7 +386,7 @@ const MenuPreview = () => {
 
   return (
     <section id="menu-preview" className="menu section">
-      <div className="container section-title" data-aos="fade-up">
+      <div className="container section-title">
         <h2>Ресторант-пицария Централ град Добрич</h2>
         <p>
           <span>Акценти от нашето</span>{' '}
@@ -395,7 +395,7 @@ const MenuPreview = () => {
       </div>
 
       <div className="container">
-        <div style={{ textAlign: 'center', marginBottom: '40px' }} data-aos="fade-up">
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <Link href="/for-home">
             <Button
               type="primary"

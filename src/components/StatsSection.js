@@ -1,6 +1,5 @@
 'use client';
 
-import 'aos/dist/aos.css';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
@@ -13,16 +12,6 @@ const StatsSection = () => {
   useEffect(() => {
     let isMounted = true;
 
-    const initAOS = async () => {
-      if (typeof window === 'undefined') {
-        return;
-      }
-
-      const { default: AOS } = await import('aos');
-      AOS.init();
-    };
-
-    initAOS();
 
     // Simulate counter animation
     const animateCounters = () => {
@@ -55,7 +44,7 @@ const StatsSection = () => {
   return (
     <section id="stats" className="stats section dark-background">
       {/* Background Image */}
-      <div data-aos="fade-in" style={{ position: 'relative', width: '100%', height: '100%', minHeight: '400px' }}>
+      <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '400px' }}>
         <Image 
           src="/images/stats-bg.jpg" 
           alt="Ресторант-пицария Централ Добрич - статистика и постижения"
@@ -65,7 +54,7 @@ const StatsSection = () => {
         />
       </div>
 
-      <div className="container position-relative" data-aos="fade-up" data-aos-delay="100">
+      <div className="container position-relative">
         <div className="row gy-4">
           {/* Stats Item 1 */}
           <div className="col-lg-3 col-md-6">

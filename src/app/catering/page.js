@@ -89,7 +89,7 @@ export default function CateringPage() {
       />
       <section id="catering" className="catering section">
       {/* Section Title */}
-      <div className="container section-title" data-aos="fade-up">
+      <div className="container section-title">
         <h2>Кетъринг</h2>
         <p>
           <span>Традиция и вкус</span> <span className="description-title">навсякъде с вас</span>
@@ -100,7 +100,7 @@ export default function CateringPage() {
       <div className="container">
         {/* Introduction Section */}
         <div className="row gy-4 mb-5">
-          <div className="col-lg-12" data-aos="fade-up" data-aos-delay="100">
+          <div className="col-lg-12">
             <div className="content text-center">
               <p className="lead" style={{ fontSize: '22px', lineHeight: '1.8' }}>
                 Ресторант-пицария <strong>„Централ"</strong> предлага професионален кетъринг за фирмени и лични събития, създаден с внимание към детайла, вкуса и визията. Подхождаме индивидуално към всяка поръчка, за да отговорим напълно на вашите изисквания, повод и предпочитания.
@@ -147,7 +147,7 @@ export default function CateringPage() {
 
         {/* Main Image */}
         <div className="row gy-4 mb-5">
-          <div className="col-lg-12" data-aos="fade-up" data-aos-delay="150">
+          <div className="col-lg-12">
             <div className="text-center" style={{ borderRadius: '8px', overflow: 'hidden' }}>
               <Image 
                 src="/images/catering/1000032298.jpg" 
@@ -167,7 +167,7 @@ export default function CateringPage() {
 
         {/* How We Work Section */}
         <div className="row gy-4 mb-5">
-          <div className="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+          <div className="col-lg-6">
             <div className="content">
               <h3 style={{ fontSize: '32px', color: 'var(--heading-color)', marginBottom: '20px', fontFamily: 'var(--heading-font)' }}>
                 Как работим
@@ -196,7 +196,7 @@ export default function CateringPage() {
               </ul>
             </div>
           </div>
-          <div className="col-lg-6" data-aos="fade-up" data-aos-delay="250">
+          <div className="col-lg-6">
             {/* Image 1 */}
             <div className="text-center" style={{ borderRadius: '8px', overflow: 'hidden', marginBottom: '20px' }}>
               <Image 
@@ -232,27 +232,27 @@ export default function CateringPage() {
 
         {/* Menu Options Section */}
         <div className="row gy-4 mb-5">
-          <div className="col-lg-12" data-aos="fade-up" data-aos-delay="300">
+          <div className="col-lg-12">
             <div className="content text-center" style={{ padding: '30px', backgroundColor: 'var(--surface-color)', borderRadius: '8px' }}>
               <h3 style={{ fontSize: '24px', color: 'var(--heading-color)', marginBottom: '20px', fontFamily: 'var(--heading-font)' }}>
                 Нашите кетъринг предложения
               </h3>
               <div className="row gy-4 mt-4">
-                <div className="col-md-4" data-aos="fade-up" data-aos-delay="350">
+                <div className="col-md-4">
                   <div style={{ padding: '20px' }}>
                     <i className="bi bi-egg-fried" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '15px', display: 'block' }}></i>
                     <h4 style={{ fontSize: '20px', fontFamily: 'var(--heading-font)', marginBottom: '10px' }}>Плата</h4>
                     <p style={{ fontSize: '18px' }}>Топли плата, студени плата и плодови плата – подходящи за фирмени събития, срещи, празници и специални поводи.</p>
                   </div>
                 </div>
-                <div className="col-md-4" data-aos="fade-up" data-aos-delay="400">
+                <div className="col-md-4">
                   <div style={{ padding: '20px' }}>
                     <i className="bi bi-basket-fill" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '15px', display: 'block' }}></i>
                     <h4 style={{ fontSize: '20px', fontFamily: 'var(--heading-font)', marginBottom: '10px' }}>Солени хапки</h4>
                     <p style={{ fontSize: '18px' }}>Брускети, мини сандвичи, тарталети и специални предложения – разнообразие от вкусове за всяко събитие.</p>
                   </div>
                 </div>
-                <div className="col-md-4" data-aos="fade-up" data-aos-delay="450">
+                <div className="col-md-4">
                   <div style={{ padding: '20px' }}>
                     <i className="bi bi-cake2-fill" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '15px', display: 'block' }}></i>
                     <h4 style={{ fontSize: '20px', fontFamily: 'var(--heading-font)', marginBottom: '10px' }}>Сладки изкушения</h4>
@@ -266,34 +266,34 @@ export default function CateringPage() {
 
         {/* Suitable For Section */}
         <div className="row gy-4 mb-5">
-          <div className="col-lg-12" data-aos="fade-up" data-aos-delay="500">
+          <div className="col-lg-12">
             <div className="content">
               <h3 style={{ fontSize: '24px', color: 'var(--heading-color)', marginBottom: '20px', fontFamily: 'var(--heading-font)', textAlign: 'center' }}>
                 Подходящо за:
               </h3>
               <div className="row gy-4">
-                <div className="col-md-3" data-aos="fade-up" data-aos-delay="550">
+                <div className="col-md-3">
                   <div className="text-center" style={{ padding: '20px' }}>
                     <i className="bi bi-briefcase-fill" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '15px', display: 'block' }}></i>
                     <h4 style={{ fontSize: '20px', fontFamily: 'var(--heading-font)', marginBottom: '10px' }}>Фирмени събития</h4>
                     <p style={{ fontSize: '18px' }}>Коктейли, срещи, обучения и презентации</p>
                   </div>
                 </div>
-                <div className="col-md-3" data-aos="fade-up" data-aos-delay="600">
+                <div className="col-md-3">
                   <div className="text-center" style={{ padding: '20px' }}>
                     <i className="bi bi-gift-fill" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '15px', display: 'block' }}></i>
                     <h4 style={{ fontSize: '20px', fontFamily: 'var(--heading-font)', marginBottom: '10px' }}>Рождени дни</h4>
                     <p style={{ fontSize: '18px' }}>Специални моменти, които заслужават специално меню</p>
                   </div>
                 </div>
-                <div className="col-md-3" data-aos="fade-up" data-aos-delay="650">
+                <div className="col-md-3">
                   <div className="text-center" style={{ padding: '20px' }}>
                     <i className="bi bi-heart-fill" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '15px', display: 'block' }}></i>
                     <h4 style={{ fontSize: '20px', fontFamily: 'var(--heading-font)', marginBottom: '10px' }}>Кръщенета</h4>
                     <p style={{ fontSize: '18px' }}>Религиозни и семейни празненства</p>
                   </div>
                 </div>
-                <div className="col-md-3" data-aos="fade-up" data-aos-delay="700">
+                <div className="col-md-3">
                   <div className="text-center" style={{ padding: '20px' }}>
                     <i className="bi bi-people-fill" style={{ fontSize: '48px', color: '#ce1212', marginBottom: '15px', display: 'block' }}></i>
                     <h4 style={{ fontSize: '20px', fontFamily: 'var(--heading-font)', marginBottom: '10px' }}>Частни партита</h4>
@@ -307,13 +307,13 @@ export default function CateringPage() {
 
         {/* Gallery Section */}
         <div className="row gy-4">
-          <div className="col-lg-12" data-aos="fade-up" data-aos-delay="750">
+          <div className="col-lg-12">
             <h3 style={{ fontSize: '18px', color: 'var(--heading-color)', marginBottom: '30px', fontFamily: 'var(--heading-font)', textAlign: 'center' }}>
               Галерия от нашите кетъринг предложения
             </h3>
           </div>
           {cateringImages.slice(3, 12).map((img, idx) => (
-            <div key={idx} className="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay={800 + idx * 50}>
+            <div key={idx} className="col-lg-4 col-md-6">
               <div className="text-center" style={{ borderRadius: '8px', overflow: 'hidden' }}>
                 <Image 
                   src={img} 
@@ -334,7 +334,7 @@ export default function CateringPage() {
 
         {/* Call to Action */}
         <div className="row gy-4 mt-5">
-          <div className="col-lg-12" data-aos="fade-up" data-aos-delay="1200">
+          <div className="col-lg-12">
             <div className="content text-center" style={{ padding: '40px', backgroundColor: 'var(--surface-color)', borderRadius: '8px' }}>
               <h3 style={{ fontSize: '24px', color: 'var(--heading-color)', marginBottom: '20px', fontFamily: 'var(--heading-font)' }}>
                 Направете вашето събитие незабравимо!

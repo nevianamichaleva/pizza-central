@@ -5,7 +5,7 @@ const AboutSection = () => {
   return (
     <section id="about" className="about section">
       {/* Section Title */}
-      <div className="container section-title" data-aos="fade-up">
+      <div className="container section-title">
         <h2>Няколко думи за нас</h2>
         <p>
           <span>Ресторант-пицария</span> <span className="description-title">Централ</span>
@@ -15,7 +15,7 @@ const AboutSection = () => {
 
       <div className="container">
         <div className="row gy-4">
-          <div className="col-lg-7" data-aos="fade-up" data-aos-delay="100">
+          <div className="col-lg-7">
             <Image 
               src="/images/terasa.jpg" 
               alt="Тераса на ресторант-пицария Централ Добрич" 
@@ -24,7 +24,7 @@ const AboutSection = () => {
               className="img-fluid mb-2"
             />
           </div>
-          <div className="col-lg-5" data-aos="fade-up" data-aos-delay="250">
+          <div className="col-lg-5">
             <div className="content ps-0 ps-lg-5" style={{ fontSize: '18px', padding: '0px!important' }}>
               <p style={{ fontSize: '20px', marginBottom: '30px', lineHeight: '1.5', fontStyle: 'italic' }}>
               Ресторант-пицария <strong>„Централ"</strong> вече 18 години е любимо място за вкусна храна и приятни моменти. Намираме се в <strong>центъра на град Добрич</strong> – ул. Независимост 4, срещу Областна Управа.

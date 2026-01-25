@@ -1,6 +1,5 @@
 'use client';
 
-import "aos/dist/aos.css";
 import { get, ref } from 'firebase/database';
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -10,16 +9,6 @@ const NewDishes = () => {
   const [chefsData, setChefsData] = useState([]);
 
   useEffect(() => {
-    const initAOS = async () => {
-      if (typeof window === "undefined") {
-        return;
-      }
-
-      const { default: AOS } = await import("aos");
-      AOS.init();
-    };
-
-    initAOS();
   }, []);
 
   useEffect(() => {
@@ -55,7 +44,7 @@ const NewDishes = () => {
   return (
     <section id="chefs" className="chefs section">
       {/* Section Title */}
-      <div className="container section-title" data-aos="fade-up">
+      <div className="container section-title">
         <h2>Вкусни нови ястия в менюто ни</h2>
         <p>
           <span>Нашите</span> <span className="description-title">най-нови предложения</span>
@@ -67,8 +56,8 @@ const NewDishes = () => {
           {chefsData.map((chef, index) => (
             <div
               className="col-lg-4 d-flex align-items-stretch"
-              data-aos="fade-up"
-              data-aos-delay={(index + 1) * 100}
+             
+             
               key={index}
             >
               <Link href={`/new-dishes/${chef.slug}`} className="team-member" style={{ textDecoration: 'none', color: 'inherit' }}>

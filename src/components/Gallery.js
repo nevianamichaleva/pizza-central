@@ -68,7 +68,7 @@ const Gallery = () => {
   return (
     <section id="gallery" className="gallery section light-background">
       {/* Section Title */}
-      <div className="container section-title" data-aos="fade-up">
+      <div className="container section-title">
         <h2>Потопете се в атмосферата на Ресторант-Пицария Централ! Разгледайте нашата галерия и усетете уюта, който създадохме за вас.</h2>
         <p>
           {/* <span>Check</span>  */}
@@ -76,7 +76,7 @@ const Gallery = () => {
         </p>
       </div>
 
-      <div className="container" data-aos="fade-up" data-aos-delay="100">
+      <div className="container">
         <div className="swiper init-swiper">
           <div className="swiper-wrapper align-items-center">
           <div className="swiper-slide">

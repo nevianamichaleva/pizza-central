@@ -7,7 +7,7 @@ const ServicesSection = () => {
     <section className="section" style={{ paddingTop: '40px', paddingBottom: '60px', backgroundColor: 'var(--surface-color)' }}>
       <div className="container">
         <div className="row gy-4">
-          <div className="col-lg-12" data-aos="fade-up">
+          <div className="col-lg-12">
             <div className="text-center mb-4">
               <h3 style={{ fontSize: '28px', color: 'var(--heading-color)', marginBottom: '15px', fontFamily: 'var(--heading-font)' }}>
                 Разгледайте нашите услуги
@@ -18,7 +18,7 @@ const ServicesSection = () => {
             </div>
             
             <div className="row gy-4 justify-content-center">            
-              <div className="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+              <div className="col-lg-3 col-md-6">
                 <Link href="/reservation" style={{ textDecoration: 'none', display: 'block' }} aria-label="Резервирай маса в ресторанта">
                   <div className="text-center" style={{
                     padding: '40px 30px',
@@ -48,7 +48,7 @@ const ServicesSection = () => {
                 </Link>
               </div>
               
-              <div className="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+              <div className="col-lg-3 col-md-6">
                 <Link href="/for-home" style={{ textDecoration: 'none', display: 'block' }} aria-label="Поръчай за доставка до дома">
                   <div className="text-center" style={{
                     padding: '40px 30px',
@@ -78,7 +78,7 @@ const ServicesSection = () => {
                 </Link>
               </div>
               
-              <div className="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+              <div className="col-lg-3 col-md-6">
                 <Link href="/catering" style={{ textDecoration: 'none', display: 'block' }}>
                   <div className="text-center" style={{
                     padding: '40px 30px',
@@ -108,7 +108,7 @@ const ServicesSection = () => {
                 </Link>
               </div>
 
-              <div className="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+              <div className="col-lg-3 col-md-6">
                 <Link href="/detski-kut" style={{ textDecoration: 'none', display: 'block' }}>
                   <div className="text-center" style={{
                     padding: '40px 30px',

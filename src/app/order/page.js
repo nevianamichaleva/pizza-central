@@ -476,8 +476,8 @@ export default function Order() {
   if (!order || !order.items || Object.keys(order.items).length === 0) {
     return (
       <section id="contact" className="contact section shopping-cart dark">
-        <div className="container" data-aos="fade-up" data-aos-delay="100">
-          <div className="container section-title" data-aos="fade-up">
+        <div className="container">
+          <div className="container section-title">
             <h2>Ресторант-пицария Централ</h2>
             <p>
               <span className="description-title">Вашата количка е празна</span>
@@ -578,8 +578,8 @@ export default function Order() {
   return (
     <>
       <section id="contact" className="contact section shopping-cart dark">
-        <div className="container" data-aos="fade-up" data-aos-delay="100">
-          <div className="container section-title" data-aos="fade-up">
+        <div className="container">
+          <div className="container section-title">
             <h2>Ресторант-пицария Централ</h2>
             <p>
               <span className="description-title">Детайли на поръчката</span>

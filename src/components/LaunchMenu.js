@@ -78,7 +78,7 @@ const LaunchMenu = () => {
 
   return (
     <section id="contact" className="contact section">
-      <div className="container section-title" data-aos="fade-up">
+      <div className="container section-title">
         <h2>Ресторант-пицария Централ град Добрич</h2>
         <p>
           <span className="description-title">Обедно меню</span>
@@ -86,9 +86,9 @@ const LaunchMenu = () => {
         <h2>{periodText}</h2>
       </div>
 
-      <div className="container" data-aos="fade-up" data-aos-delay="100">
+      <div className="container">
         <section id="events" className="events section">
-          <div className="container-fluid" data-aos="fade-up" data-aos-delay="100">
+          <div className="container-fluid">
             <Swiper
               loop={true}
               speed={600}
@@ -104,7 +104,7 @@ const LaunchMenu = () => {
               {launchMenus.map((day, index) => (
                 <SwiperSlide key={day.title + index}>
                   <section id="chefs" className="chefs section">
-                    <div className="d-flex align-items-stretch" data-aos="fade-up" data-aos-delay={(index + 1) * 100}>
+                    <div className="d-flex align-items-stretch">
                       <div className="team-member">
                         <div className="member-img">
                           <img src={day.image} className="img-fluid" alt={day.name} />
@@ -132,7 +132,7 @@ const LaunchMenu = () => {
 
         <div className="row gy-4">
           <div className="col-md-6">
-            <div className="info-item d-flex align-items-center" data-aos="fade-up" data-aos-delay="200">
+            <div className="info-item d-flex align-items-center">
               <i className="icon bi bi-geo-alt flex-shrink-0"></i>
               <div>
                 <h3>Адрес</h3>
@@ -141,7 +141,7 @@ const LaunchMenu = () => {
             </div>
           </div>
           <div className="col-md-6">
-            <div className="info-item d-flex align-items-center" data-aos="fade-up" data-aos-delay="300">
+            <div className="info-item d-flex align-items-center">
               <i className="icon bi bi-telephone flex-shrink-0"></i>
               <div>
                 <h3>Телефон</h3>
@@ -150,7 +150,7 @@ const LaunchMenu = () => {
             </div>
           </div>
           <div className="col-md-6">
-            <div className="info-item d-flex align-items-center" data-aos="fade-up" data-aos-delay="400">
+            <div className="info-item d-flex align-items-center">
               <i className="icon bi bi-envelope flex-shrink-0"></i>
               <div>
                 <h3>Email</h3>
@@ -159,7 +159,7 @@ const LaunchMenu = () => {
             </div>
           </div>
           <div className="col-md-6">
-            <div className="info-item d-flex align-items-center" data-aos="fade-up" data-aos-delay="500">
+            <div className="info-item d-flex align-items-center">
               <i className="icon bi bi-clock flex-shrink-0"></i>
               <div>
                 <h3>Работно време</h3>

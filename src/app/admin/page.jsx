@@ -278,8 +278,8 @@ const AdministrationPage = () => {
 
     if (!isAdmin) {
         return <section id="contact" className="contact section">
-            <div className="container" data-aos="fade-up" data-aos-delay="100">
-                <div className="container section-title" data-aos="fade-up">
+            <div className="container">
+                <div className="container section-title">
                     <h2>Ресторант-пицария Централ</h2>
                     <p>
                         <span></span> <span className="description-title">Нямате права за тази страница</span>
@@ -291,8 +291,8 @@ const AdministrationPage = () => {
 
     return (
         <section id="contact" className="contact section">
-            <div className="container" data-aos="fade-up" data-aos-delay="100" style={{ maxWidth: '1400px' }}>
-                <div className="container section-title" data-aos="fade-up">
+            <div className="container" style={{ maxWidth: '1400px' }}>
+                <div className="container section-title">
                     <h2>Ресторант-пицария Централ</h2>
                     <p>
                         <span></span> <span className="description-title">Административен панел</span>

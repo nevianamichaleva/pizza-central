@@ -135,18 +135,18 @@ const Profile = () => {
 
   return (
     <section id="contact" className="contact section">
-      <div className="container section-title" data-aos="fade-up">
+      <div className="container section-title">
         <h2>Ресторант-пицария Централ гр. Добрич</h2>
         <p>
           <span></span> <span className="description-title">Потребителски профил</span>
         </p>
       </div>
 
-      <div className="container" data-aos="fade-up" data-aos-delay="100">
+      <div className="container">
 
         <div className="row gy-4">
           <div className="col-md-6">
-            <div className="info-item d-flex align-items-center" data-aos="fade-up" data-aos-delay="500">
+            <div className="info-item d-flex align-items-center">
               <i className="icon bi bi-chat-square-heart flex-shrink-0"></i>
               <div>
                 <h3>Име</h3>
@@ -157,7 +157,7 @@ const Profile = () => {
             </div>
           </div>
           <div className="col-md-6">
-            <div className="info-item d-flex align-items-center" data-aos="fade-up" data-aos-delay="200">
+            <div className="info-item d-flex align-items-center">
               <i className="icon bi bi-geo-alt flex-shrink-0"></i>
               <div>
                 <h3>Адрес</h3>
@@ -166,7 +166,7 @@ const Profile = () => {
             </div>
           </div>
           <div className="col-md-6">
-            <div className="info-item d-flex align-items-center" data-aos="fade-up" data-aos-delay="300">
+            <div className="info-item d-flex align-items-center">
               <i className="icon bi bi-telephone flex-shrink-0"></i>
               <div>
                 <h3>Телефон</h3>
@@ -175,7 +175,7 @@ const Profile = () => {
             </div>
           </div>
           <div className="col-md-6">
-            <div className="info-item d-flex align-items-center" data-aos="fade-up" data-aos-delay="400">
+            <div className="info-item d-flex align-items-center">
               <i className="icon bi bi-envelope flex-shrink-0"></i>
               <div>
                 <h3>Email</h3>
@@ -185,11 +185,11 @@ const Profile = () => {
           </div>
         </div>
         <section id="contact" className="contact section">
-          <div className="container section-title" data-aos="fade-up">
+          <div className="container section-title">
             <h2>Искаш ли да споделиш нещо с нас?</h2>
 
           </div>
-          <form onSubmit={handleSubmit} className="php-email-form" data-aos="fade-up" data-aos-delay="600">
+          <form onSubmit={handleSubmit} className="php-email-form">
             <div className="row gy-4">
               <div className="col-md-6">
                 <input

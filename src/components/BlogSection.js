@@ -1,6 +1,5 @@
 'use client';
 
-import "aos/dist/aos.css";
 import { get, ref } from 'firebase/database';
 import moment from 'moment';
 import Image from "next/image";
@@ -13,16 +12,6 @@ const BlogSection = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initAOS = async () => {
-      if (typeof window === "undefined") {
-        return;
-      }
-
-      const { default: AOS } = await import("aos");
-      AOS.init();
-    };
-
-    initAOS();
   }, []);
 
   useEffect(() => {
@@ -74,7 +63,7 @@ const BlogSection = () => {
   return (
     <section id="blog-section" className="blog section">
       {/* Section Title */}
-      <div className="container section-title" data-aos="fade-up">
+      <div className="container section-title">
         <h2>Любопитно от Централ</h2>
         <p>
           <span>Нашите</span> <span className="description-title">последни статии</span>
@@ -86,8 +75,8 @@ const BlogSection = () => {
           {posts.map((post, index) => (
             <div
               className="col-lg-4 col-md-6 d-flex align-items-stretch"
-              data-aos="fade-up"
-              data-aos-delay={index * 100}
+             
+             
               key={post.id}
             >
               <Link 

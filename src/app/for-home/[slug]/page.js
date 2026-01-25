@@ -172,7 +172,7 @@ export default async function CategoryPage({ params }) {
               />
             )}
           </div> */}
-          <div className="container section-title" data-aos="fade-up">
+          <div className="container section-title">
             <h2>{category.name.charAt(0).toUpperCase() + category.name.slice(1)}</h2>
             <h1>
               <span style={{ fontSize: '32px'}}>{h1Title}</span> 

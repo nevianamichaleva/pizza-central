@@ -104,7 +104,7 @@ const Contact = (props) => {
 
   return (
     <section id="contact" className="contact section">
-      <div className="container section-title" data-aos="fade-up">
+      <div className="container section-title">
         <h2>Контакти</h2>
         <p>
           <span></span> <span className="description-title">Обърнете се към нас</span>
@@ -113,7 +113,7 @@ const Contact = (props) => {
 
       {!props.part && (
         <div className="container">
-          <form onSubmit={handleSubmit} className="php-email-form" data-aos="fade-up" data-aos-delay="600">
+          <form onSubmit={handleSubmit} className="php-email-form">
             <div className="row gy-4">
               <div className="col-md-6">
                 <input
@@ -179,10 +179,10 @@ const Contact = (props) => {
           </form>
         </div>
       )}
-      <div className="container" data-aos="fade-up" data-aos-delay="100">
+      <div className="container">
         <div className="row gy-4">
           <div className="col-md-6">
-            <div className="info-item d-flex align-items-center" data-aos="fade-up" data-aos-delay="200">
+            <div className="info-item d-flex align-items-center">
               <i className="icon bi bi-geo-alt flex-shrink-0"></i>
               <div>
                 <h3>Адрес</h3>
@@ -191,7 +191,7 @@ const Contact = (props) => {
             </div>
           </div>
           <div className="col-md-6">
-            <div className="info-item d-flex align-items-center" data-aos="fade-up" data-aos-delay="300">
+            <div className="info-item d-flex align-items-center">
               <i className="icon bi bi-telephone flex-shrink-0"></i>
               <div>
                 <h3>Телефон</h3>
@@ -200,7 +200,7 @@ const Contact = (props) => {
             </div>
           </div>
           <div className="col-md-6">
-            <div className="info-item d-flex align-items-center" data-aos="fade-up" data-aos-delay="400">
+            <div className="info-item d-flex align-items-center">
               <i className="icon bi bi-envelope flex-shrink-0"></i>
               <div>
                 <h3>Email</h3>
@@ -209,7 +209,7 @@ const Contact = (props) => {
             </div>
           </div>
           <div className="col-md-6">
-            <div className="info-item d-flex align-items-center" data-aos="fade-up" data-aos-delay="500">
+            <div className="info-item d-flex align-items-center">
               <i className="icon bi bi-clock flex-shrink-0"></i>
               <div>
                 <h3>Работно време</h3>
@@ -221,7 +221,7 @@ const Contact = (props) => {
           </div>
         </div>
         {props.part && (
-          <div style={{ textAlign: 'center', marginTop: '40px' }} data-aos="fade-up">
+          <div style={{ textAlign: 'center', marginTop: '40px' }}>
             <Link href="/contact">
               <button
                 type="button"

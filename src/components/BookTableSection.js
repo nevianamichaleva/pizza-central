@@ -1,7 +1,6 @@
 'use client';
 
 import { Button, DatePicker, Form, Input, InputNumber, Select } from "antd";
-import 'aos/dist/aos.css';
 import { get, push, ref, set } from 'firebase/database';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
@@ -13,17 +12,6 @@ const BookTableSection = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const initAOS = async () => {
-      if (typeof window === 'undefined') {
-        return;
-      }
-
-      const { default: AOS } = await import('aos');
-      AOS.init();
-      AOS.refresh();
-    };
-
-    initAOS();
   }, []);
 
   const handleSubmit = async (values) => {
@@ -167,7 +155,7 @@ const BookTableSection = () => {
   return (
     <section id="book-a-table" className="book-a-table section">
       {/* Section Title */}
-      <div className="container section-title" data-aos="fade-up">
+      <div className="container section-title">
         <h2>Запази маса</h2>
         <p>
           <span>Резервирайте</span> <span className="description-title">престоя си при нас</span>
@@ -176,7 +164,7 @@ const BookTableSection = () => {
       </div>
 
       <div className="container">
-        <div className="row g-0" data-aos="fade-up" data-aos-delay="100">
+        <div className="row g-0">
           {/* Reservation Image */}
           <div
             className="col-lg-4 reservation-img"
@@ -184,7 +172,7 @@ const BookTableSection = () => {
           ></div>
 
           {/* Reservation Form */}
-          <div className="col-lg-8 d-flex align-items-center reservation-form-bg" data-aos="fade-up" data-aos-delay="200" style={{ padding: "25px" }}>
+          <div className="col-lg-8 d-flex align-items-center reservation-form-bg" style={{ padding: "25px" }}>
             <Form
               form={form}
               layout="vertical"

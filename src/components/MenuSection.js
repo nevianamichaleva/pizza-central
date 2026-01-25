@@ -576,7 +576,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
   return (
     <section id="menu" className="menu section">
       {!hideTitle && !categorySlug && (
-        <div className="container section-title" data-aos="fade-up">
+        <div className="container section-title">
           <h2>
             {selectedCategory 
               ? selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1)
@@ -599,7 +599,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
 
       <div className="container">
         {/* Search Bar */}
-        <div style={{ marginBottom: '20px', marginTop: '0px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }} data-aos="fade-up">
+        <div style={{ marginBottom: '20px', marginTop: '0px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
           <Search
             placeholder="Въведете за търсене в менюто"
             allowClear
@@ -613,7 +613,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
 
         {/* Desktop Tab Navigation - Hide if single category or when searching (min 3 chars) */}
         {!categorySlug && (!activeSearchQuery || activeSearchQuery.trim().length < 3) && (
-          <ul className="nav nav-tabs d-flex justify-content-center menu-desktop-tabs" role="tablist" data-aos="fade-up" data-aos-delay="100">
+          <ul className="nav nav-tabs d-flex justify-content-center menu-desktop-tabs" role="tablist">
           {categories
             .filter((category) => {
               // If both fields are missing, show the category in both menus
@@ -653,7 +653,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
         )}
 
         {/* Desktop Tab Content */}
-        <div className="tab-content menu-desktop-content" data-aos="fade-up" data-aos-delay="200">
+        <div className="tab-content menu-desktop-content">
           {(() => {
             // If searching (at least 3 characters), show all products from all categories
             if (activeSearchQuery && activeSearchQuery.trim().length >= 3) {
@@ -773,7 +773,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                     </div>
               </div>
               {category?.children && category.children?.length &&
-                <ul className="nav nav-tabs d-flex justify-content-center" role="tablist" data-aos="fade-up" data-aos-delay="100">
+                <ul className="nav nav-tabs d-flex justify-content-center" role="tablist">
                   {category.children.map((subcategory) => {
                     const subTabId = `menu-${subcategory.name}`;
                     const isSubActive = subcategoryActiveTab === subTabId;

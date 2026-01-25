@@ -25,8 +25,8 @@ const Login = () => {
 
   return (
     <section id="contact" className="contact section">
-      <div className="container" data-aos="fade-up" data-aos-delay="100">
-        <div className="container section-title" data-aos="fade-up">
+      <div className="container">
+        <div className="container section-title">
           <h2>Моля, въведете данни за вход</h2>
           <p>
             <span></span> <span className="description-title">Здравей!</span>
@@ -38,8 +38,8 @@ const Login = () => {
           onFinish={handleSubmit}
           layout="vertical"
           className="php-email-form"
-          data-aos="fade-up"
-          data-aos-delay="600"
+         
+         
         >
           <div className="row gy-4">
             <div className="col-md-6">
@@ -80,7 +80,7 @@ const Login = () => {
             </div>
           </div>
         </Form>
-        <div className="container section-title" style={{ marginTop: "15px" }} data-aos="fade-up">
+        <div className="container section-title" style={{ marginTop: "15px" }}>
           <h2>Още ли нямате акаунт?</h2> <a href='/signup'>Регистрирайте се</a>
         </div>
       </div>
