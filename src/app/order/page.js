@@ -478,7 +478,7 @@ export default function Order() {
             <p>
               <span className="description-title">Вашата количка е празна</span>
             </p>
-            <Link href="/our-menu" className="btn btn-primary w-auto text-center py-1 px-3" aria-label="Към менюто за поръчка">
+            <Link href="/for-home" className="btn btn-primary w-auto text-center py-1 px-3" aria-label="Към менюто за поръчка">
               Към меню
             </Link>
           </div>
@@ -580,7 +580,7 @@ export default function Order() {
             <p>
               <span className="description-title">Детайли на поръчката</span>
             </p>
-            <Link href="/our-menu" className="btn btn-primary w-auto text-center py-1 px-3" style={{ marginBottom: "20px" }}>
+            <Link href="/for-home" className="btn btn-primary w-auto text-center py-1 px-3" style={{ marginBottom: "20px" }}>
               Към меню
             </Link>
             <div className="content box">
@@ -1104,7 +1104,7 @@ export default function Order() {
                         <p style={{ fontSize: '15px', textAlign: 'left', color: 'red' }}>
                           Минимална сума за доставка {formatPrice(25).bgn} лв ({formatPrice(25).eur}€), добавете продукти за още {formatPrice(25 - calculatedTotal).bgn} лв ({formatPrice(25 - calculatedTotal).eur}€).
                         </p>
-                        <Link href='/our-menu' className="btn btn-primary w-auto text-center py-1 px-3">Към меню</Link>
+                        <Link href='/for-home' className="btn btn-primary w-auto text-center py-1 px-3">Към меню</Link>
                         </>
                       )}
                     </>

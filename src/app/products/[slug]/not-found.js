@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Button } from "antd";
+import Link from "next/link";
 
 export default function NotFound() {
   return (
@@ -10,7 +10,7 @@ export default function NotFound() {
           <p style={{ fontSize: '18px', color: '#666', marginBottom: '30px' }}>
             Продуктът не е намерен
           </p>
-          <Link href="/our-menu">
+          <Link href="/for-home">
             <Button type="primary" size="large">
               Върни се към менюто
             </Button>

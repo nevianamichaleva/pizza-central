@@ -451,7 +451,7 @@ const Header = () => {
             gap: '10px',
             alignItems: 'flex-end'
           }}>
-            <Link href="/our-menu" className="btn-getstarted" aria-label="Поръчай от менюто">
+            <Link href="/for-home" className="btn-getstarted" aria-label="Поръчай от менюто">
               Доставка
             </Link>
             <Link href="/reservation" className="btn-getstarted" aria-label="Резервирай маса">

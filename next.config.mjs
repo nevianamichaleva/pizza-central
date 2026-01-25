@@ -108,7 +108,7 @@ const nextConfig = {
       },
       {
         source: '/menu-2',
-        destination: '/our-menu',
+        destination: '/for-home',
         permanent: true,
       },
       {
@@ -118,7 +118,7 @@ const nextConfig = {
       },
       {
         source: '/category/:path*',
-        destination: '/our-menu',
+        destination: '/for-home',
         permanent: true,
       },
       {
