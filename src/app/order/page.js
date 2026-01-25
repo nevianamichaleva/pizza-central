@@ -1,8 +1,7 @@
 "use client"
 
 import { useUser } from "@/context/UserContext";
-import { CheckOutlined } from "@ant-design/icons";
-import { Button, Input, message, Select, Tooltip } from "antd";
+import { Input, message, Select, Tooltip } from "antd";
 import { get, onValue, ref, update } from "firebase/database";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,15 +21,10 @@ export default function Order() {
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
-  const [isEditingEmail, setIsEditingEmail] = useState(false);
-  const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [orderCompleted, setOrderCompleted] = useState(false);
   const [workingHours, setWorkingHours] = useState({ startHour: 10, endHour: 22 });
   const [specialNotes, setSpecialNotes] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("");
-  const [isEditingNotes, setIsEditingNotes] = useState(false);
-  const [isEditingDeliveryTime, setIsEditingDeliveryTime] = useState(false);
   const [orderType, setOrderType] = useState('delivery'); // 'pickup' or 'delivery'
   const [selectedHour, setSelectedHour] = useState(null);
   const [selectedMinute, setSelectedMinute] = useState(null);
@@ -226,6 +220,16 @@ export default function Order() {
       }
     }
   };
+
+  useEffect(() => {
+    if (orderType === "delivery" && deliveryTime) {
+      const [h, m] = deliveryTime.split(":").map(Number);
+      if (!isNaN(h) && !isNaN(m)) {
+        setSelectedHour(h);
+        setSelectedMinute(m);
+      }
+    }
+  }, [orderType, deliveryTime]);
 
   // Initialize hour and minute from deliveryTime
   useEffect(() => {
@@ -822,32 +826,17 @@ export default function Order() {
                     );
                   })}
                   
-                  {/* Discount Summary - Mobile */}
-                  {pickupDiscount > 0 && (
-                    <div className="mobile-only" style={{ 
-                      marginTop: "20px", 
-                      padding: "15px", 
-                      backgroundColor: "#fff", 
-                      borderRadius: "8px",
-                      border: "1px solid #e0e0e0"
-                    }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span style={{ fontSize: "16px", fontWeight: "600" }}>ОБЩО ОТСТЪПКА:</span>
-                        <span style={{ fontSize: "16px", fontWeight: "600", color: "#ce1212" }}>
-                          - {formatPrice(pickupDiscount).bgn} лв ({formatPrice(pickupDiscount).eur}€)
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                  
                   {/* Delivery/Pickup Options - Mobile */}
                   {!orderCompleted && (
-                    <div className="mobile-only order-type-selection" style={{ marginTop: "20px" }}>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                    <div className="mobile-only order-type-selection" style={{ marginTop: "16px" }}>
+                      <div style={{ display: "flex", flexDirection: "row", gap: "8px" }}>
                         <label style={{ 
+                          flex: 1,
                           display: "flex", 
+                          flexDirection: "column",
                           alignItems: "center", 
-                          padding: "15px",
+                          justifyContent: "center",
+                          padding: "10px 8px",
                           border: orderType === 'pickup' ? "2px solid #ce1212" : "2px solid #e0e0e0",
                           borderRadius: "8px",
                           backgroundColor: orderType === 'pickup' ? "#ce1212" : "#fff",
@@ -862,31 +851,28 @@ export default function Order() {
                             value="pickup"
                             checked={orderType === 'pickup'}
                             onChange={(e) => setOrderType(e.target.value)}
-                            style={{ display: "none", marginRight: "12px", width: "20px", height: "20px", cursor: "pointer" }}
+                            style={{ display: "none", cursor: "pointer" }}
                           />
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: "600", fontSize: "16px" }}>
-                              ЩЕ ВЗЕМА САМ ПОРЪЧКАТА ОТ РЕСТОРАНТА
-                            </div>
-                            <div style={{ fontSize: "14px", marginTop: "4px", opacity: 0.9 }}>
-                              (-10%)
-                            </div>
+                          <div style={{ fontWeight: "600", fontSize: "13px", textAlign: "center", lineHeight: "1.2" }}>
+                            Вземане от ресторанта
+                          </div>
+                          <div style={{ fontSize: "11px", marginTop: "2px", opacity: 0.9 }}>
+                            (-10%)
                           </div>
                           {orderType === 'pickup' && (
                             <div style={{
                               position: "absolute",
-                              right: "15px",
-                              top: "50%",
-                              transform: "translateY(-50%)",
-                              width: "24px",
-                              height: "24px",
+                              top: "4px",
+                              right: "6px",
+                              width: "16px",
+                              height: "16px",
                               borderRadius: "50%",
                               backgroundColor: "#fff",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
                               color: "#ce1212",
-                              fontSize: "16px",
+                              fontSize: "11px",
                               fontWeight: "bold"
                             }}>
                               ✓
@@ -894,9 +880,12 @@ export default function Order() {
                           )}
                         </label>
                         <label style={{ 
+                          flex: 1,
                           display: "flex", 
+                          flexDirection: "column",
                           alignItems: "center", 
-                          padding: "15px",
+                          justifyContent: "center",
+                          padding: "10px 8px",
                           border: orderType === 'delivery' ? "2px solid #ce1212" : "2px solid #e0e0e0",
                           borderRadius: "8px",
                           backgroundColor: orderType === 'delivery' ? "#ce1212" : "#fff",
@@ -911,31 +900,28 @@ export default function Order() {
                             value="delivery"
                             checked={orderType === 'delivery'}
                             onChange={(e) => setOrderType(e.target.value)}
-                            style={{ display: "none", marginRight: "12px", width: "20px", height: "20px", cursor: "pointer" }}
+                            style={{ display: "none", cursor: "pointer" }}
                           />
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: "600", fontSize: "16px" }}>
-                              С ДОСТАВКА
-                            </div>
-                            <div style={{ fontSize: "14px", marginTop: "4px", opacity: 0.9 }}>
-                              {formatPrice(3.00).bgn}ЛВ ({formatPrice(3.00).eur}€)
-                            </div>
+                          <div style={{ fontWeight: "600", fontSize: "13px", textAlign: "center", lineHeight: "1.2" }}>
+                            Доставка
+                          </div>
+                          <div style={{ fontSize: "11px", marginTop: "2px", opacity: 0.9 }}>
+                            {formatPrice(3.00).bgn}лв
                           </div>
                           {orderType === 'delivery' && (
                             <div style={{
                               position: "absolute",
-                              right: "15px",
-                              top: "50%",
-                              transform: "translateY(-50%)",
-                              width: "24px",
-                              height: "24px",
+                              top: "4px",
+                              right: "6px",
+                              width: "16px",
+                              height: "16px",
                               borderRadius: "50%",
                               backgroundColor: "#fff",
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
                               color: "#ce1212",
-                              fontSize: "16px",
+                              fontSize: "11px",
                               fontWeight: "bold"
                             }}>
                               ✓
@@ -985,6 +971,14 @@ export default function Order() {
                           {formatPrice(calculatedTotal).bgn} лв ({formatPrice(calculatedTotal).eur}€)
                         </span>
                       </div>
+                      {orderType === 'pickup' && pickupDiscount > 0 && (
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", color: "#ce1212" }}>
+                          <span style={{ fontSize: "16px" }}>Общо отстъпка:</span>
+                          <span style={{ fontSize: "16px", fontWeight: "600" }}>
+                            -{formatPrice(pickupDiscount).bgn} лв ({formatPrice(pickupDiscount).eur}€)
+                          </span>
+                        </div>
+                      )}
                       {orderType === 'delivery' && (
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
                           <span style={{ fontSize: "16px" }}>Доставка:</span>
@@ -1114,41 +1108,44 @@ export default function Order() {
                     {(orderType === 'delivery' || orderCompleted) && (
                       <div style={{ marginBottom: "20px" }}>
                         <h5>Адрес:</h5>
-                        {isEditing ? (
-                          <Input value={address} onChange={(e) => setAddress(e.target.value)} />
+                        {!orderCompleted ? (
+                          <Input 
+                            value={address} 
+                            onChange={(e) => setAddress(e.target.value)} 
+                            placeholder="Въведете адрес за доставка"
+                          />
                         ) : (
                           <span>{address || ""}</span>
                         )}
-                        {!orderCompleted &&
-                          <Button style={{ float: "right" }} onClick={() => setIsEditing(!isEditing)}>{isEditing ? <CheckOutlined /> : (address && address.trim() ? "Редактирай" : "Добави")}</Button>
-                        }
                       </div>
                     )}
                     <div style={{ marginBottom: "20px" }}>
                       <h5>Email:</h5>
-                      {isEditingEmail ? (
-                        <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+                      {!orderCompleted ? (
+                        <Input 
+                          value={email} 
+                          onChange={(e) => setEmail(e.target.value)} 
+                          placeholder="Въведете email"
+                        />
                       ) : (
                         <span>{email}</span>
                       )}
-                      {!orderCompleted &&
-                        <Button style={{ float: "right" }} onClick={() => setIsEditingEmail(!isEditingEmail)}>{isEditingEmail ? <CheckOutlined /> : (email && email.trim() ? "Редактирай" : "Добави")}</Button>
-                      }
                     </div>
                     <div style={{ marginBottom: "20px" }}>
                       <h5>Телефон:</h5>
-                      {isEditingPhone ? (
-                        <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+                      {!orderCompleted ? (
+                        <Input 
+                          value={phone} 
+                          onChange={(e) => setPhone(e.target.value)} 
+                          placeholder="Въведете телефон"
+                        />
                       ) : (
                         <span>{phone || ""}</span>
                       )}
-                      {!orderCompleted &&
-                        <Button style={{ float: "right" }} onClick={() => setIsEditingPhone(!isEditingPhone)}>{isEditingPhone ? <CheckOutlined /> : (phone && phone.trim() ? "Редактирай" : "Добави")}</Button>
-                      }
                     </div>
                     <div style={{ marginBottom: "20px" }}>
                       <h5>Специални предпочитания/забележки:</h5>
-                      {isEditingNotes ? (
+                      {!orderCompleted ? (
                         <TextArea 
                           value={specialNotes} 
                           onChange={(e) => setSpecialNotes(e.target.value)}
@@ -1158,14 +1155,11 @@ export default function Order() {
                       ) : (
                         <span>{specialNotes || "Няма специални забележки"}</span>
                       )}
-                      {!orderCompleted &&
-                        <Button style={{ float: "right" }} onClick={() => setIsEditingNotes(!isEditingNotes)}>{isEditingNotes ? <CheckOutlined /> : (specialNotes && specialNotes.trim() ? "Редактирай" : "Добави")}</Button>
-                      }
                     </div>
                     {(orderType === 'delivery' || orderCompleted) && (
                       <div style={{ marginBottom: "20px" }}>
                         <h5>Час за доставка (по избор):</h5>
-                        {isEditingDeliveryTime ? (
+                        {!orderCompleted ? (
                           <div>
                             <div style={{ display: "flex", gap: "10px", marginBottom: "8px" }}>
                               <div style={{ flex: 1 }}>
@@ -1200,25 +1194,6 @@ export default function Order() {
                         ) : (
                           <span>{deliveryTime || "Възможно най-скоро"}</span>
                         )}
-                        {!orderCompleted &&
-                          <Button style={{ float: "right" }} onClick={() => {
-                            if (!isEditingDeliveryTime) {
-                              // Initialize hour and minute when opening
-                              if (!deliveryTime || !validateDeliveryTime(deliveryTime)) {
-                                const minTime = getMinDeliveryTime();
-                                setDeliveryTime(minTime);
-                                const [hour, minute] = minTime.split(':').map(Number);
-                                setSelectedHour(hour);
-                                setSelectedMinute(minute);
-                              } else {
-                                const [hour, minute] = deliveryTime.split(':').map(Number);
-                                setSelectedHour(hour);
-                                setSelectedMinute(minute);
-                              }
-                            }
-                            setIsEditingDeliveryTime(!isEditingDeliveryTime);
-                          }}>{isEditingDeliveryTime ? <CheckOutlined /> : (deliveryTime && deliveryTime.trim() ? "Редактирай" : "Добави")}</Button>
-                        }
                       </div>
                     )}
                   </div>
@@ -1233,31 +1208,17 @@ export default function Order() {
                         borderRadius: "8px",
                         border: "1px solid #e0e0e0"
                       }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                          <h5 style={{ fontSize: "16px", fontWeight: "600", margin: 0, textAlign: "left" }}>Адрес:</h5>
-                          {!orderCompleted && (
-                            <Button 
-                              size="small"
-                              onClick={() => setIsEditing(!isEditing)}
-                              style={{ 
-                                padding: "4px 12px",
-                                height: "auto",
-                                fontSize: "12px"
-                              }}
-                            >
-                              {isEditing ? <CheckOutlined /> : (address && address.trim() ? "Редактирай" : "Добави")}
-                            </Button>
-                          )}
-                        </div>
-                        {isEditing ? (
+                        <h5 style={{ fontSize: "16px", fontWeight: "600", margin: "0 0 10px 0", textAlign: "left" }}>Адрес:</h5>
+                        {!orderCompleted ? (
                           <Input 
                             value={address} 
                             onChange={(e) => setAddress(e.target.value)}
+                            placeholder="Въведете адрес за доставка"
                             style={{ width: "100%" }}
                           />
                         ) : (
                           <div style={{ fontSize: "14px", color: address ? "#333" : "#999", textAlign: "left" }}>
-                            {address || "Не е въведен адрес"}
+                            {address || ""}
                           </div>
                         )}
                       </div>
@@ -1270,31 +1231,17 @@ export default function Order() {
                       borderRadius: "8px",
                       border: "1px solid #e0e0e0"
                     }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                        <h5 style={{ fontSize: "16px", fontWeight: "600", margin: 0, textAlign: "left" }}>Email:</h5>
-                        {!orderCompleted && (
-                          <Button 
-                            size="small"
-                            onClick={() => setIsEditingEmail(!isEditingEmail)}
-                            style={{ 
-                              padding: "4px 12px",
-                              height: "auto",
-                              fontSize: "12px"
-                            }}
-                          >
-                            {isEditingEmail ? <CheckOutlined /> : (email && email.trim() ? "Редактирай" : "Добави")}
-                          </Button>
-                        )}
-                      </div>
-                      {isEditingEmail ? (
+                      <h5 style={{ fontSize: "16px", fontWeight: "600", margin: "0 0 10px 0", textAlign: "left" }}>Email:</h5>
+                      {!orderCompleted ? (
                         <Input 
                           value={email} 
                           onChange={(e) => setEmail(e.target.value)}
+                          placeholder="Въведете email"
                           style={{ width: "100%" }}
                         />
                       ) : (
                         <div style={{ fontSize: "14px", color: email ? "#333" : "#999", textAlign: "left" }}>
-                          {email || "Не е въведен email"}
+                          {email || ""}
                         </div>
                       )}
                     </div>
@@ -1306,31 +1253,17 @@ export default function Order() {
                       borderRadius: "8px",
                       border: "1px solid #e0e0e0"
                     }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                        <h5 style={{ fontSize: "16px", fontWeight: "600", margin: 0, textAlign: "left" }}>Телефон:</h5>
-                        {!orderCompleted && (
-                          <Button 
-                            size="small"
-                            onClick={() => setIsEditingPhone(!isEditingPhone)}
-                            style={{ 
-                              padding: "4px 12px",
-                              height: "auto",
-                              fontSize: "12px"
-                            }}
-                          >
-                            {isEditingPhone ? <CheckOutlined /> : (phone && phone.trim() ? "Редактирай" : "Добави")}
-                          </Button>
-                        )}
-                      </div>
-                      {isEditingPhone ? (
+                      <h5 style={{ fontSize: "16px", fontWeight: "600", margin: "0 0 10px 0", textAlign: "left" }}>Телефон:</h5>
+                      {!orderCompleted ? (
                         <Input 
                           value={phone} 
                           onChange={(e) => setPhone(e.target.value)}
+                          placeholder="Въведете телефон"
                           style={{ width: "100%" }}
                         />
                       ) : (
                         <div style={{ fontSize: "14px", color: phone ? "#333" : "#999", textAlign: "left" }}>
-                          {phone || "Не е въведен телефон"}
+                          {phone || ""}
                         </div>
                       )}
                     </div>
@@ -1342,23 +1275,8 @@ export default function Order() {
                       borderRadius: "8px",
                       border: "1px solid #e0e0e0"
                     }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                        <h5 style={{ fontSize: "16px", fontWeight: "600", margin: 0, textAlign: "left" }}>Специални предпочитания/забележки:</h5>
-                        {!orderCompleted && (
-                          <Button 
-                            size="small"
-                            onClick={() => setIsEditingNotes(!isEditingNotes)}
-                            style={{ 
-                              padding: "4px 12px",
-                              height: "auto",
-                              fontSize: "12px"
-                            }}
-                          >
-                            {isEditingNotes ? <CheckOutlined /> : (specialNotes && specialNotes.trim() ? "Редактирай" : "Добави")}
-                          </Button>
-                        )}
-                      </div>
-                      {isEditingNotes ? (
+                      <h5 style={{ fontSize: "16px", fontWeight: "600", margin: "0 0 10px 0", textAlign: "left" }}>Специални предпочитания/забележки:</h5>
+                      {!orderCompleted ? (
                         <TextArea 
                           value={specialNotes} 
                           onChange={(e) => setSpecialNotes(e.target.value)}
@@ -1381,39 +1299,8 @@ export default function Order() {
                         borderRadius: "8px",
                         border: "1px solid #e0e0e0"
                       }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                          <h5 style={{ fontSize: "16px", fontWeight: "600", margin: 0, textAlign: "left" }}>Час за доставка (по избор):</h5>
-                          {!orderCompleted && (
-                          <Button 
-                            size="small"
-                            onClick={() => {
-                              if (!isEditingDeliveryTime) {
-                                // Initialize hour and minute when opening
-                                if (!deliveryTime || !validateDeliveryTime(deliveryTime)) {
-                                  const minTime = getMinDeliveryTime();
-                                  setDeliveryTime(minTime);
-                                  const [hour, minute] = minTime.split(':').map(Number);
-                                  setSelectedHour(hour);
-                                  setSelectedMinute(minute);
-                                } else {
-                                  const [hour, minute] = deliveryTime.split(':').map(Number);
-                                  setSelectedHour(hour);
-                                  setSelectedMinute(minute);
-                                }
-                              }
-                              setIsEditingDeliveryTime(!isEditingDeliveryTime);
-                            }}
-                              style={{ 
-                                padding: "4px 12px",
-                                height: "auto",
-                                fontSize: "12px"
-                              }}
-                            >
-                              {isEditingDeliveryTime ? <CheckOutlined /> : (deliveryTime && deliveryTime.trim() ? "Редактирай" : "Добави")}
-                            </Button>
-                          )}
-                        </div>
-                        {isEditingDeliveryTime ? (
+                        <h5 style={{ fontSize: "16px", fontWeight: "600", margin: "0 0 10px 0", textAlign: "left" }}>Час за доставка (по избор):</h5>
+                        {!orderCompleted ? (
                           <div>
                             <div style={{ display: "flex", gap: "10px", marginBottom: "8px" }}>
                               <div style={{ flex: 1 }}>
@@ -1453,6 +1340,38 @@ export default function Order() {
                       </div>
                     )}
                   </div>
+                  
+                  {/* Second Поръчай button - below contact data */}
+                  {!orderCompleted && (
+                    <>
+                      <Tooltip title={
+                        (!phone || !phone.trim()) 
+                          ? "Въведете телефон" 
+                          : (orderType === 'delivery' && (!address || !address.trim()))
+                            ? "Въведете адрес за доставка"
+                            : !isWithinWorkingHours() 
+                              ? `Поръчките се приемат от ${workingHours.startHour}:00 до ${workingHours.endHour}:00 часа` 
+                              : ""
+                      }>
+                        <span style={{ display: 'inline-block', width: '100%', marginTop: '20px' }}>
+                          <button
+                            className="btn btn-primary btn-lg btn-block"
+                            onClick={changeOrderStatus}
+                            disabled={
+                              order?.status === 'in progress' || 
+                              (orderType === 'delivery' && calculatedTotal <= 25) || 
+                              !isWithinWorkingHours() ||
+                              !phone || 
+                              !phone.trim() ||
+                              (orderType === 'delivery' && (!address || !address.trim()))
+                            }
+                          >
+                            Поръчай
+                          </button>
+                        </span>
+                      </Tooltip>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

@@ -2,7 +2,7 @@ import { ShoppingCartOutlined } from "@ant-design/icons";
 import { get, onValue, ref } from "firebase/database";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { rtdb } from "../../lib/firebase";
 
 const CartIcon = ({ userId }) => {
@@ -17,6 +17,26 @@ const CartIcon = ({ userId }) => {
   const hasDraggedRef = useRef(false);
   const pathname = usePathname();
 
+  // Helper function to constrain position to viewport bounds
+  // Using useCallback to avoid recreating on every render, but function reads window.innerWidth dynamically
+  const constrainToViewport = useCallback((x, y) => {
+    if (typeof window === "undefined") {
+      return { x, y };
+    }
+
+    // Get cart icon size - 60px on mobile, 56px on desktop
+    const isMobile = window.innerWidth <= 768;
+    const cartSize = isMobile ? 60 : 56;
+    
+    const maxX = window.innerWidth - cartSize;
+    const maxY = window.innerHeight - cartSize;
+
+    const constrainedX = Math.max(0, Math.min(x, maxX));
+    const constrainedY = Math.max(0, Math.min(y, maxY));
+
+    return { x: constrainedX, y: constrainedY };
+  }, []);
+
   // Load saved position from localStorage
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -27,8 +47,18 @@ const CartIcon = ({ userId }) => {
     if (savedPosition) {
       try {
         const { x, y } = JSON.parse(savedPosition);
-        setPosition({ x, y });
-        positionRef.current = { x, y };
+        // Constrain the loaded position to viewport
+        const constrained = constrainToViewport(x, y);
+        setPosition(constrained);
+        positionRef.current = constrained;
+        
+        // Update localStorage with constrained position if it was changed
+        if (constrained.x !== x || constrained.y !== y) {
+          window.localStorage.setItem(
+            "cartIconPosition",
+            JSON.stringify(constrained)
+          );
+        }
       } catch (e) {
         console.error("Error parsing saved cart position:", e);
       }
@@ -202,14 +232,8 @@ const CartIcon = ({ userId }) => {
       const newX = coords.x - dragOffset.x;
       const newY = coords.y - dragOffset.y;
 
-      // Constrain to viewport
-      const maxX = window.innerWidth - 56; // 56px is the width of cart-fab
-      const maxY = window.innerHeight - 56; // 56px is the height of cart-fab
-
-      const constrainedX = Math.max(0, Math.min(newX, maxX));
-      const constrainedY = Math.max(0, Math.min(newY, maxY));
-
-      const newPosition = { x: constrainedX, y: constrainedY };
+      // Constrain to viewport using helper function
+      const newPosition = constrainToViewport(newX, newY);
       setPosition(newPosition);
       positionRef.current = newPosition;
     };
@@ -243,7 +267,43 @@ const CartIcon = ({ userId }) => {
       window.removeEventListener("touchmove", handleMove);
       window.removeEventListener("touchend", handleEnd);
     };
-  }, [isDragging, dragOffset]);
+  }, [isDragging, dragOffset, constrainToViewport]);
+
+  // Recalculate position on viewport resize to keep it within bounds
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const handleResize = () => {
+      if (positionRef.current.x !== null && positionRef.current.y !== null) {
+        const constrained = constrainToViewport(
+          positionRef.current.x,
+          positionRef.current.y
+        );
+        
+        // Only update if position changed
+        if (constrained.x !== positionRef.current.x || constrained.y !== positionRef.current.y) {
+          setPosition(constrained);
+          positionRef.current = constrained;
+          
+          // Update localStorage with new constrained position
+          window.localStorage.setItem(
+            "cartIconPosition",
+            JSON.stringify(constrained)
+          );
+        }
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+    };
+  }, [constrainToViewport]);
 
   // Calculate position style
   const getPositionStyle = () => {
@@ -254,11 +314,14 @@ const CartIcon = ({ userId }) => {
     };
 
     if (position.x !== null && position.y !== null) {
+      // Ensure position is still within bounds (double-check)
+      const constrained = constrainToViewport(position.x, position.y);
+      
       return {
         ...baseStyle,
         position: "fixed",
-        left: `${position.x}px`,
-        top: `${position.y}px`,
+        left: `${constrained.x}px`,
+        top: `${constrained.y}px`,
         bottom: "auto",
         right: "auto",
       };
