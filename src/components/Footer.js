@@ -44,21 +44,50 @@ const Footer = () => {
           </div>
 
           {/* Social Links */}
-          <div className="col-lg-3 col-md-6">
-            <h4>Последвайте ни</h4>
-            <div className="social-links d-flex">
-              <Link 
-                href="https://www.facebook.com/CentralDobrich?locale=bg_BG" 
-                className="facebook" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="Последвайте ни на Facebook"
-              >
-                <i className="bi bi-facebook"></i>
-              </Link>
-              {/* <Link href="#" className="instagram">
-                <i className="bi bi-instagram"></i>
-              </Link> */}
+          <div className="col-lg-3 col-md-6 d-flex">
+            <i className="bi bi-share icon"></i>
+            <div>
+              <h4>Последвайте ни</h4>
+              <div className="social-links d-flex">
+                <Link 
+                  href="https://www.facebook.com/CentralDobrich?locale=bg_BG" 
+                  className="facebook" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  aria-label="Последвайте ни на Facebook"
+                >
+                  <i className="bi bi-facebook"></i>
+                </Link>
+                {/* <Link href="#" className="instagram">
+                  <i className="bi bi-instagram"></i>
+                </Link> */}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Useful Links Section */}
+        <div className="row gy-3 mt-3">
+          <div className="col-lg-12">
+            <div className="d-flex">
+              <i className="bi bi-info-circle icon"></i>
+              <div>
+                <h4>Полезно</h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                  <Link href="/privacy-policy" style={{ color: '#fff', textDecoration: 'none' }}>
+                    Политика за личните данни
+                  </Link>
+                  <Link href="/obshti-usloviya" style={{ color: '#fff', textDecoration: 'none' }}>
+                    Общи условия
+                  </Link>
+                  <Link href="/faq" style={{ color: '#fff', textDecoration: 'none' }}>
+                    Често задавани въпроси
+                  </Link>
+                  <Link href="/contact" style={{ color: '#fff', textDecoration: 'none' }}>
+                    Контакти
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -71,14 +100,6 @@ const Footer = () => {
           <strong className="px-1 sitename">Централ</strong>{' '}
           <span>All Rights Reserved</span>
         </p>
-        <div className="credits" style={{ marginTop: '15px' }}>
-          <Link href="/privacy-policy" style={{ color: '#fff', textDecoration: 'none', marginRight: '20px' }}>
-            Политика за личните данни
-          </Link>
-          <Link href="/obshti-usloviya" style={{ color: '#fff', textDecoration: 'none' }}>
-            Общи условия
-          </Link>
-        </div>
         <div className="credits">
           Designed by{' '}
           <a href="https://bootstrapmade.com/" target="_blank" rel="noopener noreferrer">
