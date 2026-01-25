@@ -599,7 +599,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
 
       <div className="container">
         {/* Search Bar */}
-        <div style={{ marginBottom: '0px', marginTop: '0px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }} data-aos="fade-up">
+        <div style={{ marginBottom: '20px', marginTop: '0px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }} data-aos="fade-up">
           <Search
             placeholder="Въведете за търсене в менюто"
             allowClear
@@ -862,69 +862,53 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                     </p>
                     <div className="menu-mobile-products-slider">
                       {allFilteredProducts.map((item, index) => (
-                        <div key={index} className="menu-mobile-product-item">
-                          <a href={item.url || item.image || "#"} className="glightbox">
-                            <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
-                          </a>
-                          <div style={{ fontSize: '20px', fontWeight: 400, marginBottom: '8px', fontFamily: 'var(--default-font)' }}>{item.name}</div>
-                          {item.weight && (
-                            <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
-                              <strong>Грамаж:</strong> {item.weight} г.
-                            </p>
-                          )}
-                          {item.ingredients && (
-                            <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
-                              {item.ingredients.length > 60 
-                                ? `${item.ingredients.substring(0, 60)}...` 
-                                : item.ingredients}
-                            </p>
-                          )}
-                          {item.description && (
-                            <p className="ingredients" style={{ marginBottom: "8px" }}>
-                              {item.description.length > 60 
-                                ? `${item.description.substring(0, 60)}...` 
-                                : item.description}
-                            </p>
-                          )}
-                          {formatPrice(getDisplayPrice(item)) && (
-                            <p className="price">{formatPrice(getDisplayPrice(item))}</p>
-                          )}
-                          <div className="menu-mobile-product-buttons">
-                            {item.slug && (
-                              <Link href={`/products/${item.slug}`} style={{ marginBottom: '8px', display: 'block' }}>
-                                <Button
-                                  type="default"
-                                  style={{
-                                    width: '100%',
-                                    borderRadius: '10px',
-                                    padding: '10px 20px',
-                                    fontSize: '16px',
-                                    height: 'auto'
-                                  }}
-                                >
-                                  Виж повече
-                                </Button>
-                              </Link>
-                            )}
+                        <Link 
+                          key={index} 
+                          href={item.slug ? `/products/${item.slug}` : '#'} 
+                          className="menu-mobile-product-item menu-mobile-product-link"
+                          style={{ textDecoration: 'none', color: 'inherit' }}
+                        >
+                          <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
+                          <div style={{ fontSize: '16px', fontWeight: 400, marginBottom: '10px', fontFamily: 'var(--default-font)', lineHeight: '1.3' }}>{item.name}</div>
+                          <div style={{ flex: 1 }}></div>
+                          {getDisplayPrice(item) && (() => {
+                            const price = getDisplayPrice(item);
+                            const priceInLv = price.toFixed(2);
+                            const priceInEuro = (price / 1.95583).toFixed(2);
+                            return (
+                              <div className="price" style={{ fontSize: '14px', fontWeight: 600, color: '#333', marginBottom: '8px', lineHeight: '1.4' }}>
+                                <div style={{ fontSize: '13px', color: '#333' }}>{priceInEuro} €</div>
+                                <div style={{ fontSize: '13px', color: '#333' }}>
+                                  {priceInLv}лв{item.weight ? ` | ${item.weight} ${item.weightUnit || 'г'}` : ''}
+                                </div>
+                              </div>
+                            );
+                          })()}
+                          <div className="menu-mobile-product-buttons" style={{ display: 'flex', gap: '6px', width: '100%' }}>
                             <Button
                               type="primary"
-                              onClick={() => handleProductClick(item)}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleProductClick(item);
+                              }}
                               icon={<ShoppingCartOutlined />}
                               style={{
                                 width: '100%',
-                                borderRadius: '10px',
-                                padding: '10px 20px',
-                                fontSize: '16px',
+                                borderRadius: '8px',
+                                padding: '6px 12px',
+                                fontSize: '12px',
                                 height: 'auto',
                                 backgroundColor: '#b01a6b',
                                 borderColor: '#b01a6b',
-                                color: '#ffffff'
+                                color: '#ffffff',
+                                lineHeight: '1.2'
                               }}
                             >
                               Добави
                             </Button>
                           </div>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   </div>
@@ -1073,68 +1057,71 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                     <h3 className="menu-mobile-category-title">
                       {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
                     </h3>
+                    {category.slug && (
+                      <div style={{ textAlign: 'right'}}>
+                        <Link 
+                          href={`/for-home/${category.slug}`}
+                          style={{ 
+                            color: '#FF8C00',
+                            textDecoration: 'none',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            display: 'inline-block'
+                          }}
+                        >
+                          Виж всички {category.name.toLowerCase()} →
+                        </Link>
+                      </div>
+                    )}
                   <div className="menu-mobile-products-slider">
                     {categoryProducts.map((item, index) => (
-                      <div key={index} className="menu-mobile-product-item">
-                        <a href={item.url || item.image || "#"} className="glightbox">
-                          <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
-                        </a>
-                        <h4>{item.name}</h4>
-                        {item.ingredients && (
-                          <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
-                            {item.ingredients.length > 60 
-                              ? `${item.ingredients.substring(0, 60)}...` 
-                              : item.ingredients}
-                          </p>
-                        )}
-                        {item.description && (
-                          <p className="ingredients" style={{ marginBottom: "8px" }}>
-                            {item.description.length > 60 
-                              ? `${item.description.substring(0, 60)}...` 
-                              : item.description}
-                          </p>
-                        )}
-                        {formatPrice(getDisplayPrice(item)) && (
-                          <p className="price">{formatPrice(getDisplayPrice(item))}</p>
-                        )}
-                        <div className="menu-mobile-product-buttons">
-                          {item.slug && (
-                            <Link href={`/products/${item.slug}`} style={{ marginBottom: '8px', display: 'block' }}>
-                              <Button
-                                type="default"
-                                style={{
-                                  width: '100%',
-                                  borderRadius: '10px',
-                                  padding: '10px 20px',
-                                  fontSize: '16px',
-                                }}
-                                size="large"
-                              >
-                                Виж повече
-                              </Button>
-                            </Link>
-                          )}
+                      <Link 
+                        key={index} 
+                        href={item.slug ? `/products/${item.slug}` : '#'} 
+                        className="menu-mobile-product-item menu-mobile-product-link"
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
+                        <div style={{ fontSize: '16px', fontWeight: 400, marginBottom: '10px', fontFamily: 'var(--default-font)', lineHeight: '1.3' }}>{item.name}</div>
+                        <div style={{ flex: 1 }}></div>
+                        {getDisplayPrice(item) && (() => {
+                          const price = getDisplayPrice(item);
+                          const priceInLv = price.toFixed(2);
+                          const priceInEuro = (price / 1.95583).toFixed(2);
+                          return (
+                            <div className="price" style={{ fontSize: '14px', fontWeight: 600, color: '#333', marginBottom: '8px', lineHeight: '1.4' }}>
+                              <div style={{ fontSize: '13px', color: '#333' }}>{priceInEuro} €</div>
+                              <div style={{ fontSize: '13px', color: '#333' }}>
+                                {priceInLv}лв{item.weight ? ` | ${item.weight} ${item.weightUnit || 'г'}` : ''}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                        <div className="menu-mobile-product-buttons" style={{ display: 'flex', gap: '6px', width: '100%' }}>
                           <Button
                             type="primary"
-                            onClick={() => handleProductClick(item)}
-                            shape="circle"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleProductClick(item);
+                            }}
                             icon={<ShoppingCartOutlined />}
                             style={{
-                              backgroundColor: '#FF8C00',
-                              color: '#ffffff',
-                              borderRadius: '10px',
-                              padding: '10px 20px',
-                              fontSize: '16px',
-                              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                              transition: 'background-color 0.3s, transform 0.2s',
                               width: '100%',
+                              borderRadius: '8px',
+                              padding: '6px 12px',
+                              fontSize: '12px',
+                              height: 'auto',
+                              backgroundColor: '#b01a6b',
+                              borderColor: '#b01a6b',
+                              color: '#ffffff',
+                              lineHeight: '1.2'
                             }}
-                            size="large"
                           >
                             Добави
                           </Button>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -1224,70 +1211,53 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                     return item.forDelivery === true;
                   })
                   .map((item, index) => (
-                    <div key={index} className="menu-mobile-product-item">
-                      <a href={item.url || item.image || "#"} className="glightbox">
-                        <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
-                      </a>
-                      <h4>{item.name}</h4>
-                      {item.weight && (
-                        <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
-                          <strong>Грамаж:</strong> {item.weight} г.
-                        </p>
-                      )}
-                      {item.ingredients && (
-                        <p className="ingredients" style={{ marginBottom: item.description ? "6px" : undefined }}>
-                          {item.ingredients.length > 60 
-                            ? `${item.ingredients.substring(0, 60)}...` 
-                            : item.ingredients}
-                        </p>
-                      )}
-                      {item.description && (
-                        <p className="ingredients" style={{ marginBottom: "8px" }}>
-                          {item.description.length > 60 
-                            ? `${item.description.substring(0, 60)}...` 
-                            : item.description}
-                        </p>
-                      )}
-                      {formatPrice(getDisplayPrice(item)) && (
-                        <p className="price">{formatPrice(getDisplayPrice(item))}</p>
-                      )}
-                      <div className="menu-mobile-product-buttons">
-                        {item.slug && (
-                          <Link href={`/products/${item.slug}`} style={{ marginBottom: '8px', display: 'block' }}>
-                            <Button
-                              type="default"
-                              style={{
-                                width: '100%',
-                                borderRadius: '10px',
-                                padding: '10px 20px',
-                                fontSize: '16px',
-                              }}
-                              size="large"
-                            >
-                              Виж повече
-                            </Button>
-                          </Link>
-                        )}
+                    <Link 
+                      key={index} 
+                      href={item.slug ? `/products/${item.slug}` : '#'} 
+                      className="menu-mobile-product-item menu-mobile-product-link"
+                      style={{ textDecoration: 'none', color: 'inherit' }}
+                    >
+                      <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
+                      <div style={{ fontSize: '16px', fontWeight: 400, marginBottom: '10px', fontFamily: 'var(--default-font)', lineHeight: '1.3' }}>{item.name}</div>
+                      <div style={{ flex: 1 }}></div>
+                      {getDisplayPrice(item) && (() => {
+                        const price = getDisplayPrice(item);
+                        const priceInLv = price.toFixed(2);
+                        const priceInEuro = (price / 1.95583).toFixed(2);
+                        return (
+                          <div className="price" style={{ fontSize: '14px', fontWeight: 600, color: '#333', marginBottom: '8px', lineHeight: '1.4' }}>
+                            <div style={{ fontSize: '13px', color: '#333' }}>{priceInEuro} €</div>
+                            <div style={{ fontSize: '13px', color: '#333' }}>
+                              {priceInLv}лв{item.weight ? ` | ${item.weight} ${item.weightUnit || 'г'}` : ''}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                      <div className="menu-mobile-product-buttons" style={{ display: 'flex', gap: '6px', width: '100%' }}>
                         <Button
                           type="primary"
-                          onClick={() => handleProductClick(item)}
-                          shape="circle"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleProductClick(item);
+                          }}
                           icon={<ShoppingCartOutlined />}
                           style={{
-                            backgroundColor: '#FFA500',
-                            borderRadius: '10px',
-                            padding: '10px 20px',
-                            fontSize: '16px',
-                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                            transition: 'background-color 0.3s, transform 0.2s',
                             width: '100%',
+                            borderRadius: '8px',
+                            padding: '6px 12px',
+                            fontSize: '12px',
+                            height: 'auto',
+                            backgroundColor: '#b01a6b',
+                            borderColor: '#b01a6b',
+                            color: '#ffffff',
+                            lineHeight: '1.2'
                           }}
-                          size="large"
                         >
                           Добави
                         </Button>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>

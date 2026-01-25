@@ -1375,7 +1375,7 @@ section,
     font-size: 28px;
     font-weight: 700;
     color: var(--accent-color);
-    margin-bottom: 20px;
+    margin-bottom: 8px;
     text-align: center;
     font-family: var(--heading-font);
   }
@@ -1386,8 +1386,8 @@ section,
     align-items: stretch;
     overflow-x: auto;
     overflow-y: hidden;
-    gap: 20px;
-    padding: 10px 0;
+    gap: 12px;
+    padding: 10px 15px;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
@@ -1410,29 +1410,58 @@ section,
   /* Individual product item in slider */
   .menu-mobile-product-item {
     flex: 0 0 auto;
-    width: 280px;
+    width: calc(50% - 10px);
+    min-width: 160px;
+    max-width: 180px;
     display: flex;
     flex-direction: column;
-    text-align: center;
+    text-align: left;
     padding: 15px;
     background-color: var(--surface-color);
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .menu-mobile-product-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .menu-mobile-product-link:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    background-color: #fafafa;
+  }
+
+  .menu-mobile-product-link:hover .menu-img {
+    opacity: 0.9;
+  }
+
+  .menu-mobile-product-item:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   }
 
   .menu-mobile-product-item .menu-img {
     width: 100%;
-    height: 200px;
+    height: 150px;
     object-fit: cover;
     border-radius: 8px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
   }
 
   .menu-mobile-product-item h4 {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 400;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     font-family: var(--default-font);
+    text-align: left;
+    line-height: 1.3;
   }
 
   .menu-mobile-product-item .ingredients {
@@ -1443,15 +1472,29 @@ section,
   }
 
   .menu-mobile-product-item .price {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--accent-color);
-    margin-bottom: 15px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    flex: 1;
+    line-height: 1.4;
   }
 
   /* Buttons container - push to bottom */
   .menu-mobile-product-buttons {
     margin-top: auto;
+    display: flex;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .menu-mobile-product-buttons .ant-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+    height: auto;
+    white-space: nowrap;
+    line-height: 1.2;
+    border-radius: 8px;
   }
 }
 

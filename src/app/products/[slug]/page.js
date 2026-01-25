@@ -222,7 +222,7 @@ export default async function ProductDetailsPage({ params }) {
       />
       <section className="section">
         <div className="container">
-          <Link className={styles.backLink} href="/our-menu" aria-label="Назад към менюто">
+          <Link className={styles.backLink} href="/for-home" aria-label="Назад към менюто">
             &larr; Назад към менюто
           </Link>
         <div className={styles.hero}>
