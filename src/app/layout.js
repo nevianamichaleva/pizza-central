@@ -43,8 +43,6 @@ export const metadata = {
     images: [
       {
         url: '/images/pizza-central-delivery.png',
-        width: 1200,
-        height: 630,
         alt: 'Ресторант-пицария Централ Добрич',
       },
     ],
