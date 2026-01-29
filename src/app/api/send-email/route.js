@@ -126,9 +126,8 @@ ${orderData.delivery_time && orderType === 'delivery' ? `Желан час за 
 
 ` : ''}Сума: ${formatPrice(subtotal).bgn} лв (${formatPrice(subtotal).eur}€)
 ${pickupDiscount > 0 ? `Отстъпка за вземане (-10%): -${formatPrice(pickupDiscount).bgn} лв (-${formatPrice(pickupDiscount).eur}€)
-` : ''}${orderType === 'delivery' ? (deliveryFee > 0 ? `Доставка: ${formatPrice(deliveryFee).bgn} лв (${formatPrice(deliveryFee).eur}€)
-` : `Доставка: безплатна
-`) : ''}Общо: ${formatPrice(grandTotal).bgn} лв (${formatPrice(grandTotal).eur}€)
+` : ''}${orderType === 'delivery' ? `Доставка: ${formatPrice(deliveryFee).bgn} лв (${formatPrice(deliveryFee).eur}€)
+` : ''}Общо: ${formatPrice(grandTotal).bgn} лв (${formatPrice(grandTotal).eur}€)
     `.trim();
 
     // Try to send email using nodemailer

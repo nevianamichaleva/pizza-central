@@ -25,11 +25,10 @@ const AdminOrdersPage = () => {
     const [workingHours, setWorkingHours] = useState({ startHour: 10, endHour: 22 });
     const [editingHours, setEditingHours] = useState({ startHour: 10, endHour: 22 });
     const [isEditingHours, setIsEditingHours] = useState(false);
-    // Delivery price tiers: up to X lv -> Y lv fee; above last tier -> free
+    // Delivery price tiers: up to X lv -> Y lv; above X lv -> Z lv (2 tiers only)
     const defaultDeliveryTiers = [
         { maxAmount: 25, fee: 5 },
-        { maxAmount: 50, fee: 3 },
-        { maxAmount: null, fee: 0 }
+        { maxAmount: null, fee: 3 }
     ];
     const [deliveryPriceTiers, setDeliveryPriceTiers] = useState(defaultDeliveryTiers);
     const [editingDeliveryTiers, setEditingDeliveryTiers] = useState(defaultDeliveryTiers);
@@ -268,11 +267,11 @@ const AdminOrdersPage = () => {
                     : raw && typeof raw === 'object'
                         ? Object.values(raw).sort((a, b) => (a.maxAmount || 9999) - (b.maxAmount || 9999))
                         : defaultDeliveryTiers;
-                const normalized = tiers.length >= 3
-                    ? tiers.slice(0, 3).map(t => ({
-                        maxAmount: t.maxAmount != null ? Number(t.maxAmount) : null,
-                        fee: Number(t.fee ?? 0)
-                    }))
+                const normalized = tiers.length >= 2
+                    ? [
+                        { maxAmount: tiers[0].maxAmount != null ? Number(tiers[0].maxAmount) : 25, fee: Number(tiers[0].fee ?? 5) },
+                        { maxAmount: null, fee: Number(tiers[1]?.fee ?? 3) }
+                    ]
                     : defaultDeliveryTiers;
                 setDeliveryPriceTiers(normalized);
                 setEditingDeliveryTiers(normalized);
@@ -287,17 +286,17 @@ const AdminOrdersPage = () => {
 
     const saveDeliveryPriceTiers = async () => {
         try {
-            const tiers = editingDeliveryTiers.map((t, i) => {
-                const max = t.maxAmount === '' || t.maxAmount == null ? (i === 2 ? null : 25) : parseInt(Number(t.maxAmount), 10);
-                const fee = i === 2 ? 0 : (parseFloat(t.fee) || 0);
-                return { maxAmount: max, fee };
-            });
-            if (tiers[0].maxAmount == null || tiers[0].fee < 0 || tiers[1].maxAmount == null || tiers[1].fee < 0) {
+            const t0 = editingDeliveryTiers[0];
+            const t1 = editingDeliveryTiers[1];
+            const max0 = t0?.maxAmount === '' || t0?.maxAmount == null ? 25 : parseInt(Number(t0.maxAmount), 10);
+            const fee0 = parseFloat(t0?.fee) || 0;
+            const fee1 = parseFloat(t1?.fee) || 0;
+            const tiers = [
+                { maxAmount: max0, fee: fee0 },
+                { maxAmount: null, fee: fee1 }
+            ];
+            if (tiers[0].maxAmount == null || tiers[0].maxAmount < 0 || tiers[0].fee < 0 || tiers[1].fee < 0) {
                 message.error('Попълнете коректно границите и таксите за доставка.');
-                return;
-            }
-            if (Number(tiers[0].maxAmount) >= Number(tiers[1].maxAmount)) {
-                message.error('Горната граница на втория ред трябва да е по-голяма от първата.');
                 return;
             }
             const minOrder = (editingMinOrderAmount === '' || editingMinOrderAmount == null) ? minOrderAmount : Number(editingMinOrderAmount);
@@ -671,10 +670,7 @@ const AdminOrdersPage = () => {
                                     <strong>До {deliveryPriceTiers[0]?.maxAmount ?? 25} лв:</strong> {deliveryPriceTiers[0]?.fee ?? 5} лв
                                 </p>
                                 <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
-                                    <strong>От {deliveryPriceTiers[0]?.maxAmount ?? 25} до {deliveryPriceTiers[1]?.maxAmount ?? 50} лв:</strong> {deliveryPriceTiers[1]?.fee ?? 3} лв
-                                </p>
-                                <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
-                                    <strong>Над {deliveryPriceTiers[1]?.maxAmount ?? 50} лв:</strong> Безплатна доставка
+                                    <strong>Над {deliveryPriceTiers[0]?.maxAmount ?? 25} лв:</strong> {deliveryPriceTiers[1]?.fee ?? 3} лв
                                 </p>
                             </div>
                         ) : (
@@ -726,28 +722,13 @@ const AdminOrdersPage = () => {
                                     <span><strong>лв</strong></span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                                    <span><strong>От</strong></span>
+                                    <span><strong>Над</strong></span>
                                     <Input
                                         type="number"
                                         min={0}
                                         value={editingDeliveryTiers[0]?.maxAmount ?? 25}
                                         style={{ width: 80 }}
                                         disabled
-                                    />
-                                    <span><strong>до</strong></span>
-                                    <Input
-                                        type="number"
-                                        min={0}
-                                        value={editingDeliveryTiers[1]?.maxAmount ?? 50}
-                                        onChange={(e) => {
-                                            const v = e.target.value === '' ? null : Number(e.target.value);
-                                            setEditingDeliveryTiers(prev => {
-                                                const next = [...prev];
-                                                next[1] = { ...next[1], maxAmount: v };
-                                                return next;
-                                            });
-                                        }}
-                                        style={{ width: 80 }}
                                     />
                                     <span><strong>лв →</strong></span>
                                     <Input
@@ -759,6 +740,7 @@ const AdminOrdersPage = () => {
                                             const v = parseFloat(e.target.value) || 0;
                                             setEditingDeliveryTiers(prev => {
                                                 const next = [...prev];
+                                                if (!next[1]) next[1] = { maxAmount: null, fee: 3 };
                                                 next[1] = { ...next[1], fee: v };
                                                 return next;
                                             });
@@ -766,9 +748,6 @@ const AdminOrdersPage = () => {
                                         style={{ width: 80 }}
                                     />
                                     <span><strong>лв</strong></span>
-                                </div>
-                                <div style={{ color: '#666' }}>
-                                    <strong>Над {editingDeliveryTiers[1]?.maxAmount ?? 50} лв:</strong> Безплатна доставка
                                 </div>
                             </Space>
                         )}
@@ -1138,7 +1117,7 @@ const AdminOrdersPage = () => {
                                                     {(deliveryFee > 0 || selectedOrder.order_type === 'delivery') && (
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                                                             <span>Такса за доставка:</span>
-                                                            <span>{deliveryFee > 0 ? `${deliveryFeeFormatted.bgn} лв (${deliveryFeeFormatted.eur}€)` : 'Безплатна'}</span>
+                                                            <span>{deliveryFeeFormatted.bgn} лв ({deliveryFeeFormatted.eur}€)</span>
                                                         </div>
                                                     )}
                                                     <div style={{ 

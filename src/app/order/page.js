@@ -25,8 +25,7 @@ export default function Order() {
   const [workingHours, setWorkingHours] = useState({ startHour: 10, endHour: 22 });
   const [deliveryPriceTiers, setDeliveryPriceTiers] = useState([
     { maxAmount: 25, fee: 5 },
-    { maxAmount: 50, fee: 3 },
-    { maxAmount: null, fee: 0 }
+    { maxAmount: null, fee: 3 }
   ]);
   const [minOrderForDelivery, setMinOrderForDelivery] = useState(25);
   const [specialNotes, setSpecialNotes] = useState("");
@@ -488,7 +487,11 @@ export default function Order() {
           const raw = data?.tiers;
           if (Array.isArray(raw) && raw.length >= 2) {
             const sorted = [...raw].sort((a, b) => (a.maxAmount ?? 9999) - (b.maxAmount ?? 9999));
-            setDeliveryPriceTiers(sorted);
+            const twoTiers = [
+              { maxAmount: sorted[0].maxAmount != null ? Number(sorted[0].maxAmount) : 25, fee: Number(sorted[0].fee ?? 5) },
+              { maxAmount: null, fee: Number(sorted[1]?.fee ?? 3) }
+            ];
+            setDeliveryPriceTiers(twoTiers);
           }
           if (data?.minOrderAmount != null) {
             setMinOrderForDelivery(Number(data.minOrderAmount));
@@ -1080,7 +1083,7 @@ export default function Order() {
                           />
                           <div>
                             <div style={{ fontWeight: "600" }}>
-                              С доставка ({deliveryFee === 0 ? 'безплатна' : `${formatPrice(deliveryFee).bgn} лв / ${formatPrice(deliveryFee).eur}€`})
+                              С доставка ({formatPrice(deliveryFee).bgn} лв / {formatPrice(deliveryFee).eur}€)
                             </div>
                           </div>
                         </label>
