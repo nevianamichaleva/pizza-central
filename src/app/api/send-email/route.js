@@ -91,7 +91,8 @@ export async function POST(request) {
     // Get order type and calculate totals
     const orderType = orderData.order_type || 'pickup'; // 'pickup' or 'delivery'
     const pickupDiscount = parseFloat(orderData.pickup_discount || 0);
-    const deliveryFee = parseFloat(orderData.delivery_fee || (orderType === 'delivery' ? 3.00 : 0));
+    // Use ?? so that 0 (free delivery) is not replaced by fallback
+    const deliveryFee = parseFloat(orderData.delivery_fee ?? (orderType === 'delivery' ? 3.00 : 0));
     
     // Calculate subtotal (before discount/delivery fee)
     const grandTotal = parseFloat(orderData.total || 0);
@@ -125,8 +126,9 @@ ${orderData.delivery_time && orderType === 'delivery' ? `Желан час за 
 
 ` : ''}Сума: ${formatPrice(subtotal).bgn} лв (${formatPrice(subtotal).eur}€)
 ${pickupDiscount > 0 ? `Отстъпка за вземане (-10%): -${formatPrice(pickupDiscount).bgn} лв (-${formatPrice(pickupDiscount).eur}€)
-` : ''}${deliveryFee > 0 ? `Доставка: ${formatPrice(deliveryFee).bgn} лв (${formatPrice(deliveryFee).eur}€)
-` : ''}Общо: ${formatPrice(grandTotal).bgn} лв (${formatPrice(grandTotal).eur}€)
+` : ''}${orderType === 'delivery' ? (deliveryFee > 0 ? `Доставка: ${formatPrice(deliveryFee).bgn} лв (${formatPrice(deliveryFee).eur}€)
+` : `Доставка: безплатна
+`) : ''}Общо: ${formatPrice(grandTotal).bgn} лв (${formatPrice(grandTotal).eur}€)
     `.trim();
 
     // Try to send email using nodemailer

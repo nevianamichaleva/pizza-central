@@ -23,6 +23,12 @@ export default function Order() {
   const [email, setEmail] = useState("");
   const [orderCompleted, setOrderCompleted] = useState(false);
   const [workingHours, setWorkingHours] = useState({ startHour: 10, endHour: 22 });
+  const [deliveryPriceTiers, setDeliveryPriceTiers] = useState([
+    { maxAmount: 25, fee: 5 },
+    { maxAmount: 50, fee: 3 },
+    { maxAmount: null, fee: 0 }
+  ]);
+  const [minOrderForDelivery, setMinOrderForDelivery] = useState(25);
   const [specialNotes, setSpecialNotes] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("");
   const [orderType, setOrderType] = useState('delivery'); // 'pickup' or 'delivery'
@@ -134,6 +140,19 @@ export default function Order() {
       return total + item.quantity * parseFloat(item.value);
     }, 0);
   };
+
+  // Delivery fee from admin tiers: first tier where subtotal <= maxAmount; above last tier = 0
+  const getDeliveryFee = (subtotal) => {
+    if (!deliveryPriceTiers?.length) return 3;
+    const sorted = [...deliveryPriceTiers].sort((a, b) => (a.maxAmount ?? 9999) - (b.maxAmount ?? 9999));
+    for (const tier of sorted) {
+      if (tier.maxAmount == null || subtotal <= tier.maxAmount) {
+        return Number(tier.fee) || 0;
+      }
+    }
+    return 0;
+  };
+
 
   const isWithinWorkingHours = () => {
     const now = new Date();
@@ -347,7 +366,7 @@ export default function Order() {
 
     // Calculate final total with pickup discount or delivery fee
     const pickupDiscountAmount = orderType === 'pickup' ? calculatedTotal * 0.1 : 0;
-    const deliveryFeeAmount = orderType === 'delivery' ? 3.00 : 0;
+    const deliveryFeeAmount = orderType === 'delivery' ? getDeliveryFee(calculatedTotal) : 0;
     const finalOrderTotal = calculatedTotal - pickupDiscountAmount + deliveryFeeAmount;
 
     const updatedOrder = {
@@ -441,6 +460,7 @@ export default function Order() {
   useEffect(() => {
     let unsubscribe = () => {};
     let unsubscribeWorkingHours = () => {};
+    let unsubDeliveryPrice = () => {};
 
     const init = async () => {
       setLoading(true);
@@ -459,6 +479,22 @@ export default function Order() {
           });
         }
       });
+
+      // Subscribe to delivery price tiers
+      const deliveryPriceRef = ref(rtdb, 'settings/deliveryPrice');
+      unsubDeliveryPrice = onValue(deliveryPriceRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const raw = data?.tiers;
+          if (Array.isArray(raw) && raw.length >= 2) {
+            const sorted = [...raw].sort((a, b) => (a.maxAmount ?? 9999) - (b.maxAmount ?? 9999));
+            setDeliveryPriceTiers(sorted);
+          }
+          if (data?.minOrderAmount != null) {
+            setMinOrderForDelivery(Number(data.minOrderAmount));
+          }
+        }
+      });
     };
 
     init();
@@ -466,6 +502,7 @@ export default function Order() {
     return () => {
       unsubscribe();
       unsubscribeWorkingHours();
+      unsubDeliveryPrice();
     };
   }, [user]);
 
@@ -569,8 +606,8 @@ export default function Order() {
   const pickupDiscount = orderType === 'pickup' ? calculatedTotal * 0.1 : 0;
   const subtotal = calculatedTotal - pickupDiscount;
   
-  // Delivery fee (3.00 лева)
-  const deliveryFee = orderType === 'delivery' ? 3.00 : 0;
+  // Delivery fee from admin tiers
+  const deliveryFee = orderType === 'delivery' ? getDeliveryFee(calculatedTotal) : 0;
   
   // Final total
   const finalTotal = subtotal + deliveryFee;
@@ -1043,7 +1080,7 @@ export default function Order() {
                           />
                           <div>
                             <div style={{ fontWeight: "600" }}>
-                              С доставка ({formatPrice(3.00).bgn} лв / {formatPrice(3.00).eur}€)
+                              С доставка ({deliveryFee === 0 ? 'безплатна' : `${formatPrice(deliveryFee).bgn} лв / ${formatPrice(deliveryFee).eur}€`})
                             </div>
                           </div>
                         </label>
@@ -1077,7 +1114,7 @@ export default function Order() {
                             onClick={changeOrderStatus}
                             disabled={
                               order?.status === 'in progress' || 
-                              (orderType === 'delivery' && calculatedTotal <= 25) || 
+                              (orderType === 'delivery' && calculatedTotal < minOrderForDelivery) || 
                               !isWithinWorkingHours() ||
                               !phone || 
                               !phone.trim() ||
@@ -1093,10 +1130,10 @@ export default function Order() {
                           Поръчките се приемат от {workingHours.startHour}:00 до {workingHours.endHour}:00 часа
                         </p>
                       )}
-                      {orderType === 'delivery' && calculatedTotal < 25 && (
+                      {orderType === 'delivery' && calculatedTotal < minOrderForDelivery && (
                         <>
                         <p style={{ fontSize: '15px', textAlign: 'left', color: 'red' }}>
-                          Минимална сума за доставка {formatPrice(25).bgn} лв ({formatPrice(25).eur}€), добавете продукти за още {formatPrice(25 - calculatedTotal).bgn} лв ({formatPrice(25 - calculatedTotal).eur}€).
+                          Минимална сума за доставка {formatPrice(minOrderForDelivery).bgn} лв ({formatPrice(minOrderForDelivery).eur}€), добавете продукти за още {formatPrice(minOrderForDelivery - calculatedTotal).bgn} лв ({formatPrice(minOrderForDelivery - calculatedTotal).eur}€).
                         </p>
                         <Link href='/for-home' className="btn btn-primary w-auto text-center py-1 px-3">Към меню</Link>
                         </>
@@ -1359,7 +1396,7 @@ export default function Order() {
                             onClick={changeOrderStatus}
                             disabled={
                               order?.status === 'in progress' || 
-                              (orderType === 'delivery' && calculatedTotal <= 25) || 
+                              (orderType === 'delivery' && calculatedTotal < minOrderForDelivery) || 
                               !isWithinWorkingHours() ||
                               !phone || 
                               !phone.trim() ||

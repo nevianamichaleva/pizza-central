@@ -25,6 +25,17 @@ const AdminOrdersPage = () => {
     const [workingHours, setWorkingHours] = useState({ startHour: 10, endHour: 22 });
     const [editingHours, setEditingHours] = useState({ startHour: 10, endHour: 22 });
     const [isEditingHours, setIsEditingHours] = useState(false);
+    // Delivery price tiers: up to X lv -> Y lv fee; above last tier -> free
+    const defaultDeliveryTiers = [
+        { maxAmount: 25, fee: 5 },
+        { maxAmount: 50, fee: 3 },
+        { maxAmount: null, fee: 0 }
+    ];
+    const [deliveryPriceTiers, setDeliveryPriceTiers] = useState(defaultDeliveryTiers);
+    const [editingDeliveryTiers, setEditingDeliveryTiers] = useState(defaultDeliveryTiers);
+    const [isEditingDeliveryTiers, setIsEditingDeliveryTiers] = useState(false);
+    const [minOrderAmount, setMinOrderAmount] = useState(25);
+    const [editingMinOrderAmount, setEditingMinOrderAmount] = useState(25);
     const [adminEmail, setAdminEmail] = useState('');
     const [editingEmail, setEditingEmail] = useState('');
     const [isEditingEmail, setIsEditingEmail] = useState(false);
@@ -179,6 +190,7 @@ const AdminOrdersPage = () => {
     useEffect(() => {
         fetchOrders();
         fetchWorkingHours();
+        fetchDeliveryPriceTiers();
         fetchAdminEmail();
         fetchSmtpConfig();
     }, []);
@@ -242,6 +254,75 @@ const AdminOrdersPage = () => {
     const cancelEditingHours = () => {
         setEditingHours(workingHours);
         setIsEditingHours(false);
+    };
+
+    const fetchDeliveryPriceTiers = async () => {
+        try {
+            const settingsRef = ref(rtdb, 'settings/deliveryPrice');
+            const snapshot = await get(settingsRef);
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                const raw = data?.tiers;
+                const tiers = Array.isArray(raw)
+                    ? raw
+                    : raw && typeof raw === 'object'
+                        ? Object.values(raw).sort((a, b) => (a.maxAmount || 9999) - (b.maxAmount || 9999))
+                        : defaultDeliveryTiers;
+                const normalized = tiers.length >= 3
+                    ? tiers.slice(0, 3).map(t => ({
+                        maxAmount: t.maxAmount != null ? Number(t.maxAmount) : null,
+                        fee: Number(t.fee ?? 0)
+                    }))
+                    : defaultDeliveryTiers;
+                setDeliveryPriceTiers(normalized);
+                setEditingDeliveryTiers(normalized);
+                const minOrder = data.minOrderAmount != null ? Number(data.minOrderAmount) : 25;
+                setMinOrderAmount(minOrder);
+                setEditingMinOrderAmount(minOrder);
+            }
+        } catch (error) {
+            console.error('Error fetching delivery price tiers:', error);
+        }
+    };
+
+    const saveDeliveryPriceTiers = async () => {
+        try {
+            const tiers = editingDeliveryTiers.map((t, i) => {
+                const max = t.maxAmount === '' || t.maxAmount == null ? (i === 2 ? null : 25) : parseInt(Number(t.maxAmount), 10);
+                const fee = i === 2 ? 0 : (parseFloat(t.fee) || 0);
+                return { maxAmount: max, fee };
+            });
+            if (tiers[0].maxAmount == null || tiers[0].fee < 0 || tiers[1].maxAmount == null || tiers[1].fee < 0) {
+                message.error('Попълнете коректно границите и таксите за доставка.');
+                return;
+            }
+            if (Number(tiers[0].maxAmount) >= Number(tiers[1].maxAmount)) {
+                message.error('Горната граница на втория ред трябва да е по-голяма от първата.');
+                return;
+            }
+            const minOrder = (editingMinOrderAmount === '' || editingMinOrderAmount == null) ? minOrderAmount : Number(editingMinOrderAmount);
+            if (isNaN(minOrder) || minOrder < 0) {
+                message.error('Минималната сума за доставка трябва да е положително число.');
+                return;
+            }
+            const settingsRef = ref(rtdb, 'settings/deliveryPrice');
+            await set(settingsRef, { tiers, minOrderAmount: minOrder });
+            setDeliveryPriceTiers(tiers);
+            setEditingDeliveryTiers(tiers);
+            setMinOrderAmount(minOrder);
+            setEditingMinOrderAmount(minOrder);
+            setIsEditingDeliveryTiers(false);
+            message.success('Цените на доставка са запазени успешно!');
+        } catch (error) {
+            console.error('Error saving delivery price tiers:', error);
+            message.error('Грешка при запазване на цените за доставка');
+        }
+    };
+
+    const cancelEditingDeliveryTiers = () => {
+        setEditingDeliveryTiers(deliveryPriceTiers);
+        setEditingMinOrderAmount(minOrderAmount);
+        setIsEditingDeliveryTiers(false);
     };
 
     const fetchAdminEmail = async () => {
@@ -559,6 +640,135 @@ const AdminOrdersPage = () => {
                                         onChange={(e) => setEditingHours({ ...editingHours, endHour: e.target.value })}
                                         style={{ width: '30%' }}
                                     />
+                                </div>
+                            </Space>
+                        )}
+                    </Card>
+                    <Card
+                        title="Цени на доставка"
+                        style={{ marginBottom: "20px" }}
+                        extra={
+                            !isEditingDeliveryTiers ? (
+                                <Button type="primary" onClick={() => setIsEditingDeliveryTiers(true)}>
+                                    Редактирай
+                                </Button>
+                            ) : (
+                                <Space>
+                                    <Button onClick={cancelEditingDeliveryTiers}>Отказ</Button>
+                                    <Button type="primary" onClick={saveDeliveryPriceTiers}>
+                                        Запази
+                                    </Button>
+                                </Space>
+                            )
+                        }
+                    >
+                        {!isEditingDeliveryTiers ? (
+                            <div>
+                                <p style={{ color: '#1890ff', fontSize: '14px', marginTop: '10px', marginBottom: '14px' }}>
+                                    <strong>Минимална сума за доставка:</strong> {minOrderAmount} лв
+                                </p>
+                                <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
+                                    <strong>До {deliveryPriceTiers[0]?.maxAmount ?? 25} лв:</strong> {deliveryPriceTiers[0]?.fee ?? 5} лв
+                                </p>
+                                <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
+                                    <strong>От {deliveryPriceTiers[0]?.maxAmount ?? 25} до {deliveryPriceTiers[1]?.maxAmount ?? 50} лв:</strong> {deliveryPriceTiers[1]?.fee ?? 3} лв
+                                </p>
+                                <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
+                                    <strong>Над {deliveryPriceTiers[1]?.maxAmount ?? 50} лв:</strong> Безплатна доставка
+                                </p>
+                            </div>
+                        ) : (
+                            <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '8px', paddingBottom: '12px', borderBottom: '1px solid #f0f0f0' }}>
+                                    <span><strong>Минимална сума за доставка:</strong></span>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        step={1}
+                                        value={editingMinOrderAmount}
+                                        onChange={(e) => setEditingMinOrderAmount(e.target.value === '' ? '' : Number(e.target.value))}
+                                        style={{ width: 80 }}
+                                    />
+                                    <span><strong>лв</strong></span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                                    <span><strong>До</strong></span>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        value={editingDeliveryTiers[0]?.maxAmount ?? 25}
+                                        onChange={(e) => {
+                                            const v = e.target.value === '' ? null : Number(e.target.value);
+                                            setEditingDeliveryTiers(prev => {
+                                                const next = [...prev];
+                                                next[0] = { ...next[0], maxAmount: v };
+                                                return next;
+                                            });
+                                        }}
+                                        style={{ width: 80 }}
+                                    />
+                                    <span><strong>лв →</strong></span>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        step={0.5}
+                                        value={editingDeliveryTiers[0]?.fee ?? 5}
+                                        onChange={(e) => {
+                                            const v = parseFloat(e.target.value) || 0;
+                                            setEditingDeliveryTiers(prev => {
+                                                const next = [...prev];
+                                                next[0] = { ...next[0], fee: v };
+                                                return next;
+                                            });
+                                        }}
+                                        style={{ width: 80 }}
+                                    />
+                                    <span><strong>лв</strong></span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                                    <span><strong>От</strong></span>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        value={editingDeliveryTiers[0]?.maxAmount ?? 25}
+                                        style={{ width: 80 }}
+                                        disabled
+                                    />
+                                    <span><strong>до</strong></span>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        value={editingDeliveryTiers[1]?.maxAmount ?? 50}
+                                        onChange={(e) => {
+                                            const v = e.target.value === '' ? null : Number(e.target.value);
+                                            setEditingDeliveryTiers(prev => {
+                                                const next = [...prev];
+                                                next[1] = { ...next[1], maxAmount: v };
+                                                return next;
+                                            });
+                                        }}
+                                        style={{ width: 80 }}
+                                    />
+                                    <span><strong>лв →</strong></span>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        step={0.5}
+                                        value={editingDeliveryTiers[1]?.fee ?? 3}
+                                        onChange={(e) => {
+                                            const v = parseFloat(e.target.value) || 0;
+                                            setEditingDeliveryTiers(prev => {
+                                                const next = [...prev];
+                                                next[1] = { ...next[1], fee: v };
+                                                return next;
+                                            });
+                                        }}
+                                        style={{ width: 80 }}
+                                    />
+                                    <span><strong>лв</strong></span>
+                                </div>
+                                <div style={{ color: '#666' }}>
+                                    <strong>Над {editingDeliveryTiers[1]?.maxAmount ?? 50} лв:</strong> Безплатна доставка
                                 </div>
                             </Space>
                         )}
@@ -925,10 +1135,10 @@ const AdminOrdersPage = () => {
                                                             <span>-{pickupDiscountFormatted.bgn} лв (-{pickupDiscountFormatted.eur}€)</span>
                                                         </div>
                                                     )}
-                                                    {deliveryFee > 0 && (
+                                                    {(deliveryFee > 0 || selectedOrder.order_type === 'delivery') && (
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                                                             <span>Такса за доставка:</span>
-                                                            <span>{deliveryFeeFormatted.bgn} лв ({deliveryFeeFormatted.eur}€)</span>
+                                                            <span>{deliveryFee > 0 ? `${deliveryFeeFormatted.bgn} лв (${deliveryFeeFormatted.eur}€)` : 'Безплатна'}</span>
                                                         </div>
                                                     )}
                                                     <div style={{ 
