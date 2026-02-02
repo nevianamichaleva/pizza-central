@@ -159,6 +159,7 @@ const AdminBlogPage = () => {
       image_caption: '',
       status: 'draft',
       published_at: null,
+      views: 0,
       seo_title: '',
       meta_description: '',
       meta_keywords: '',
@@ -180,6 +181,7 @@ const AdminBlogPage = () => {
       image_caption: post.image_caption || '',
       status: post.status || 'draft',
       published_at: post.published_at ? moment(post.published_at) : null,
+      views: post.views ?? 0,
       seo_title: post.seo_title || '',
       meta_description: post.meta_description || '',
       meta_keywords: post.meta_keywords || '',
@@ -204,6 +206,7 @@ const AdminBlogPage = () => {
         image_caption: values.image_caption || '',
         status: values.status || 'draft',
         published_at: values.published_at ? values.published_at.toISOString() : null,
+        views: typeof values.views === 'number' ? values.views : parseInt(values.views, 10) || 0,
         seo_title: values.seo_title || '',
         meta_description: values.meta_description || '',
         meta_keywords: values.meta_keywords || '',
@@ -430,6 +433,14 @@ const AdminBlogPage = () => {
                   format="DD.MM.YYYY HH:mm"
                   style={{ width: '100%' }}
                 />
+              </Form.Item>
+
+              <Form.Item
+                name="views"
+                label="Прегледи"
+                extra="Брой прегледи на статията (може да се коригира ръчно)"
+              >
+                <Input type="number" min={0} placeholder="0" style={{ width: '120px' }} />
               </Form.Item>
 
               <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: '20px', marginTop: '20px' }}>

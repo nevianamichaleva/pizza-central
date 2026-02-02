@@ -4,7 +4,7 @@ import { useUser } from '@/context/UserContext';
 import { get, ref, remove } from 'firebase/database';
 import moment from 'moment';
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { rtdb } from '../../../../lib/firebase';
 
@@ -169,6 +169,16 @@ const PageViewsPage = () => {
         }
     };
 
+    // Най-посещавани страници за днес (за графиката)
+    const mostVisitedToday = useMemo(() => {
+        const todayStr = moment().format('YYYY-MM-DD');
+        return pageViewsDetails
+            .filter(item => item.date === todayStr)
+            .sort((a, b) => b.views - a.views)
+            .slice(0, 15)
+            .map(item => ({ page: item.page, views: item.views }));
+    }, [pageViewsDetails]);
+
     // Filter data based on search
     const filteredData = pageViewsDetails.filter(item => {
         const matchesDate = !searchDate || item.dateFormatted.includes(searchDate) || item.date.includes(searchDate);
@@ -236,6 +246,39 @@ const PageViewsPage = () => {
                             />
                         </LineChart>
                     </ResponsiveContainer>
+                </div>
+
+                {/* Най-посещавани страници за днес */}
+                <div style={{ 
+                    background: '#fff', 
+                    padding: '24px', 
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    marginBottom: '20px'
+                }}>
+                    <h3 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: '600' }}>
+                        Най-посещавани страници за днес
+                    </h3>
+                    {mostVisitedToday.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={Math.max(300, mostVisitedToday.length * 36)}>
+                            <BarChart
+                                data={mostVisitedToday}
+                                layout="vertical"
+                                margin={{ left: 20, right: 30, top: 5, bottom: 5 }}
+                            >
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis type="number" allowDecimals={false} />
+                                <YAxis type="category" dataKey="page" width={180} tick={{ fontSize: 12 }} />
+                                <Tooltip formatter={(value) => [value, 'Посещения']} />
+                                <Legend />
+                                <Bar dataKey="views" fill="#1890ff" name="Посещения" radius={[0, 4, 4, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div style={{ textAlign: 'center', padding: '40px', color: '#999', fontSize: '16px' }}>
+                            Няма данни за посещения днес
+                        </div>
+                    )}
                 </div>
 
             {/* Search Filters */}
