@@ -1,0 +1,225 @@
+import Image from 'next/image';
+
+const ModernHero = () => {
+    return (
+        <section id="hero" className="hero section light-background">
+            <div className="container">
+                <div className="row gy-4 align-items-center justify-content-center justify-content-lg-between">
+
+                    {/* Left Content */}
+                    <div className="col-lg-5 order-2 order-lg-1 d-flex flex-column justify-content-center">
+                        <h1 data-aos="fade-up" className="hero-title">
+                            Вкус, който остава
+                            <span className="hero-brand"
+                                data-aos="fade-up"
+                                data-aos-delay="150">
+                                Ресторант-пицария Централ
+                            </span>
+                        </h1>
+
+                        <p
+                            className="hero-subtitle"
+                            data-aos="fade-up"
+                            data-aos-delay="100"
+                        >
+                            Авторска кухня, подбрани продукти
+                            и уютна атмосфера в сърцето на Добрич.
+                        </p>
+
+                        <div
+                            className="d-flex flex-wrap hero-actions"
+                            data-aos="fade-up"
+                            data-aos-delay="200"
+                        >
+                            <a
+                                href="/reservation"
+                                className="btn-primary-hero"
+                                aria-label="Резервирай маса в ресторанта"
+                            >
+                                Резервирай с отстъпка
+                            </a>
+
+                            <a
+                                href="/for-home"
+                                className="btn-secondary-hero"
+                                aria-label="Поръчай за вкъщи"
+                            >
+                                Поръчай за вкъщи
+                            </a>
+                        </div>
+
+                    </div>
+
+                    {/* Hero Image */}
+                    <div
+                        className="col-lg-5 order-1 order-lg-2 hero-img"
+                        data-aos="zoom-out"
+                    >
+                        <div style={{ width: '100%', maxWidth: '500px', aspectRatio: '1', margin: '0 auto', borderRadius: '50%', overflow: 'hidden' }}>
+                            <Image
+                                src="/images/dinner-3.jpg"
+                                alt="Авторско ястие от ресторант Централ Добрич"
+                                width={500}
+                                height={500}
+                                //className="img-fluid animated"
+                                className="img-fluid"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                priority
+                            />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <style jsx>{`
+        .hero-title {
+          font-size: clamp(2.2rem, 4vw, 3.2rem);
+          font-weight: 700;
+          line-height: 1.1;
+          margin-bottom: 20px;
+        }
+        .hero-title span {
+            display: block;
+            font-size: 0.55em;
+            font-weight: 500;
+            margin-top: 12px;
+            color: #666;
+            }
+
+        .hero-subtitle {
+          font-size: 1.05rem;
+          color: #555;
+          max-width: 460px;
+          margin-bottom: 12px;
+        }
+
+        .hero-brand {
+          display: block;
+          font-size: 0.9rem;
+          color: #999;
+          margin-bottom: 28px;
+        }
+
+        .hero-actions {
+          gap: 16px;
+          margin-bottom: 20px;
+        }
+
+        .btn-primary-hero {
+          background: #d41317;
+          color: #fff;
+          padding: 12px 26px;
+          border-radius: 30px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+        }
+
+        .btn-primary-hero:hover {
+          background: #b50f13;
+          box-shadow: 0 10px 30px rgba(212, 19, 23, 0.35);
+          transform: translateY(-1px);
+        }
+
+        .btn-secondary-hero {
+          border: 1px solid #d41317;
+          color: #d41317;
+          padding: 12px 26px;
+          border-radius: 30px;
+          font-weight: 500;
+          transition: all 0.3s ease;
+        }
+
+        .btn-secondary-hero:hover {
+          background: #d41317;
+          color: #fff;
+        }
+
+        .hero-trust {
+          font-size: 0.85rem;
+          color: #777;
+        }
+
+        .hero-image-wrapper {
+          position: relative;
+          width: 100%;
+          max-width: 480px;
+          aspect-ratio: 1;
+          margin: 0 auto;
+          border-radius: 50%;
+          overflow: hidden;
+          box-shadow:
+            0 25px 50px rgba(0, 0, 0, 0.2),
+            0 15px 35px rgba(0, 0, 0, 0.15),
+            0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+            inset 0 -25px 50px rgba(0, 0, 0, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15);
+          transform: perspective(800px) rotateY(-2deg) rotateX(2deg);
+          transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .hero-image-wrapper:hover {
+          transform: perspective(800px) rotateY(0) rotateX(0) scale(1.02);
+          box-shadow:
+            0 35px 70px rgba(0, 0, 0, 0.25),
+            0 20px 40px rgba(0, 0, 0, 0.18),
+            0 0 0 1px rgba(255, 255, 255, 0.12) inset,
+            inset 0 -30px 55px rgba(0, 0, 0, 0.28),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .hero-image-wrapper::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(
+            circle at center,
+            rgba(0, 0, 0, 0) 40%,
+            rgba(0, 0, 0, 0.35) 100%
+          );
+          pointer-events: none;
+        }
+
+        .hero-image {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          transform: scale(1.25);
+          transition: transform 6s ease;
+        }
+
+        .hero-image-wrapper:hover .hero-image {
+          transform: scale(1.3);
+        }
+
+        @media (max-width: 768px) {
+          .hero {
+            padding-top: 0 !important;
+            padding-bottom: 40px !important;
+          }
+
+          .hero-title {
+            text-align: center;
+          }
+
+          .hero-subtitle,
+          .hero-brand,
+          .hero-trust {
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+          }
+
+          .hero-actions {
+            justify-content: center;
+          }
+        }
+      `}</style>
+        </section>
+    );
+};
+
+export default ModernHero;
