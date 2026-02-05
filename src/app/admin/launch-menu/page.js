@@ -81,7 +81,10 @@ const LaunchMenu = () => {
   }, [launchMenu])
 
   const openDrawer = () => setDrawerVisible(true);
-  const closeDrawer = () => setDrawerVisible(false);
+  const closeDrawer = () => {
+    setDrawerVisible(false);
+    setLaunchMenu(null);
+  };
 
   const fetchMenu = async () => {
     try {
@@ -106,11 +109,12 @@ const LaunchMenu = () => {
   };
 
   const addNewMenu = () => {
+    setImage('');
     form.setFieldsValue({
       image: null,
       weekDay: null,
       description: '',
-      dishes: null,
+      dishes: [],
       date: dayjs(),
       id: null
     });
@@ -121,7 +125,7 @@ const LaunchMenu = () => {
     if (!values.date) {
       values.date = dayjs();
     }
-    const sanitizedDishes = values.dishes.map((dish) => {
+    const sanitizedDishes = (values.dishes || []).map((dish) => {
       const sanitizedDish = {
         name: dish.name || '',
         price: dish.price || '',
@@ -158,7 +162,7 @@ const LaunchMenu = () => {
       values.date = dayjs();
     }
   
-    const sanitizedDishes = values.dishes.map((dish) => {
+    const sanitizedDishes = (values.dishes || []).map((dish) => {
       const sanitizedDish = {
         name: dish.name || '',
         price: dish.price || '',

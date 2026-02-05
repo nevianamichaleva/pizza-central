@@ -1,6 +1,6 @@
 'use client';
 // import AboutSection from '@/components/AboutSection';
-// import BlogSection from '@/components/BlogSection';
+import BlogSection from '@/components/BlogSection';
 // import BookTableSection from '@/components/BookTableSection';
 // import CateringSection from '@/components/CateringSection';
 import Contact from '@/components/Contact';
@@ -35,6 +35,7 @@ export default function Home() {
       <Chefs /> */}
       
       <Contact part={true}/>
+      <BlogSection />
       <Gallery />
     </div>
   );
