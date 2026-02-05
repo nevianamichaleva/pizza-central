@@ -173,16 +173,12 @@ const CartIcon = ({ userId }) => {
     return { x: e.clientX, y: e.clientY };
   };
 
-  // Drag handlers
+  // Drag handlers (touchstart is attached with { passive: false } in useEffect so preventDefault works on mobile)
   const handleStart = (e) => {
     if (e.type === "mousedown" && e.button !== 0) return; // Only handle left mouse button
     
     if (cartRef.current) {
-      // Prevent default on touch to avoid triggering click immediately
-      if (e.type === "touchstart") {
-        e.preventDefault();
-      }
-      
+      // Don't preventDefault on touchstart so tap still navigates to /order; drag-vs-tap is handled in onClick via hasDraggedRef
       const coords = getClientCoords(e);
       const rect = cartRef.current.getBoundingClientRect();
       let currentX, currentY;
@@ -205,7 +201,6 @@ const CartIcon = ({ userId }) => {
       hasDraggedRef.current = false;
     }
   };
-
   useEffect(() => {
     if (!isDragging) return;
 

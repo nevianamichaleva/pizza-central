@@ -109,9 +109,9 @@ export default function Order() {
       const orderData = snapshot.val();
       setOrder(orderData);
       setOrderId(orderData.id || currentCartId);
-      // Use delivery_address/phone/email if user_address/user_phone/user_email is not available (for completed orders)
-      setAddress(orderData.user_address || orderData.delivery_address || "");
-      setPhone(orderData.user_phone || orderData.phone || "");
+      // Use delivery_address/phone/email if user_address/user_phone/user_email is not available (for completed orders). Coerce to string for mobile/production (Firebase can return numbers).
+      setAddress(String(orderData.user_address ?? orderData.delivery_address ?? ""));
+      setPhone(String(orderData.user_phone ?? orderData.phone ?? ""));
       setEmail(orderData.user_email || orderData.email || "");
       setSpecialNotes(orderData.special_notes || "");
       setDeliveryTime(orderData.delivery_time || "");
@@ -336,12 +336,14 @@ export default function Order() {
       return;
     }
 
-    if (orderType === 'delivery' && (!address || !address.trim())) {
+    const addressStr = String(address ?? "");
+    const phoneStr = String(phone ?? "");
+    if (orderType === 'delivery' && !addressStr.trim()) {
       message.error("Моля, въведете адрес за доставка.");
       return;
     }
 
-    if (!phone || !phone.trim()) {
+    if (!phoneStr.trim()) {
       message.error("Моля, въведете телефон за връзка.");
       return;
     }
@@ -371,8 +373,8 @@ export default function Order() {
     const updatedOrder = {
       ...order,
       status: 'in progress',
-      delivery_address: orderType === 'delivery' ? address : '',
-      phone: phone,
+      delivery_address: orderType === 'delivery' ? addressStr : '',
+      phone: phoneStr,
       email: email,
       special_notes: specialNotes,
       delivery_time: orderType === 'delivery' ? deliveryTime : '',
@@ -1103,9 +1105,9 @@ export default function Order() {
                         </Link>
                       </div>
                       <Tooltip title={
-                        (!phone || !phone.trim()) 
+                        (!phone || !String(phone).trim()) 
                           ? "Въведете телефон като натиснете бутона Добави" 
-                          : (orderType === 'delivery' && (!address || !address.trim()))
+                          : (orderType === 'delivery' && (!address || !String(address).trim()))
                             ? "Въведете адрес за доставка"
                             : !isWithinWorkingHours() 
                               ? `Поръчките се приемат от ${workingHours.startHour}:00 до ${workingHours.endHour}:00 часа` 
@@ -1120,8 +1122,8 @@ export default function Order() {
                               (orderType === 'delivery' && calculatedTotal < minOrderForDelivery) || 
                               !isWithinWorkingHours() ||
                               !phone || 
-                              !phone.trim() ||
-                              (orderType === 'delivery' && (!address || !address.trim()))
+                              !String(phone).trim() ||
+                              (orderType === 'delivery' && (!address || !String(address).trim()))
                             }
                           >
                             Поръчай
@@ -1385,9 +1387,9 @@ export default function Order() {
                   {!orderCompleted && (
                     <>
                       <Tooltip title={
-                        (!phone || !phone.trim()) 
+                        (!phone || !String(phone).trim()) 
                           ? "Въведете телефон" 
-                          : (orderType === 'delivery' && (!address || !address.trim()))
+                          : (orderType === 'delivery' && (!address || !String(address).trim()))
                             ? "Въведете адрес за доставка"
                             : !isWithinWorkingHours() 
                               ? `Поръчките се приемат от ${workingHours.startHour}:00 до ${workingHours.endHour}:00 часа` 
@@ -1402,8 +1404,8 @@ export default function Order() {
                               (orderType === 'delivery' && calculatedTotal < minOrderForDelivery) || 
                               !isWithinWorkingHours() ||
                               !phone || 
-                              !phone.trim() ||
-                              (orderType === 'delivery' && (!address || !address.trim()))
+                              !String(phone).trim() ||
+                              (orderType === 'delivery' && (!address || !String(address).trim()))
                             }
                           >
                             Поръчай
