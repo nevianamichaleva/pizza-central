@@ -45,6 +45,17 @@ a {
   }
 }
 
+/* Header Lottie (до бутона Доставка) */
+.header-lottie {
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.header-lottie > div,
+.header-lottie svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 /* Enhanced Menu Styles - Desktop & Mobile */
 .menu-item-desktop {
   margin-bottom: 2rem;
