@@ -30,6 +30,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hasLaunchMenuToday, setHasLaunchMenuToday] = useState(false);
   const [headerLottieData, setHeaderLottieData] = useState(null);
+  const [showStickyBar, setShowStickyBar] = useState(false);
 
   useEffect(() => {
     fetch(LOTTIE_URL)
@@ -117,6 +118,16 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
+    const STICKY_THRESHOLD = 100;
+    const handleScroll = () => {
+      setShowStickyBar(window.scrollY > STICKY_THRESHOLD);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
@@ -172,7 +183,46 @@ const Header = () => {
   };
 
   return (
-    <header id="header" className="header d-flex align-items-center sticky-top">
+    <>
+    {/* На мобилни при превъртане – компактна лента отгоре: лого, доставка, резервация, меню */}
+    {isMobile && (
+      <div
+        className={`header-sticky-bar ${showStickyBar ? 'header-sticky-bar-visible' : ''}`}
+        aria-hidden="true"
+      >
+        <div className="header-sticky-bar-inner">
+          <Link href="/" className="header-sticky-bar-logo" aria-label="Начало">
+            <Image
+              src="/images/logo.png"
+              alt=""
+              width={36}
+              height={36}
+              style={{ objectFit: 'contain' }}
+            />
+            <span className="header-sticky-bar-sitename">Централ</span>
+          </Link>
+          <div className="header-sticky-bar-actions">
+            <Link href="/for-home" className="header-sticky-bar-btn header-sticky-bar-icon" aria-label="Доставка" title="Доставка">
+              <i className="bi bi-truck" aria-hidden="true" />
+            </Link>
+            <Link href="/reservation" className="header-sticky-bar-btn header-sticky-bar-icon" aria-label="Резервация" title="Резервация">
+              <i className="bi bi-calendar-check" aria-hidden="true" />
+            </Link>
+            <Link href="/catering" className="header-sticky-bar-btn header-sticky-bar-icon" aria-label="Кетъринг" title="Кетъринг">
+              <i className="bi bi-cup-hot" aria-hidden="true" />
+            </Link>
+            <button
+              type="button"
+              className={`header-sticky-bar-menu bi ${isMenuOpen ? 'bi-x' : 'bi-list'}`}
+              onClick={toggleMenu}
+              aria-label={isMenuOpen ? 'Затвори меню' : 'Отвори меню'}
+              aria-expanded={isMenuOpen}
+            />
+          </div>
+        </div>
+      </div>
+    )}
+    <header id="header" className={`header d-flex align-items-center ${isMobile ? 'header-mobile-no-sticky' : 'sticky-top'}`}>
       <div className="container position-relative d-flex align-items-center" style={{
         justifyContent: isMobile ? 'space-between' : 'space-between',
         flexWrap: isMobile ? 'nowrap' : 'nowrap'
@@ -487,6 +537,7 @@ const Header = () => {
         )}
       </div>
     </header>
+    </>
   );
 };
 

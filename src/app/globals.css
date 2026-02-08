@@ -56,6 +56,112 @@ a {
   height: 100% !important;
 }
 
+/* Мобилен хедър – при превъртане не е sticky, за да се покаже лентата отгоре */
+@media (max-width: 768px) {
+  .header-mobile-no-sticky {
+    position: relative !important;
+  }
+}
+
+/* Лента при превъртане на мобилни – лого, доставка, резервация, меню */
+.header-sticky-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  pointer-events: none;
+}
+.header-sticky-bar.header-sticky-bar-visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.header-sticky-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  gap: 12px;
+  max-width: 100%;
+}
+.header-sticky-bar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  flex-shrink: 0;
+}
+.header-sticky-bar-sitename {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--nav-color, #333);
+}
+.header-sticky-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.header-sticky-bar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent-color, #d41317);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+.header-sticky-bar-btn:active {
+  background: rgba(212, 19, 23, 0.08);
+}
+.header-sticky-bar-icon {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  color: #f56505;
+  font-weight: 700;
+}
+.header-sticky-bar-icon i {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+.header-sticky-bar-menu {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--nav-color, #333);
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.header-sticky-bar-menu:active {
+  background: rgba(0, 0, 0, 0.06);
+}
+@media (max-width: 768px) {
+  .header-sticky-bar {
+    display: block;
+  }
+}
+@media (min-width: 769px) {
+  .header-sticky-bar {
+    display: none !important;
+  }
+}
+
 /* Enhanced Menu Styles - Desktop & Mobile */
 .menu-item-desktop {
   margin-bottom: 2rem;
