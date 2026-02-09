@@ -6,7 +6,7 @@ import { CaretDownOutlined, LoginOutlined, UserOutlined } from '@ant-design/icon
 import { Dropdown, Space } from 'antd';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { onValue, ref } from 'firebase/database';
-import Lottie from 'lottie-react';
+// import Lottie from 'lottie-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from "next/navigation";
@@ -15,7 +15,7 @@ import { logoutUser } from '../../lib/auth';
 import { rtdb } from '../../lib/firebase';
 import CartIcon from './CartIcon';
 
-const LOTTIE_URL = '/animations/Pizza-delivery-app.json';
+// const LOTTIE_URL = '/animations/Pizza-delivery-app.json';
 
 const Header = () => {
   const auth = getAuth();
@@ -29,15 +29,15 @@ const Header = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hasLaunchMenuToday, setHasLaunchMenuToday] = useState(false);
-  const [headerLottieData, setHeaderLottieData] = useState(null);
+  // const [headerLottieData, setHeaderLottieData] = useState(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
 
-  useEffect(() => {
-    fetch(LOTTIE_URL)
-      .then((res) => res.json())
-      .then((data) => setHeaderLottieData(data))
-      .catch(() => setHeaderLottieData(null));
-  }, []);
+  // useEffect(() => {
+  //   fetch(LOTTIE_URL)
+  //     .then((res) => res.json())
+  //     .then((data) => setHeaderLottieData(data))
+  //     .catch(() => setHeaderLottieData(null));
+  // }, []);
 
   const items = [
     {
@@ -270,11 +270,11 @@ const Header = () => {
             order: 2
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {headerLottieData && (
+              {/* {headerLottieData && (
                 <div className="header-lottie" style={{ width: 50, height: 50 }} aria-hidden="true">
                   <Lottie animationData={headerLottieData} loop />
                 </div>
-              )}
+              )} */}
               <Link href="/for-home" className="btn-getstarted" aria-label="Поръчай за доставка до дома">
                 Доставка
               </Link>
@@ -519,11 +519,11 @@ const Header = () => {
             gap: '10px',
             alignItems: 'flex-end'
           }}>
-            {headerLottieData && (
+            {/* {headerLottieData && (
               <div className="header-lottie" style={{ width: 50, height: 50 }} aria-hidden="true">
                 <Lottie animationData={headerLottieData} loop />
               </div>
-            )}
+            )} */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 
               <Link href="/for-home" className="btn-getstarted" aria-label="Поръчай от менюто">
