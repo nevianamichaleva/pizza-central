@@ -31,13 +31,49 @@ const Header = () => {
   const [hasLaunchMenuToday, setHasLaunchMenuToday] = useState(false);
   // const [headerLottieData, setHeaderLottieData] = useState(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [stickyBarCartCount, setStickyBarCartCount] = useState(0);
+  const [stickyBarCartId, setStickyBarCartId] = useState(null);
 
-  // useEffect(() => {
-  //   fetch(LOTTIE_URL)
-  //     .then((res) => res.json())
-  //     .then((data) => setHeaderLottieData(data))
-  //     .catch(() => setHeaderLottieData(null));
-  // }, []);
+  useEffect(() => {
+    const cartId = typeof window !== 'undefined' ? window.localStorage.getItem('cartId') : null;
+    setStickyBarCartId(cartId);
+  }, []);
+
+  useEffect(() => {
+    const handleCartUpdate = () => {
+      const cartId = typeof window !== 'undefined' ? window.localStorage.getItem('cartId') : null;
+      setStickyBarCartId(cartId);
+    };
+    window.addEventListener('cart:update', handleCartUpdate);
+    return () => window.removeEventListener('cart:update', handleCartUpdate);
+  }, []);
+
+  useEffect(() => {
+    if (!stickyBarCartId) {
+      setStickyBarCartCount(0);
+      return;
+    }
+    const orderRef = ref(rtdb, `orders/${stickyBarCartId}`);
+    const unsubscribe = onValue(orderRef, (snapshot) => {
+      if (!snapshot.exists()) {
+        setStickyBarCartCount(0);
+        return;
+      }
+      const order = snapshot.val();
+      if (!order || order.status !== 'pending') {
+        setStickyBarCartCount(0);
+        return;
+      }
+      const items = order.items || {};
+      const count = Object.values(items).reduce((total, item) => {
+        if (item.isPackaging) return total;
+        const q = Number(item.quantity);
+        return total + (Number.isFinite(q) ? q : 0);
+      }, 0);
+      setStickyBarCartCount(count);
+    });
+    return () => unsubscribe();
+  }, [stickyBarCartId]);
 
   const items = [
     {
@@ -203,13 +239,21 @@ const Header = () => {
           </Link>
           <div className="header-sticky-bar-actions">
             <Link href="/for-home" className="header-sticky-bar-btn header-sticky-bar-icon" aria-label="Доставка" title="Доставка">
-              <i className="bi bi-truck" aria-hidden="true" />
+              <i className="bi bi-car-front" aria-hidden="true" />
             </Link>
             <Link href="/reservation" className="header-sticky-bar-btn header-sticky-bar-icon" aria-label="Резервация" title="Резервация">
-              <i className="bi bi-calendar-check" aria-hidden="true" />
+              <svg className="header-sticky-bar-svg-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M13 .5c0-.276-.226-.506-.498-.465-1.703.257-2.94 2.012-3 8.462a.5.5 0 0 0 .498.5c.56.01 1 .13 1 1.003v5.5a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5zM4.25 0a.25.25 0 0 1 .25.25v5.122a.128.128 0 0 0 .256.006l.233-5.14A.25.25 0 0 1 5.24 0h.522a.25.25 0 0 1 .25.238l.233 5.14a.128.128 0 0 0 .256-.006V.25A.25.25 0 0 1 6.75 0h.29a.5.5 0 0 1 .498.458l.423 5.07a1.69 1.69 0 0 1-1.059 1.711l-.053.022a.92.92 0 0 0-.58.884L6.47 15a.971.971 0 1 1-1.942 0l.202-6.855a.92.92 0 0 0-.58-.884l-.053-.022a1.69 1.69 0 0 1-1.059-1.712L3.462.458A.5.5 0 0 1 3.96 0z"/>
+              </svg>
             </Link>
             <Link href="/catering" className="header-sticky-bar-btn header-sticky-bar-icon" aria-label="Кетъринг" title="Кетъринг">
-              <i className="bi bi-cup-hot" aria-hidden="true" />
+              <i className="bi bi-cake2" aria-hidden="true" />
+            </Link>
+            <Link href="/order" className="header-sticky-bar-btn header-sticky-bar-icon header-sticky-bar-cart" aria-label={`Количка${stickyBarCartCount > 0 ? ` – ${stickyBarCartCount} продукта` : ''}`} title="Количка">
+              <i className="bi bi-cart3" aria-hidden="true" />
+              {stickyBarCartCount > 0 && (
+                <span className="header-sticky-bar-cart-badge" aria-hidden="true">{stickyBarCartCount > 99 ? '99+' : stickyBarCartCount}</span>
+              )}
             </Link>
             <button
               type="button"
