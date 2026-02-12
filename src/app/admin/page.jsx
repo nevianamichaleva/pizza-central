@@ -15,6 +15,8 @@ const AdministrationPage = () => {
     const [ordersData, setOrdersData] = useState([]);
     const [bookingsData, setBookingsData] = useState([]);
     const [blogViews, setBlogViews] = useState(0);
+    const [monthlyOrdersCount, setMonthlyOrdersCount] = useState(0);
+    const [monthlyOrdersValue, setMonthlyOrdersValue] = useState(0);
     const [cateringRequestsCount, setCateringRequestsCount] = useState(0);
     const [loading, setLoading] = useState(true);
 
@@ -31,6 +33,7 @@ const AdministrationPage = () => {
                 fetchOrdersData(),
                 fetchBookingsData(),
                 fetchBlogViewsData(),
+                fetchMonthlyOrdersData(),
                 fetchCateringRequestsData()
             ]);
         } catch (error) {
@@ -227,6 +230,56 @@ const AdministrationPage = () => {
         } catch (error) {
             console.error("Грешка при зареждане на прегледи на блог:", error);
             setBlogViews(0);
+        }
+    };
+
+    const parseOrderDate = (order) => {
+        if (!order?.order_date) return null;
+        let cleanedDate = order.order_date.toString().trim().replace(/ г\./g, '').replace(/ ч\./g, '').trim();
+        let datePart = cleanedDate.includes(',') ? cleanedDate.split(',')[0].trim() : cleanedDate;
+        let orderDate = null;
+        if (datePart.includes('.')) orderDate = moment(datePart, ['D.M.YYYY', 'DD.MM.YYYY', 'D.M.YY', 'DD.MM.YY'], true);
+        if ((!orderDate || !orderDate.isValid()) && datePart.includes('/')) orderDate = moment(datePart, ['DD/MM/YYYY', 'D/M/YYYY', 'DD/MM/YY', 'D/M/YY'], true);
+        if (!orderDate || !orderDate.isValid()) {
+            try {
+                const dateObj = new Date(order.order_date);
+                if (!isNaN(dateObj.getTime())) orderDate = moment(dateObj);
+            } catch (e) {}
+        }
+        if (!orderDate || !orderDate.isValid()) orderDate = moment(datePart, ['DD.MM.YYYY', 'DD-MM-YYYY', 'YYYY-MM-DD', 'DD/MM/YYYY', 'D.M.YYYY', 'D/M/YYYY'], false);
+        if (!orderDate || !orderDate.isValid()) orderDate = moment(cleanedDate, ['DD.MM.YYYY HH:mm:ss', 'DD-MM-YYYY HH:mm:ss', 'DD/MM/YYYY HH:mm:ss', 'DD.MM.YYYY HH:mm', 'D.M.YYYY HH:mm', 'DD/MM/YYYY HH:mm', 'D/M/YYYY HH:mm'], true);
+        return (orderDate && orderDate.isValid()) ? orderDate : null;
+    };
+
+    const fetchMonthlyOrdersData = async () => {
+        try {
+            const ordersRef = ref(rtdb, "orders");
+            const snapshot = await get(ordersRef);
+            if (!snapshot.exists()) {
+                setMonthlyOrdersCount(0);
+                setMonthlyOrdersValue(0);
+                return;
+            }
+            const data = snapshot.val();
+            const ordersArray = Object.entries(data).map(([key, value]) => ({ id: key, ...value })).filter(o => o.order_date);
+            const thisMonth = moment().startOf('month');
+            let count = 0;
+            let totalValue = 0;
+            const excludedStatuses = ['pending', 'cancelled']; // чака изпращане, отказана
+            ordersArray.forEach(order => {
+                const orderDate = parseOrderDate(order);
+                if (!orderDate || !orderDate.isSame(thisMonth, 'month')) return;
+                const status = (order.status || '').toLowerCase();
+                if (excludedStatuses.includes(status)) return;
+                count++;
+                totalValue += parseFloat(order.total) || 0;
+            });
+            setMonthlyOrdersCount(count);
+            setMonthlyOrdersValue(totalValue);
+        } catch (error) {
+            console.error("Грешка при зареждане на поръчки за месеца:", error);
+            setMonthlyOrdersCount(0);
+            setMonthlyOrdersValue(0);
         }
     };
 
@@ -771,8 +824,37 @@ const AdministrationPage = () => {
                                     </ResponsiveContainer>
                                 </div>
 
-                                {/* Blog Views and Catering Requests */}
+                                {/* Monthly Orders, Blog Views and Catering Requests */}
                                 <div style={{ display: 'flex', gap: '30px', flexWrap: 'wrap' }}>
+                                    <div style={{ 
+                                        background: '#fff', 
+                                        padding: '24px', 
+                                        borderRadius: '8px',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                        flex: '1',
+                                        minWidth: '300px'
+                                    }}>
+                                        <h3 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: '600' }}>
+                                            Общо поръчки за текущия месец
+                                        </h3>
+                                        <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', flexWrap: 'wrap', padding: '20px 0' }}>
+                                            <div style={{ textAlign: 'center' }}>
+                                                <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#1890ff' }}>
+                                                    {monthlyOrdersCount.toLocaleString('bg-BG')}
+                                                </div>
+                                                <p style={{ margin: '8px 0 0', color: '#666', fontSize: '14px' }}>брой</p>
+                                            </div>
+                                            <div style={{ textAlign: 'center' }}>
+                                                <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#52c41a' }}>
+                                                    {(monthlyOrdersValue / 1.95583).toLocaleString('bg-BG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+                                                </div>
+                                                <p style={{ margin: '8px 0 0', color: '#666', fontSize: '14px' }}>стойност (евро)</p>
+                                            </div>
+                                        </div>
+                                        <p style={{ textAlign: 'center', color: '#666', fontSize: '14px', marginTop: '8px' }}>
+                                            Поръчки за текущия месец
+                                        </p>
+                                    </div>
                                     <div style={{ 
                                         background: '#fff', 
                                         padding: '24px', 

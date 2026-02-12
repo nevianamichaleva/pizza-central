@@ -24,6 +24,7 @@ const NewDishes = () => {
               id: key,
               ...value,
             }))
+            .filter((d) => d.status == 'active')
             .sort((a, b) => {
               // Sort by creation order (newest first) - using Firebase key
               return b.id.localeCompare(a.id);

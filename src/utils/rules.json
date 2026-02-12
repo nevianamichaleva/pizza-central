@@ -25,6 +25,15 @@
       "page_views": {
         ".read": true,  // Public read access for page views
         ".write": true  // Public write access for page views (anyone can track page visits)
+      },
+
+      "blog_posts": {
+        ".read": true,  // Public read access for blog (listing and post pages)
+        "$postId": {
+          "views": {
+            ".write": true  // Anyone can increment view count on visit
+          }
+        }
       }
     }
   }

@@ -8,6 +8,41 @@ import styles from "./page.module.css";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
 
+// Fetch packaging data from Firebase
+async function getPackagingData() {
+  try {
+    const packagingRef = ref(rtdb, 'packaging');
+    const packagingSnapshot = await get(packagingRef);
+    if (packagingSnapshot.exists()) {
+      return packagingSnapshot.val();
+    }
+    return {};
+  } catch (error) {
+    console.error("Error fetching packaging:", error);
+    return {};
+  }
+}
+
+// Calculate display price (product price + packaging price)
+function getDisplayPrice(product, packagingData) {
+  const basePrice = parseFloat(product.price);
+  if (isNaN(basePrice)) {
+    return null;
+  }
+  if (product.packagingIds && packagingData) {
+    const packagingIds = Array.isArray(product.packagingIds) ? product.packagingIds : [product.packagingIds];
+    let packagingTotal = 0;
+    packagingIds.forEach(packagingId => {
+      const packaging = packagingData[packagingId];
+      if (packaging && packaging.price) {
+        packagingTotal += parseFloat(packaging.price) || 0;
+      }
+    });
+    return basePrice + packagingTotal;
+  }
+  return basePrice;
+}
+
 // Fetch new dish from Firebase
 async function getNewDish(slug) {
   try {
@@ -20,7 +55,8 @@ async function getNewDish(slug) {
       
       if (foundDish) {
         const [dishId, dishData] = foundDish;
-        
+        if (dishData.status === 'inactive') return null;
+
         // Fetch product data if productId exists
         let product = null;
         if (dishData.productId) {
@@ -131,6 +167,9 @@ export default async function NewDishDetailsPage({ params }) {
     notFound();
   }
 
+  const packagingData = await getPackagingData();
+  const displayPrice = dish.product ? getDisplayPrice(dish.product, packagingData) : null;
+
   // Generate Schema.org structured data for Product
   const productSchema = {
     "@context": "https://schema.org",
@@ -140,9 +179,9 @@ export default async function NewDishDetailsPage({ params }) {
     "image": dish.img 
       ? (dish.img.startsWith('http') ? dish.img : `${baseUrl}${dish.img.startsWith('/') ? '' : '/'}${dish.img}`)
       : `${baseUrl}/images/no-image.png`,
-    "offers": dish.product && dish.product.price ? {
+    "offers": displayPrice != null ? {
       "@type": "Offer",
-      "price": parseFloat(dish.product.price).toFixed(2),
+      "price": parseFloat(displayPrice).toFixed(2),
       "priceCurrency": "BGN",
       "availability": "https://schema.org/InStock",
       "url": `${baseUrl}/new-dishes/${slug}`
@@ -188,9 +227,9 @@ export default async function NewDishDetailsPage({ params }) {
             
             {dish.product && (
               <>
-                {dish.product.price && (
+                {(displayPrice != null) && (
                   <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#c41d7f', marginBottom: '15px' }}>
-                    {parseFloat(dish.product.price).toFixed(2)} лв / {(parseFloat(dish.product.price) / 1.95583).toFixed(2)} €
+                    {parseFloat(displayPrice).toFixed(2)} лв / {(parseFloat(displayPrice) / 1.95583).toFixed(2)} €
                   </div>
                 )}
                 

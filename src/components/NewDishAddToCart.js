@@ -116,11 +116,17 @@ const NewDishAddToCart = ({ dish }) => {
         }
         emitCartUpdate(orderKey);
 
+        let packagingTotal = 0;
+        packagingItems.forEach((packaging) => {
+          packagingTotal += parseFloat(packaging.price);
+        });
+        const totalProductPrice = productPrice + packagingTotal;
+
         const items = {
           [itemKey]: {
             name: productName,
             quantity: 1,
-            value: productPrice,
+            value: totalProductPrice, // Include packaging price in product price
             image: productImage,
             productId: product.id,
             sideDishId: sideDish ? sideDish.id : null,
@@ -128,7 +134,7 @@ const NewDishAddToCart = ({ dish }) => {
           },
         };
 
-        let packagingTotal = 0;
+        // Add packaging items linked to this product (hidden in cart but kept for email and admin)
         packagingItems.forEach((packaging) => {
           const packagingKey = `${itemKey}_packaging_${packaging.id}`;
           items[packagingKey] = {
@@ -142,15 +148,15 @@ const NewDishAddToCart = ({ dish }) => {
             isPackaging: true,
             linkedToItemId: itemKey,
             packagingId: packaging.id,
+            hiddenInCart: true, // Hide in cart but keep for email and admin
           };
-          packagingTotal += parseFloat(packaging.price);
         });
 
         const newOrder = {
           items: items,
           order_date: new Date().toLocaleString(),
           status: "pending",
-          total: productPrice + packagingTotal,
+          total: totalProductPrice,
           user_id: user ? user.uid : null,
           user_email: user ? user.email : null,
           user_phone: userDetails ? userDetails.phone : null,
@@ -171,11 +177,17 @@ const NewDishAddToCart = ({ dish }) => {
           }
           emitCartUpdate(orderKey);
 
+          let packagingTotal = 0;
+          packagingItems.forEach((packaging) => {
+            packagingTotal += parseFloat(packaging.price);
+          });
+          const totalProductPrice = productPrice + packagingTotal;
+
           const items = {
             [itemKey]: {
               name: productName,
               quantity: 1,
-              value: productPrice,
+              value: totalProductPrice, // Include packaging price in product price
               image: productImage,
               productId: product.id,
               sideDishId: sideDish ? sideDish.id : null,
@@ -183,7 +195,7 @@ const NewDishAddToCart = ({ dish }) => {
             },
           };
 
-          let packagingTotal = 0;
+          // Add packaging items linked to this product (hidden in cart but kept for email and admin)
           packagingItems.forEach((packaging) => {
             const packagingKey = `${itemKey}_packaging_${packaging.id}`;
             items[packagingKey] = {
@@ -197,15 +209,15 @@ const NewDishAddToCart = ({ dish }) => {
               isPackaging: true,
               linkedToItemId: itemKey,
               packagingId: packaging.id,
+              hiddenInCart: true, // Hide in cart but keep for email and admin
             };
-            packagingTotal += parseFloat(packaging.price);
           });
 
           const newOrder = {
             items: items,
             order_date: new Date().toLocaleString(),
             status: "pending",
-            total: productPrice + packagingTotal,
+            total: totalProductPrice,
             user_id: user ? user.uid : null,
             user_email: user ? user.email : null,
             user_phone: userDetails ? userDetails.phone : null,
@@ -219,13 +231,19 @@ const NewDishAddToCart = ({ dish }) => {
           const orderData = orderSnapshot.val();
           const existingItems = orderData.items || {};
           
+          let packagingTotal = 0;
+          packagingItems.forEach((packaging) => {
+            packagingTotal += parseFloat(packaging.price);
+          });
+          const totalProductPrice = productPrice + packagingTotal;
+
           if (existingItems[itemKey]) {
             existingItems[itemKey].quantity += 1;
           } else {
             existingItems[itemKey] = {
               name: productName,
               quantity: 1,
-              value: productPrice,
+              value: totalProductPrice, // Include packaging price in product price
               image: productImage,
               productId: product.id,
               sideDishId: sideDish ? sideDish.id : null,
@@ -233,6 +251,7 @@ const NewDishAddToCart = ({ dish }) => {
             };
           }
 
+          // Add packaging items linked to this product (hidden in cart but kept for email and admin)
           packagingItems.forEach((packaging) => {
             const packagingKey = `${itemKey}_packaging_${packaging.id}`;
             const existingPackaging = existingItems[packagingKey];
@@ -254,6 +273,7 @@ const NewDishAddToCart = ({ dish }) => {
                 isPackaging: true,
                 linkedToItemId: itemKey,
                 packagingId: packaging.id,
+                hiddenInCart: true, // Hide in cart but keep for email and admin
               };
             }
           });
