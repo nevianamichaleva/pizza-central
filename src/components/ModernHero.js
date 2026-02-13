@@ -1,8 +1,10 @@
 import Image from 'next/image';
+import FloatingHearts from '@/components/FloatingHearts';
 
 const ModernHero = () => {
     return (
-        <section id="hero" className="hero section light-background">
+        <section id="hero" className="hero section light-background hero-with-love">
+            <FloatingHearts />
             <div className="container">
                 <div className="row gy-4 align-items-center justify-content-center justify-content-lg-between">
 
@@ -23,7 +25,12 @@ const ModernHero = () => {
                             data-aos-delay="100"
                         >
                             Авторска кухня, подбрани продукти
-                            и уютна атмосфера в сърцето на Добрич.
+                            и уютна атмосфера в сърцето на Добрич{' '}
+                            <span className="hero-heart" aria-hidden="true" title="С любов">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="heart-pulse">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                </svg>
+                            </span>
                         </p>
 
                         <div
@@ -73,6 +80,30 @@ const ModernHero = () => {
             </div>
 
             <style jsx>{`
+        .hero-with-love {
+          position: relative;
+        }
+        .hero-with-love .container {
+          position: relative;
+          z-index: 1;
+        }
+        .hero-heart {
+          display: inline-flex;
+          align-items: center;
+          vertical-align: middle;
+          color: #d41317;
+          margin-left: 2px;
+          animation: heartPulse 1.4s ease-in-out infinite;
+        }
+        .hero-heart .heart-pulse {
+          width: 18px;
+          height: 18px;
+          filter: drop-shadow(0 0 4px rgba(212, 19, 23, 0.3));
+        }
+        @keyframes heartPulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.15); opacity: 0.9; }
+        }
         .hero-title {
           font-size: clamp(2.2rem, 4vw, 3.2rem);
           font-weight: 700;
