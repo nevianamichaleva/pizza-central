@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import FloatingHearts from '@/components/FloatingHearts';
+import Image from 'next/image';
 
 const ModernHero = () => {
     return (
@@ -16,6 +16,9 @@ const ModernHero = () => {
                                 data-aos="fade-up"
                                 data-aos-delay="150">
                                 Ресторант-пицария Централ
+                            </span>
+                            <span className="hero-valentine-overlay" aria-hidden="true" data-aos="fade-up" data-aos-delay="200">
+                                Happy Valentine&apos;s Day
                             </span>
                         </h1>
 
@@ -86,6 +89,17 @@ const ModernHero = () => {
         .hero-with-love .container {
           position: relative;
           z-index: 1;
+        }
+        .hero-valentine-overlay {
+          display: block;
+          margin-top: 10px;
+          font-family: 'Dancing Script', cursive;
+          font-size: clamp(2.75rem, 8vw, 4.25rem) !important;
+          font-weight: 600;
+          color: #d41317 !important;
+          letter-spacing: 0.02em;
+          line-height: 1.2;
+          user-select: none;
         }
         .hero-heart {
           display: inline-flex;

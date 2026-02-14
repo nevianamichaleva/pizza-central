@@ -5,17 +5,17 @@
  * Сърцата се движат нагоре с леко люлеене и избледняват.
  */
 const HEARTS = [
-  { left: '8%', size: 22, delay: 0, duration: 14, drift: 8 },
-  { left: '18%', size: 16, delay: 2, duration: 16, drift: -6 },
-  { left: '28%', size: 26, delay: 4, duration: 12, drift: 5 },
-  { left: '42%', size: 19, delay: 1, duration: 15, drift: -4 },
-  { left: '55%', size: 24, delay: 3, duration: 13, drift: 7 },
-  { left: '68%', size: 17, delay: 5, duration: 17, drift: -5 },
-  { left: '78%', size: 23, delay: 2.5, duration: 14, drift: 6 },
-  { left: '88%', size: 14, delay: 6, duration: 18, drift: -3 },
-  { left: '22%', size: 20, delay: 7, duration: 15, drift: -7 },
-  { left: '52%', size: 16, delay: 4.5, duration: 16, drift: 4 },
-  { left: '72%', size: 26, delay: 1.5, duration: 11, drift: -6 },
+  { left: '8%', size: 22, delay: 0, duration: 7, drift: 8 },
+  { left: '18%', size: 16, delay: 0.5, duration: 8, drift: -6 },
+  { left: '28%', size: 26, delay: 1, duration: 6, drift: 5 },
+  { left: '42%', size: 19, delay: 0.2, duration: 7.5, drift: -4 },
+  { left: '55%', size: 24, delay: 0.8, duration: 6.5, drift: 7 },
+  { left: '68%', size: 17, delay: 1.2, duration: 8.5, drift: -5 },
+  { left: '78%', size: 23, delay: 0.6, duration: 7, drift: 6 },
+  { left: '88%', size: 14, delay: 1.5, duration: 9, drift: -3 },
+  { left: '22%', size: 20, delay: 1.8, duration: 7.5, drift: -7 },
+  { left: '52%', size: 16, delay: 1.1, duration: 8, drift: 4 },
+  { left: '72%', size: 26, delay: 0.4, duration: 5.5, drift: -6 },
 ];
 
 function HeartIcon({ size, className }) {
