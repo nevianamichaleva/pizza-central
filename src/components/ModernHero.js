@@ -1,10 +1,9 @@
-import FloatingHearts from '@/components/FloatingHearts';
 import Image from 'next/image';
 
 const ModernHero = () => {
     return (
         <section id="hero" className="hero section light-background hero-with-love">
-            <FloatingHearts />
+            {/* <FloatingHearts /> */}
             <div className="container">
                 <div className="row gy-4 align-items-center justify-content-center justify-content-lg-between">
 
@@ -17,9 +16,9 @@ const ModernHero = () => {
                                 data-aos-delay="150">
                                 Ресторант-пицария Централ
                             </span>
-                            <span className="hero-valentine-overlay" aria-hidden="true" data-aos="fade-up" data-aos-delay="200">
+                            {/* <span className="hero-valentine-overlay" aria-hidden="true" data-aos="fade-up" data-aos-delay="200">
                                 Happy Valentine&apos;s Day
-                            </span>
+                            </span> */}
                         </h1>
 
                         <p
