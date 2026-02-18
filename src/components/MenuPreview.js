@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from 'react';
 import { rtdb } from "../../lib/firebase";
 import showAToast from "./common/showAToast";
+import MobileProductsSlider from "./MobileProductsSlider";
 
 const MenuPreview = () => {
   const { products } = useProducts();
@@ -498,7 +499,7 @@ const MenuPreview = () => {
 
         {/* Mobile view with horizontal scroll */}
         <div className="menu-mobile-categories">
-          <div className="menu-mobile-products-slider">
+          <MobileProductsSlider>
             {randomProducts.map((item, index) => (
               <Link 
                 key={index} 
@@ -548,7 +549,7 @@ const MenuPreview = () => {
                 </div>
               </Link>
             ))}
-          </div>
+          </MobileProductsSlider>
         </div>
       </div>
 

@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useEffect, useState } from 'react';
 import { rtdb } from "../../lib/firebase";
 import showAToast from "../components/common/showAToast";
+import MobileProductsSlider from "./MobileProductsSlider";
 const { Search } = Input;
 
 // 14 основни алергена според ЕС регулациите
@@ -860,7 +861,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                     <p style={{ fontSize: '14px', color: '#4a4a4a', marginBottom: '15px', textAlign: 'center' }}>
                       Намерени {allFilteredProducts.length} {allFilteredProducts.length === 1 ? 'продукт' : 'продукта'}
                     </p>
-                    <div className="menu-mobile-products-slider">
+                    <MobileProductsSlider>
                       {allFilteredProducts.map((item, index) => (
                         <Link 
                           key={index} 
@@ -910,7 +911,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                           </div>
                         </Link>
                       ))}
-                    </div>
+                    </MobileProductsSlider>
                   </div>
                 );
               }
@@ -945,7 +946,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                     <p style={{ fontSize: '14px', color: '#4a4a4a', marginBottom: '15px', textAlign: 'center' }}>
                       Намерени {allFilteredProducts.length} {allFilteredProducts.length === 1 ? 'продукт' : 'продукта'}
                     </p>
-                    <div className="menu-mobile-products-slider">
+                    <MobileProductsSlider>
                       {allFilteredProducts.map((item, index) => (
                         <div key={index} className="menu-mobile-product-item">
                           <a href={item.url || item.image || "#"} className="glightbox">
@@ -1011,7 +1012,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                           </div>
                         </div>
                       ))}
-                    </div>
+                    </MobileProductsSlider>
                   </div>
                 );
               }
@@ -1073,7 +1074,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                         </Link>
                       </div>
                     )}
-                  <div className="menu-mobile-products-slider">
+                  <MobileProductsSlider>
                     {categoryProducts.map((item, index) => (
                       <Link 
                         key={index} 
@@ -1123,7 +1124,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                         </div>
                       </Link>
                     ))}
-                  </div>
+                  </MobileProductsSlider>
                 </div>
                 );
               });
@@ -1199,7 +1200,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                     → Виж всички за доставка
                   </Link>
                 </div>
-                <div className="menu-mobile-products-slider">
+                <MobileProductsSlider>
                 {products
                   .filter((item) => {
                     if (!productBelongsToCategory(item, selectedCategory.id) || item.isSideDish) return false;
@@ -1259,7 +1260,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                       </div>
                     </Link>
                   ))}
-                </div>
+                </MobileProductsSlider>
               </div>
             </div>
           );

@@ -626,31 +626,53 @@ a {
   gap: 30px;
 }
 
-/* Mobile horizontal scroll for products */
+/* Mobile horizontal scroll for products – scrollbar always visible */
 @media (max-width: 768px) {
   .central-menu-items {
     flex-direction: row;
-    overflow-x: auto;
+    overflow-x: scroll;
     overflow-y: hidden;
     gap: 20px;
-    padding: 10px 0;
+    padding: 10px 0 16px;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: #FFA500 transparent;
+    scrollbar-color: #FFA500 rgba(0, 0, 0, 0.1);
   }
 
   .central-menu-items::-webkit-scrollbar {
-    height: 6px;
+    height: 8px;
   }
 
   .central-menu-items::-webkit-scrollbar-track {
-    background: transparent;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
   }
 
   .central-menu-items::-webkit-scrollbar-thumb {
     background-color: #FFA500;
-    border-radius: 3px;
+    border-radius: 4px;
+  }
+
+  .mobile-slider-with-scrollbar .central-menu-items {
+    padding-bottom: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .mobile-slider-with-scrollbar .central-menu-items::-webkit-scrollbar {
+    display: none;
+  }
+
+  .central-menu-items-with-bar .custom-scrollbar-track {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+@media (min-width: 769px) {
+  .custom-scrollbar-track {
+    display: none !important;
   }
 }
 

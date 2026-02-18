@@ -10,6 +10,7 @@ import { Button, Image, Select } from "antd";
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import MobileProductsSlider from '@/components/MobileProductsSlider';
 
 export default function CentralMenuPage({ params }) {
   const router = useRouter();
@@ -342,7 +343,7 @@ export default function CentralMenuPage({ params }) {
                         <h3 className="central-menu-subcategory-title">
                           {t(subcategory.name.charAt(0).toUpperCase() + subcategory.name.slice(1))}
                         </h3>
-                        <div className="central-menu-items">
+                        <MobileProductsSlider scrollClassName="central-menu-items" wrapperClassName="central-menu-items-with-bar">
                           {subcategoryProducts.map((item, index) => (
                             <div key={index} className="central-menu-item">
                               <div className="central-menu-item-image">
@@ -408,12 +409,12 @@ export default function CentralMenuPage({ params }) {
                               </div>
                             </div>
                           ))}
-                        </div>
+                        </MobileProductsSlider>
                       </div>
                     );
                   })
                 ) : (
-                  <div className="central-menu-items">
+                  <MobileProductsSlider scrollClassName="central-menu-items" wrapperClassName="central-menu-items-with-bar">
                     {categoryProducts.map((item, index) => (
                       <div key={index} className="central-menu-item">
                         <div className="central-menu-item-image">
@@ -479,7 +480,7 @@ export default function CentralMenuPage({ params }) {
                         </div>
                       </div>
                     ))}
-                  </div>
+                  </MobileProductsSlider>
                 )}
               </div>
             );
