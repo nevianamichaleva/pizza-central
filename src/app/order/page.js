@@ -12,7 +12,7 @@ import showAToast from "../../components/common/showAToast";
 const { TextArea } = Input;
 
 export default function Order() {
-  const { user } = useUser();
+  const { user, userDetails } = useUser();
   const [cartId, setCartId] = useState(null);
   const [orderId, setOrderId] = useState(null);
   const [order, setOrder] = useState(null);
@@ -28,6 +28,7 @@ export default function Order() {
     { maxAmount: null, fee: 3 }
   ]);
   const [minOrderForDelivery, setMinOrderForDelivery] = useState(25);
+  const [registeredUserDiscountPercent, setRegisteredUserDiscountPercent] = useState(0);
   const [specialNotes, setSpecialNotes] = useState("");
   const [deliveryTime, setDeliveryTime] = useState("");
   const [orderType, setOrderType] = useState('delivery'); // 'pickup' or 'delivery'
@@ -110,9 +111,12 @@ export default function Order() {
       setOrder(orderData);
       setOrderId(orderData.id || currentCartId);
       // Use delivery_address/phone/email if user_address/user_phone/user_email is not available (for completed orders). Coerce to string for mobile/production (Firebase can return numbers).
-      setAddress(String(orderData.user_address ?? orderData.delivery_address ?? ""));
-      setPhone(String(orderData.user_phone ?? orderData.phone ?? ""));
-      setEmail(orderData.user_email || orderData.email || "");
+      const orderAddress = String(orderData.user_address ?? orderData.delivery_address ?? "");
+      const orderPhone = String(orderData.user_phone ?? orderData.phone ?? "");
+      const orderEmail = orderData.user_email || orderData.email || "";
+      setAddress(orderAddress);
+      setPhone(orderPhone);
+      setEmail(orderEmail);
       setSpecialNotes(orderData.special_notes || "");
       setDeliveryTime(orderData.delivery_time || "");
       setStatus(orderData.status || "");
@@ -128,6 +132,16 @@ export default function Order() {
 
     return unsubscribe;
   };
+
+  // Pre-fill address and phone from profile when user is logged in and order has no saved data
+  useEffect(() => {
+    if (!user || !userDetails || !order || order.status !== "pending") return;
+    const orderAddress = String(order.user_address ?? order.delivery_address ?? "").trim();
+    const orderPhone = String(order.user_phone ?? order.phone ?? "").trim();
+    if (userDetails.address && !orderAddress) setAddress(String(userDetails.address));
+    if (userDetails.phone && !orderPhone) setPhone(String(userDetails.phone));
+    if ((user.email || userDetails.email) && !(order.user_email || order.email)) setEmail(user.email || userDetails.email || "");
+  }, [user, userDetails, order]);
 
   const calculateTotal = (items) => {
     if (!items) return 0;
@@ -365,10 +379,13 @@ export default function Order() {
       }
     }
 
-    // Calculate final total with pickup discount or delivery fee
+    // Calculate final total with pickup discount, registered user discount, and delivery fee
     const pickupDiscountAmount = orderType === 'pickup' ? calculatedTotal * 0.1 : 0;
+    const registeredUserDiscountAmountSubmit = user && registeredUserDiscountPercent > 0
+      ? calculatedTotal * (registeredUserDiscountPercent / 100)
+      : 0;
     const deliveryFeeAmount = orderType === 'delivery' ? getDeliveryFee(calculatedTotal) : 0;
-    const finalOrderTotal = calculatedTotal - pickupDiscountAmount + deliveryFeeAmount;
+    const finalOrderTotal = calculatedTotal - pickupDiscountAmount - registeredUserDiscountAmountSubmit + deliveryFeeAmount;
 
     const updatedOrder = {
       ...order,
@@ -381,6 +398,8 @@ export default function Order() {
       order_number: orderNumber,
       order_type: orderType,
       pickup_discount: pickupDiscountAmount,
+      registered_user_discount: registeredUserDiscountAmountSubmit,
+      registered_user_discount_percent: user && registeredUserDiscountPercent > 0 ? registeredUserDiscountPercent : null,
       delivery_fee: deliveryFeeAmount,
       total: finalOrderTotal
     };
@@ -498,6 +517,9 @@ export default function Order() {
           if (data?.minOrderAmount != null) {
             setMinOrderForDelivery(Number(data.minOrderAmount));
           }
+          if (data?.registeredUserDiscountPercent != null) {
+            setRegisteredUserDiscountPercent(Number(data.registeredUserDiscountPercent));
+          }
         }
       });
     };
@@ -602,16 +624,21 @@ export default function Order() {
     return { bgn: bgn.toFixed(2), eur };
   };
   
+  // Discount for registered users: % of order value (excluding delivery)
+  const registeredUserDiscountAmount = user && registeredUserDiscountPercent > 0
+    ? calculatedTotal * (registeredUserDiscountPercent / 100)
+    : 0;
+
   // Calculate discount per item (10% off for pickup)
   const getItemDiscount = (itemPrice) => {
     return orderType === 'pickup' ? itemPrice * 0.1 : 0;
   };
   
-  // Calculate subtotal with pickup discount (10% off for pickup)
+  // Calculate subtotal with pickup discount (10% off for pickup) and registered user discount
   const pickupDiscount = orderType === 'pickup' ? calculatedTotal * 0.1 : 0;
-  const subtotal = calculatedTotal - pickupDiscount;
+  const subtotal = calculatedTotal - pickupDiscount - registeredUserDiscountAmount;
   
-  // Delivery fee from admin tiers
+  // Delivery fee from admin tiers (based on order value before discounts)
   const deliveryFee = orderType === 'delivery' ? getDeliveryFee(calculatedTotal) : 0;
   
   // Final total
@@ -981,6 +1008,12 @@ export default function Order() {
                     <span>Сума:</span>
                     <span>{formatPrice(calculatedTotal).bgn} лв ({formatPrice(calculatedTotal).eur}€)</span>
                   </div>
+                  {registeredUserDiscountAmount > 0 && (
+                    <div className="summary-item" style={{ color: "#ce1212" }}>
+                      <span>Отстъпка за регистрирани (-{registeredUserDiscountPercent}%):</span>
+                      <span>-{formatPrice(registeredUserDiscountAmount).bgn} лв ({formatPrice(registeredUserDiscountAmount).eur}€)</span>
+                    </div>
+                  )}
                   {orderType === 'pickup' && pickupDiscount > 0 && (
                     <div className="summary-item" style={{ color: "#ce1212" }}>
                       <span>Отстъпка за вземане (-10%):</span>
@@ -1013,6 +1046,14 @@ export default function Order() {
                           {formatPrice(calculatedTotal).bgn} лв ({formatPrice(calculatedTotal).eur}€)
                         </span>
                       </div>
+                      {registeredUserDiscountAmount > 0 && (
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", color: "#ce1212" }}>
+                          <span style={{ fontSize: "16px" }}>Отстъпка регистрирани (-{registeredUserDiscountPercent}%):</span>
+                          <span style={{ fontSize: "16px", fontWeight: "600" }}>
+                            -{formatPrice(registeredUserDiscountAmount).bgn} лв ({formatPrice(registeredUserDiscountAmount).eur}€)
+                          </span>
+                        </div>
+                      )}
                       {orderType === 'pickup' && pickupDiscount > 0 && (
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", color: "#ce1212" }}>
                           <span style={{ fontSize: "16px" }}>Общо отстъпка:</span>

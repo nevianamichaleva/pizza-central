@@ -1380,31 +1380,69 @@ section,
     font-family: var(--heading-font);
   }
 
-  /* Products slider container */
+  /* Products slider container – scrollbar always visible so users see they can scroll */
   .menu-mobile-products-slider {
     display: flex;
     align-items: stretch;
-    overflow-x: auto;
+    overflow-x: scroll;
     overflow-y: hidden;
     gap: 12px;
-    padding: 10px 15px;
+    padding: 10px 15px 16px;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: var(--accent-color) transparent;
+    scrollbar-color: var(--accent-color) rgba(0, 0, 0, 0.1);
   }
 
   .menu-mobile-products-slider::-webkit-scrollbar {
-    height: 6px;
+    height: 8px;
   }
 
   .menu-mobile-products-slider::-webkit-scrollbar-track {
-    background: transparent;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
   }
 
   .menu-mobile-products-slider::-webkit-scrollbar-thumb {
     background-color: var(--accent-color);
-    border-radius: 3px;
+    border-radius: 4px;
+  }
+
+  /* Custom always-visible scrollbar (native one hides after scroll on mobile) */
+  .mobile-slider-with-scrollbar {
+    width: 100%;
+  }
+
+  .mobile-slider-with-scrollbar .menu-mobile-products-slider {
+    padding-bottom: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .mobile-slider-with-scrollbar .menu-mobile-products-slider::-webkit-scrollbar {
+    display: none;
+  }
+
+  .custom-scrollbar-track {
+    display: block;
+    height: 10px;
+    margin: 4px 15px 0;
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 5px;
+    position: relative;
+    cursor: pointer;
+    touch-action: none;
+  }
+
+  .custom-scrollbar-thumb {
+    position: absolute;
+    top: 0;
+    height: 10px;
+    min-width: 24px;
+    background: var(--accent-color);
+    border-radius: 5px;
+    pointer-events: none;
+    transition: left 0.05s ease-out;
   }
 
   /* Individual product item in slider */

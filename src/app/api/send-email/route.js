@@ -91,12 +91,14 @@ export async function POST(request) {
     // Get order type and calculate totals
     const orderType = orderData.order_type || 'pickup'; // 'pickup' or 'delivery'
     const pickupDiscount = parseFloat(orderData.pickup_discount || 0);
+    const registeredUserDiscount = parseFloat(orderData.registered_user_discount || 0);
+    const registeredUserDiscountPercent = orderData.registered_user_discount_percent != null ? Number(orderData.registered_user_discount_percent) : null;
     // Use ?? so that 0 (free delivery) is not replaced by fallback
     const deliveryFee = parseFloat(orderData.delivery_fee ?? (orderType === 'delivery' ? 3.00 : 0));
     
-    // Calculate subtotal (before discount/delivery fee)
+    // Calculate subtotal (products only, before discounts)
     const grandTotal = parseFloat(orderData.total || 0);
-    const subtotal = grandTotal - deliveryFee + pickupDiscount;
+    const subtotal = grandTotal - deliveryFee + pickupDiscount + registeredUserDiscount;
 
     const orderNumber = orderData.order_number ? `ORD-${String(orderData.order_number).padStart(4, '0')}` : (orderData.id || 'N/A');
     const emailSubject = `Нова поръчка #${orderNumber}`;
@@ -125,7 +127,8 @@ ${orderData.special_notes}
 ${orderData.delivery_time && orderType === 'delivery' ? `Желан час за доставка: ${orderData.delivery_time}
 
 ` : ''}Сума: ${formatPrice(subtotal).bgn} лв (${formatPrice(subtotal).eur}€)
-${pickupDiscount > 0 ? `Отстъпка за вземане (-10%): -${formatPrice(pickupDiscount).bgn} лв (-${formatPrice(pickupDiscount).eur}€)
+${registeredUserDiscount > 0 ? `Отстъпка за регистрирани потребители (-${registeredUserDiscountPercent != null ? registeredUserDiscountPercent : ''}%): -${formatPrice(registeredUserDiscount).bgn} лв (-${formatPrice(registeredUserDiscount).eur}€)
+` : ''}${pickupDiscount > 0 ? `Отстъпка за вземане (-10%): -${formatPrice(pickupDiscount).bgn} лв (-${formatPrice(pickupDiscount).eur}€)
 ` : ''}${orderType === 'delivery' ? `Доставка: ${formatPrice(deliveryFee).bgn} лв (${formatPrice(deliveryFee).eur}€)
 ` : ''}Общо: ${formatPrice(grandTotal).bgn} лв (${formatPrice(grandTotal).eur}€)
     `.trim();

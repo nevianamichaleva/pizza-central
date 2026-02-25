@@ -35,6 +35,8 @@ const AdminOrdersPage = () => {
     const [isEditingDeliveryTiers, setIsEditingDeliveryTiers] = useState(false);
     const [minOrderAmount, setMinOrderAmount] = useState(25);
     const [editingMinOrderAmount, setEditingMinOrderAmount] = useState(25);
+    const [registeredUserDiscountPercent, setRegisteredUserDiscountPercent] = useState(0);
+    const [editingRegisteredUserDiscountPercent, setEditingRegisteredUserDiscountPercent] = useState(0);
     const [adminEmail, setAdminEmail] = useState('');
     const [editingEmail, setEditingEmail] = useState('');
     const [isEditingEmail, setIsEditingEmail] = useState(false);
@@ -278,6 +280,9 @@ const AdminOrdersPage = () => {
                 const minOrder = data.minOrderAmount != null ? Number(data.minOrderAmount) : 25;
                 setMinOrderAmount(minOrder);
                 setEditingMinOrderAmount(minOrder);
+                const regDiscount = data.registeredUserDiscountPercent != null ? Number(data.registeredUserDiscountPercent) : 0;
+                setRegisteredUserDiscountPercent(regDiscount);
+                setEditingRegisteredUserDiscountPercent(regDiscount);
             }
         } catch (error) {
             console.error('Error fetching delivery price tiers:', error);
@@ -304,14 +309,20 @@ const AdminOrdersPage = () => {
                 message.error('Минималната сума за доставка трябва да е положително число.');
                 return;
             }
+            const regDiscountPct = (editingRegisteredUserDiscountPercent === '' || editingRegisteredUserDiscountPercent == null)
+                ? registeredUserDiscountPercent
+                : Number(editingRegisteredUserDiscountPercent);
+            const regDiscountClamped = Math.min(100, Math.max(0, isNaN(regDiscountPct) ? 0 : regDiscountPct));
             const settingsRef = ref(rtdb, 'settings/deliveryPrice');
-            await set(settingsRef, { tiers, minOrderAmount: minOrder });
+            await set(settingsRef, { tiers, minOrderAmount: minOrder, registeredUserDiscountPercent: regDiscountClamped });
             setDeliveryPriceTiers(tiers);
             setEditingDeliveryTiers(tiers);
             setMinOrderAmount(minOrder);
             setEditingMinOrderAmount(minOrder);
+            setRegisteredUserDiscountPercent(regDiscountClamped);
+            setEditingRegisteredUserDiscountPercent(regDiscountClamped);
             setIsEditingDeliveryTiers(false);
-            message.success('Цените на доставка са запазени успешно!');
+            message.success('Цените на доставка и отстъпката са запазени успешно!');
         } catch (error) {
             console.error('Error saving delivery price tiers:', error);
             message.error('Грешка при запазване на цените за доставка');
@@ -321,6 +332,7 @@ const AdminOrdersPage = () => {
     const cancelEditingDeliveryTiers = () => {
         setEditingDeliveryTiers(deliveryPriceTiers);
         setEditingMinOrderAmount(minOrderAmount);
+        setEditingRegisteredUserDiscountPercent(registeredUserDiscountPercent);
         setIsEditingDeliveryTiers(false);
     };
 
@@ -672,6 +684,9 @@ const AdminOrdersPage = () => {
                                 <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
                                     <strong>Над {deliveryPriceTiers[0]?.maxAmount ?? 25} лв:</strong> {deliveryPriceTiers[1]?.fee ?? 3} лв
                                 </p>
+                                <p style={{ color: '#52c41a', fontSize: '14px', marginTop: '14px', marginBottom: '10px' }}>
+                                    <strong>Отстъпка за регистрирани потребители:</strong> {registeredUserDiscountPercent}% от стойността на поръчката (без доставка)
+                                </p>
                             </div>
                         ) : (
                             <Space direction="vertical" style={{ width: '100%' }} size="middle">
@@ -748,6 +763,19 @@ const AdminOrdersPage = () => {
                                         style={{ width: 80 }}
                                     />
                                     <span><strong>лв</strong></span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #f0f0f0' }}>
+                                    <span><strong>Отстъпка за регистрирани потребители (%):</strong></span>
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        max={100}
+                                        step={1}
+                                        value={editingRegisteredUserDiscountPercent}
+                                        onChange={(e) => setEditingRegisteredUserDiscountPercent(e.target.value === '' ? '' : Number(e.target.value))}
+                                        style={{ width: 80 }}
+                                    />
+                                    <span style={{ color: '#666', fontSize: '13px' }}>от стойността на поръчката без доставка</span>
                                 </div>
                             </Space>
                         )}
@@ -1095,10 +1123,12 @@ const AdminOrdersPage = () => {
                                             const total = parseFloat(selectedOrder.total || 0);
                                             const deliveryFee = parseFloat(selectedOrder.delivery_fee || 0);
                                             const pickupDiscount = parseFloat(selectedOrder.pickup_discount || 0);
-                                            const subtotal = total - deliveryFee + pickupDiscount;
+                                            const registeredUserDiscount = parseFloat(selectedOrder.registered_user_discount || 0);
+                                            const subtotal = total - deliveryFee + pickupDiscount + registeredUserDiscount;
                                             
                                             const subtotalFormatted = formatPrice(subtotal);
                                             const pickupDiscountFormatted = formatPrice(pickupDiscount);
+                                            const registeredUserDiscountFormatted = formatPrice(registeredUserDiscount);
                                             const deliveryFeeFormatted = formatPrice(deliveryFee);
                                             const totalFormatted = formatPrice(total);
                                             
@@ -1108,6 +1138,12 @@ const AdminOrdersPage = () => {
                                                         <span>Сума на продукти:</span>
                                                         <span>{subtotalFormatted.bgn} лв ({subtotalFormatted.eur}€)</span>
                                                     </div>
+                                                    {registeredUserDiscount > 0 && (
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: '#52c41a' }}>
+                                                            <span>Отстъпка за регистрирани ({selectedOrder.registered_user_discount_percent != null ? selectedOrder.registered_user_discount_percent : ''}%):</span>
+                                                            <span>-{registeredUserDiscountFormatted.bgn} лв (-{registeredUserDiscountFormatted.eur}€)</span>
+                                                        </div>
+                                                    )}
                                                     {pickupDiscount > 0 && (
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: '#52c41a' }}>
                                                             <span>Отстъпка за вземане (10%):</span>
