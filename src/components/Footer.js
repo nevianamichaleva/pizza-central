@@ -73,6 +73,9 @@ const Footer = () => {
               <i className="bi bi-info-circle icon"></i>
               <div>
                 <h4>Полезно</h4>
+                <p style={{ marginBottom: '10px', opacity: 0.95 }}>
+                  Отстъпки при поръчка: 5% за регистрирани потребители, 10% при вземане от място. <Link href="/faq" style={{ color: '#fff', textDecoration: 'underline' }}>Повече в FAQ</Link>
+                </p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
                   <Link href="/privacy-policy" style={{ color: '#fff', textDecoration: 'none' }}>
                     Политика за личните данни

@@ -56,7 +56,6 @@ const ModernHero = () => {
                                 Поръчай за вкъщи
                             </a>
                         </div>
-
                     </div>
 
                     {/* Hero Image */}
