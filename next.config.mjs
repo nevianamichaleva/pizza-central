@@ -141,6 +141,17 @@ const nextConfig = {
         destination: '/for-home',
         permanent: true,
       },
+      // Пренасочване на грешен URL с многоточие към статията за пица каперси
+      {
+        source: '/%E2%80%A6/pizza-kapersi-cheri-domati%E2%80%A6',
+        destination: '/blog/pizza-kapersi-cheri-domati-rucola',
+        permanent: true,
+      },
+      {
+        source: '/\u2026/pizza-kapersi-cheri-domati\u2026',
+        destination: '/blog/pizza-kapersi-cheri-domati-rucola',
+        permanent: true,
+      },
     ];
   },
 };
