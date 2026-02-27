@@ -379,9 +379,9 @@ export default function Order() {
       }
     }
 
-    // Calculate final total with pickup discount, registered user discount, and delivery fee
+    // Calculate final total: when pickup, only 10% pickup discount; when delivery and registered, 5% registered discount. Only the higher discount applies when both would apply.
     const pickupDiscountAmount = orderType === 'pickup' ? calculatedTotal * 0.1 : 0;
-    const registeredUserDiscountAmountSubmit = user && registeredUserDiscountPercent > 0
+    const registeredUserDiscountAmountSubmit = user && registeredUserDiscountPercent > 0 && orderType !== 'pickup'
       ? calculatedTotal * (registeredUserDiscountPercent / 100)
       : 0;
     const deliveryFeeAmount = orderType === 'delivery' ? getDeliveryFee(calculatedTotal) : 0;
@@ -399,7 +399,7 @@ export default function Order() {
       order_type: orderType,
       pickup_discount: pickupDiscountAmount,
       registered_user_discount: registeredUserDiscountAmountSubmit,
-      registered_user_discount_percent: user && registeredUserDiscountPercent > 0 ? registeredUserDiscountPercent : null,
+      registered_user_discount_percent: user && registeredUserDiscountPercent > 0 && orderType !== 'pickup' ? registeredUserDiscountPercent : null,
       delivery_fee: deliveryFeeAmount,
       total: finalOrderTotal
     };
@@ -624,8 +624,8 @@ export default function Order() {
     return { bgn: bgn.toFixed(2), eur };
   };
   
-  // Discount for registered users: % of order value (excluding delivery)
-  const registeredUserDiscountAmount = user && registeredUserDiscountPercent > 0
+  // Discount for registered users: % of order value (excluding delivery). When pickup is chosen, only the higher pickup discount (10%) applies, not both.
+  const registeredUserDiscountAmount = user && registeredUserDiscountPercent > 0 && orderType !== 'pickup'
     ? calculatedTotal * (registeredUserDiscountPercent / 100)
     : 0;
 
