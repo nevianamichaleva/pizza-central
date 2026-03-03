@@ -2,14 +2,18 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+const SCROLL_STEP = 0.75; // fraction of visible width to scroll per click
+
 /**
  * Wraps horizontal product sliders on mobile with an always-visible custom scrollbar
- * so users see they can scroll (native scrollbar hides after scroll on mobile).
+ * and left/right arrows so users see they can scroll.
  */
 export default function MobileProductsSlider({ children, scrollClassName = 'menu-mobile-products-slider', wrapperClassName }) {
   const scrollRef = useRef(null);
   const trackRef = useRef(null);
   const [thumbStyle, setThumbStyle] = useState({ width: '100%', left: 0 });
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   const updateThumb = useCallback(() => {
     const el = scrollRef.current;
@@ -17,6 +21,8 @@ export default function MobileProductsSlider({ children, scrollClassName = 'menu
     if (!el || !track) return;
     const { scrollLeft, scrollWidth, clientWidth } = el;
     const maxScroll = scrollWidth - clientWidth;
+    setCanScrollLeft(scrollLeft > 2);
+    setCanScrollRight(maxScroll > 2 && scrollLeft < maxScroll - 2);
     if (maxScroll <= 0) {
       setThumbStyle({ width: '100%', left: 0 });
       return;
@@ -52,10 +58,38 @@ export default function MobileProductsSlider({ children, scrollClassName = 'menu
     el.scrollTo({ left: frac * maxScroll, behavior: 'smooth' });
   };
 
+  const scrollBy = (direction) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const step = el.clientWidth * SCROLL_STEP;
+    const newLeft = el.scrollLeft + (direction === 'left' ? -step : step);
+    el.scrollTo({ left: Math.max(0, newLeft), behavior: 'smooth' });
+  };
+
   return (
     <div className={['mobile-slider-with-scrollbar', wrapperClassName].filter(Boolean).join(' ')}>
-      <div ref={scrollRef} className={scrollClassName}>
-        {children}
+      <div className="mobile-slider-arrows-wrapper">
+        <div ref={scrollRef} className={scrollClassName}>
+          {children}
+        </div>
+        <button
+          type="button"
+          className="mobile-slider-arrow mobile-slider-arrow-left"
+          onClick={() => scrollBy('left')}
+          disabled={!canScrollLeft}
+          aria-label="Превърни наляво"
+        >
+          <span aria-hidden>‹</span>
+        </button>
+        <button
+          type="button"
+          className="mobile-slider-arrow mobile-slider-arrow-right"
+          onClick={() => scrollBy('right')}
+          disabled={!canScrollRight}
+          aria-label="Превърни надясно"
+        >
+          <span aria-hidden>›</span>
+        </button>
       </div>
       <div
         ref={trackRef}
