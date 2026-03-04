@@ -1424,20 +1424,20 @@ section,
     top: 50%;
     transform: translateY(-50%);
     z-index: 2;
-    width: 28px;
-    height: 28px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 1px solid rgba(0, 0, 0, 0.12);
     background: rgba(255, 255, 255, 0.92);
     color: var(--accent-color, #b01a6b);
-    font-size: 18px;
+    font-size: 30px;
     line-height: 1;
     cursor: pointer;
     padding: 0;
     border-radius: 50%;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.286), 0 4px 16px rgba(0, 0, 0, 0.276);
     transition: background 0.2s, color 0.2s, opacity 0.2s;
     -webkit-tap-highlight-color: transparent;
   }
