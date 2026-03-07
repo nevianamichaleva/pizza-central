@@ -24,7 +24,7 @@ const NewDishes = () => {
               id: key,
               ...value,
             }))
-            .filter((d) => d.status == 'active')
+            .filter((d) => String(d?.status ?? '').toLowerCase().trim() === 'active')
             .sort((a, b) => {
               // Sort by creation order (newest first) - using Firebase key
               return b.id.localeCompare(a.id);
@@ -54,7 +54,7 @@ const NewDishes = () => {
 
       <div className="container">
         <div className="row gy-4">
-          {chefsData.map((chef, index) => (
+          {chefsData.slice(0, 3).map((chef, index) => (
             <div
               className="col-lg-4 d-flex align-items-stretch"
              
@@ -100,6 +100,13 @@ const NewDishes = () => {
             </div>
           ))}
         </div>
+        {/* {chefsData.length > 0 && (
+          <div className="text-center mt-4">
+            <Link href="/new-dishes" className="btn btn-outline-primary">
+              Виж всички
+            </Link>
+          </div>
+        )} */}
       </div>
     </section>
   );

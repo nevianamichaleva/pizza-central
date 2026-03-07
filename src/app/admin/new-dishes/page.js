@@ -307,13 +307,14 @@ const AdminNewDishesPage = () => {
               rowKey="id"
             />
           </div>
+          <Form form={form} onFinish={handleSubmit} layout="vertical">
           <Drawer
             title={selectedDish ? "Редактиране на предложение" : "Добавяне на ново предложение"}
-            visible={drawerVisible}
+            open={drawerVisible}
             onClose={closeDrawer}
             width={600}
+            destroyOnClose={false}
           >
-            <Form form={form} onFinish={handleSubmit} layout="vertical">
               <Form.Item
                 name="name"
                 label="Име на ястието"
@@ -365,16 +366,19 @@ const AdminNewDishesPage = () => {
                 <Select
                   showSearch
                   placeholder="Изберете продукт"
-                  optionFilterProp="children"
+                  optionFilterProp="label"
                   filterOption={(input, option) =>
-                    (option?.children ?? '').toLowerCase().includes(input.toLowerCase())
+                    String(option?.label ?? '').toLowerCase().includes(input.toLowerCase())
                   }
                 >
-                  {products.map((product) => (
-                    <Option key={product.id} value={product.id}>
-                      {product.name} - {parseFloat(product.price || 0).toFixed(2)} лв
-                    </Option>
-                  ))}
+                  {products.map((product) => {
+                    const label = `${product.name} - ${parseFloat(product.price || 0).toFixed(2)} лв`;
+                    return (
+                      <Option key={product.id} value={product.id} label={label}>
+                        {label}
+                      </Option>
+                    );
+                  })}
                 </Select>
               </Form.Item>
 
@@ -382,17 +386,19 @@ const AdminNewDishesPage = () => {
                 name="img"
                 label="Изображение"
               >
-                <CloudinaryUpload setImage={setImage} />
-                {image && (
-                  <div style={{ marginTop: '10px' }}>
-                    <Image
-                      src={image}
-                      alt="Preview"
-                      width={200}
-                      style={{ borderRadius: "8px" }}
-                    />
-                  </div>
-                )}
+                <div>
+                  <CloudinaryUpload setImage={setImage} />
+                  {image && (
+                    <div style={{ marginTop: '10px' }}>
+                      <Image
+                        src={image}
+                        alt="Preview"
+                        width={200}
+                        style={{ borderRadius: "8px" }}
+                      />
+                    </div>
+                  )}
+                </div>
               </Form.Item>
 
               <Form.Item
@@ -409,14 +415,14 @@ const AdminNewDishesPage = () => {
 
               <Form.Item>
                 <Space>
-                  <Button type="primary" htmlType="submit">
+                  <Button type="primary" onClick={() => form.submit()}>
                     {selectedDish ? "Обнови" : "Добави"}
                   </Button>
                   <Button onClick={closeDrawer}>Отказ</Button>
                 </Space>
               </Form.Item>
-            </Form>
           </Drawer>
+          </Form>
         </div>
       </div>
     </section>
