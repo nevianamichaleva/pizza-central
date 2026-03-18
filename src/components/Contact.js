@@ -110,7 +110,7 @@ const Contact = (props) => {
           <span></span> <span className="description-title">Обърнете се към нас</span>
         </p>
         <p style={{ fontSize: '15px', color: '#666', marginTop: '8px', maxWidth: '560px', marginLeft: 'auto', marginRight: 'auto' }}>
-          При поръчки: 5% отстъпка за регистрирани потребители, 10% при вземане от място.{' '}
+          При поръчки: 5% за регистрирани, 10% при вземане от място.{' '}
           <Link href="/faq" style={{ color: '#ce1212', textDecoration: 'underline' }}>Повече в FAQ</Link>
         </p>
       </div>

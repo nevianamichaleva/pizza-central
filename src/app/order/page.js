@@ -379,13 +379,16 @@ export default function Order() {
       }
     }
 
-    // Calculate final total: when pickup, only 10% pickup discount; when delivery and registered, 5% registered discount. Only the higher discount applies when both would apply.
+    // Pickup: 10% on products only. Delivery + registered: % on products + delivery fee.
     const pickupDiscountAmount = orderType === 'pickup' ? calculatedTotal * 0.1 : 0;
-    const registeredUserDiscountAmountSubmit = user && registeredUserDiscountPercent > 0 && orderType !== 'pickup'
-      ? calculatedTotal * (registeredUserDiscountPercent / 100)
-      : 0;
     const deliveryFeeAmount = orderType === 'delivery' ? getDeliveryFee(calculatedTotal) : 0;
-    const finalOrderTotal = calculatedTotal - pickupDiscountAmount - registeredUserDiscountAmountSubmit + deliveryFeeAmount;
+    const registeredUserDiscountAmountSubmit = user && registeredUserDiscountPercent > 0 && orderType !== 'pickup'
+      ? (calculatedTotal + deliveryFeeAmount) * (registeredUserDiscountPercent / 100)
+      : 0;
+    const finalOrderTotal =
+      orderType === 'pickup'
+        ? calculatedTotal - pickupDiscountAmount
+        : calculatedTotal + deliveryFeeAmount - registeredUserDiscountAmountSubmit;
 
     const updatedOrder = {
       ...order,
@@ -624,25 +627,23 @@ export default function Order() {
     return { bgn: bgn.toFixed(2), eur };
   };
   
-  // Discount for registered users: % of order value (excluding delivery). When pickup is chosen, only the higher pickup discount (10%) applies, not both.
+  // Delivery fee from admin tiers (based on order value before discounts)
+  const deliveryFee = orderType === 'delivery' ? getDeliveryFee(calculatedTotal) : 0;
+  // Registered users: % on products + delivery (delivery only). Pickup uses 10% on products only.
   const registeredUserDiscountAmount = user && registeredUserDiscountPercent > 0 && orderType !== 'pickup'
-    ? calculatedTotal * (registeredUserDiscountPercent / 100)
+    ? (calculatedTotal + deliveryFee) * (registeredUserDiscountPercent / 100)
     : 0;
 
   // Calculate discount per item (10% off for pickup)
   const getItemDiscount = (itemPrice) => {
     return orderType === 'pickup' ? itemPrice * 0.1 : 0;
   };
-  
-  // Calculate subtotal with pickup discount (10% off for pickup) and registered user discount
+
   const pickupDiscount = orderType === 'pickup' ? calculatedTotal * 0.1 : 0;
-  const subtotal = calculatedTotal - pickupDiscount - registeredUserDiscountAmount;
-  
-  // Delivery fee from admin tiers (based on order value before discounts)
-  const deliveryFee = orderType === 'delivery' ? getDeliveryFee(calculatedTotal) : 0;
-  
-  // Final total
-  const finalTotal = subtotal + deliveryFee;
+  const finalTotal =
+    orderType === 'pickup'
+      ? calculatedTotal - pickupDiscount
+      : calculatedTotal + deliveryFee - registeredUserDiscountAmount;
 
   return (
     <>
@@ -1008,12 +1009,6 @@ export default function Order() {
                     <span>Сума:</span>
                     <span>{formatPrice(calculatedTotal).bgn} лв ({formatPrice(calculatedTotal).eur}€)</span>
                   </div>
-                  {registeredUserDiscountAmount > 0 && (
-                    <div className="summary-item" style={{ color: "#ce1212" }}>
-                      <span>Отстъпка за регистрирани (-{registeredUserDiscountPercent}%):</span>
-                      <span>-{formatPrice(registeredUserDiscountAmount).bgn} лв ({formatPrice(registeredUserDiscountAmount).eur}€)</span>
-                    </div>
-                  )}
                   {orderType === 'pickup' && pickupDiscount > 0 && (
                     <div className="summary-item" style={{ color: "#ce1212" }}>
                       <span>Отстъпка за вземане (-10%):</span>
@@ -1024,6 +1019,12 @@ export default function Order() {
                     <div className="summary-item">
                       <span>Доставка:</span>
                       <span>{formatPrice(deliveryFee).bgn} лв ({formatPrice(deliveryFee).eur}€)</span>
+                    </div>
+                  )}
+                  {registeredUserDiscountAmount > 0 && (
+                    <div className="summary-item" style={{ color: "#ce1212" }}>
+                      <span>Отстъпка за регистрирани (-{registeredUserDiscountPercent}%):</span>
+                      <span>-{formatPrice(registeredUserDiscountAmount).bgn} лв ({formatPrice(registeredUserDiscountAmount).eur}€)</span>
                     </div>
                   )}
                   <div className="summary-item" style={{ fontWeight: "bold", fontSize: "18px", borderTop: "2px solid #e0e0e0", paddingTop: "10px", marginTop: "10px" }}>
@@ -1046,14 +1047,6 @@ export default function Order() {
                           {formatPrice(calculatedTotal).bgn} лв ({formatPrice(calculatedTotal).eur}€)
                         </span>
                       </div>
-                      {registeredUserDiscountAmount > 0 && (
-                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", color: "#ce1212" }}>
-                          <span style={{ fontSize: "16px" }}>Отстъпка регистрирани (-{registeredUserDiscountPercent}%):</span>
-                          <span style={{ fontSize: "16px", fontWeight: "600" }}>
-                            -{formatPrice(registeredUserDiscountAmount).bgn} лв ({formatPrice(registeredUserDiscountAmount).eur}€)
-                          </span>
-                        </div>
-                      )}
                       {orderType === 'pickup' && pickupDiscount > 0 && (
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", color: "#ce1212" }}>
                           <span style={{ fontSize: "16px" }}>Общо отстъпка:</span>
@@ -1067,6 +1060,14 @@ export default function Order() {
                           <span style={{ fontSize: "16px" }}>Доставка:</span>
                           <span style={{ fontSize: "16px", fontWeight: "600" }}>
                             {formatPrice(deliveryFee).bgn} лв ({formatPrice(deliveryFee).eur}€)
+                          </span>
+                        </div>
+                      )}
+                      {registeredUserDiscountAmount > 0 && (
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", color: "#ce1212" }}>
+                          <span style={{ fontSize: "16px" }}>Отстъпка регистрирани (-{registeredUserDiscountPercent}%, пр.+дост.):</span>
+                          <span style={{ fontSize: "16px", fontWeight: "600" }}>
+                            -{formatPrice(registeredUserDiscountAmount).bgn} лв ({formatPrice(registeredUserDiscountAmount).eur}€)
                           </span>
                         </div>
                       )}

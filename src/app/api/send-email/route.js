@@ -127,9 +127,9 @@ ${orderData.special_notes}
 ${orderData.delivery_time && orderType === 'delivery' ? `Желан час за доставка: ${orderData.delivery_time}
 
 ` : ''}Сума: ${formatPrice(subtotal).bgn} лв (${formatPrice(subtotal).eur}€)
-${registeredUserDiscount > 0 ? `Отстъпка за регистрирани потребители (-${registeredUserDiscountPercent != null ? registeredUserDiscountPercent : ''}%): -${formatPrice(registeredUserDiscount).bgn} лв (-${formatPrice(registeredUserDiscount).eur}€)
+${orderType === 'delivery' ? `Доставка: ${formatPrice(deliveryFee).bgn} лв (${formatPrice(deliveryFee).eur}€)
+` : ''}${registeredUserDiscount > 0 ? `Отстъпка за регистрирани (-${registeredUserDiscountPercent != null ? registeredUserDiscountPercent : ''}% върху продукти и доставка): -${formatPrice(registeredUserDiscount).bgn} лв (-${formatPrice(registeredUserDiscount).eur}€)
 ` : ''}${pickupDiscount > 0 ? `Отстъпка за вземане (-10%): -${formatPrice(pickupDiscount).bgn} лв (-${formatPrice(pickupDiscount).eur}€)
-` : ''}${orderType === 'delivery' ? `Доставка: ${formatPrice(deliveryFee).bgn} лв (${formatPrice(deliveryFee).eur}€)
 ` : ''}Общо: ${formatPrice(grandTotal).bgn} лв (${formatPrice(grandTotal).eur}€)
     `.trim();
 

@@ -685,7 +685,7 @@ const AdminOrdersPage = () => {
                                     <strong>Над {deliveryPriceTiers[0]?.maxAmount ?? 25} лв:</strong> {deliveryPriceTiers[1]?.fee ?? 3} лв
                                 </p>
                                 <p style={{ color: '#52c41a', fontSize: '14px', marginTop: '14px', marginBottom: '10px' }}>
-                                    <strong>Отстъпка за регистрирани потребители:</strong> {registeredUserDiscountPercent}% от стойността на поръчката (без доставка)
+                                    <strong>Отстъпка за регистрирани потребители:</strong> {registeredUserDiscountPercent}%
                                 </p>
                             </div>
                         ) : (
@@ -775,7 +775,7 @@ const AdminOrdersPage = () => {
                                         onChange={(e) => setEditingRegisteredUserDiscountPercent(e.target.value === '' ? '' : Number(e.target.value))}
                                         style={{ width: 80 }}
                                     />
-                                    <span style={{ color: '#666', fontSize: '13px' }}>от стойността на поръчката без доставка</span>
+                                    <span style={{ color: '#666', fontSize: '13px' }}>върху продукти + такса доставка (при доставка)</span>
                                 </div>
                             </Space>
                         )}
@@ -1138,12 +1138,6 @@ const AdminOrdersPage = () => {
                                                         <span>Сума на продукти:</span>
                                                         <span>{subtotalFormatted.bgn} лв ({subtotalFormatted.eur}€)</span>
                                                     </div>
-                                                    {registeredUserDiscount > 0 && (
-                                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: '#52c41a' }}>
-                                                            <span>Отстъпка за регистрирани ({selectedOrder.registered_user_discount_percent != null ? selectedOrder.registered_user_discount_percent : ''}%):</span>
-                                                            <span>-{registeredUserDiscountFormatted.bgn} лв (-{registeredUserDiscountFormatted.eur}€)</span>
-                                                        </div>
-                                                    )}
                                                     {pickupDiscount > 0 && (
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: '#52c41a' }}>
                                                             <span>Отстъпка за вземане (10%):</span>
@@ -1154,6 +1148,12 @@ const AdminOrdersPage = () => {
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                                                             <span>Такса за доставка:</span>
                                                             <span>{deliveryFeeFormatted.bgn} лв ({deliveryFeeFormatted.eur}€)</span>
+                                                        </div>
+                                                    )}
+                                                    {registeredUserDiscount > 0 && (
+                                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: '#52c41a' }}>
+                                                            <span>Отстъпка регистрирани ({selectedOrder.registered_user_discount_percent != null ? selectedOrder.registered_user_discount_percent : ''}% пр.+дост.):</span>
+                                                            <span>-{registeredUserDiscountFormatted.bgn} лв (-{registeredUserDiscountFormatted.eur}€)</span>
                                                         </div>
                                                     )}
                                                     <div style={{ 

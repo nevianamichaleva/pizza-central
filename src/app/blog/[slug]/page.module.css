@@ -145,6 +145,17 @@
   border-bottom-color: #c41d7f;
 }
 
+/* CTA / резервация – бял текст върху червен фон (не лилав линк от .blogContent a) */
+.blogContent a.cta-reservation,
+.blogContent a.cta-reservation:link,
+.blogContent a.cta-reservation:visited,
+.blogContent a.cta-reservation:hover,
+.blogContent a.cta-reservation:active,
+.blogContent a.cta-reservation:focus {
+  color: #ffffff !important;
+  border-bottom: none;
+}
+
 .blogContent code {
   background-color: #f8f9fa;
   padding: 2px 6px;
