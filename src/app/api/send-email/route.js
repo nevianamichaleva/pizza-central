@@ -55,15 +55,10 @@ export async function POST(request) {
           // Find packaging items linked to this product
           const linkedPackaging = packagingItems.filter(pack => pack.linkedToItemId === product.key);
           
-          // Calculate packaging total for this product
-          const packagingTotal = linkedPackaging.reduce((sum, pack) => {
-            return sum + (parseFloat(pack.value || 0) * pack.quantity);
-          }, 0);
-          
-          // Subtract packaging price from product price
-          const productPriceWithoutPackaging = parseFloat(product.value || 0) - packagingTotal;
-          const productTotal = productPriceWithoutPackaging * product.quantity;
-          const priceFormatted = formatPrice(productPriceWithoutPackaging);
+          // product.value already includes hidden linked packaging (same as cart/menu total)
+          const unitPrice = parseFloat(product.value || 0);
+          const productTotal = unitPrice * product.quantity;
+          const priceFormatted = formatPrice(unitPrice);
           const totalFormatted = formatPrice(productTotal);
           
           let itemLine = `- ${product.name} x${product.quantity} - ${priceFormatted.bgn} лв (${priceFormatted.eur}€) | Общо: ${totalFormatted.bgn} лв (${totalFormatted.eur}€)`;
@@ -76,11 +71,7 @@ export async function POST(request) {
           // Add packaging items on separate lines
           if (linkedPackaging.length > 0) {
             linkedPackaging.forEach(pack => {
-              const packPrice = parseFloat(pack.value || 0);
-              const packTotal = packPrice * pack.quantity;
-              const packPriceFormatted = formatPrice(packPrice);
-              const packTotalFormatted = formatPrice(packTotal);
-              itemLine += `\n  └ ${pack.name} x${pack.quantity} - ${packPriceFormatted.bgn} лв (${packPriceFormatted.eur}€) | Общо: ${packTotalFormatted.bgn} лв (${packTotalFormatted.eur}€)`;
+              itemLine += `\n  └ ${pack.name} x${pack.quantity} (включена в цената на продукта)`;
             });
           }
           

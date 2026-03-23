@@ -1063,14 +1063,9 @@ const AdminOrdersPage = () => {
                                                     // Find packaging items linked to this product
                                                     const linkedPackaging = packagingItems.filter(pack => pack.linkedToItemId === product.key);
                                                     
-                                                    // Calculate packaging total for this product
-                                                    const packagingTotal = linkedPackaging.reduce((sum, pack) => {
-                                                        return sum + (parseFloat(pack.value || 0) * pack.quantity);
-                                                    }, 0);
-                                                    
-                                                    // Subtract packaging price from product price
-                                                    const productPriceWithoutPackaging = parseFloat(product.value || 0) - packagingTotal;
-                                                    const productTotal = productPriceWithoutPackaging * product.quantity;
+                                                    // product.value already includes hidden linked packaging (matches cart/menu)
+                                                    const unitPrice = parseFloat(product.value || 0);
+                                                    const productTotal = unitPrice * product.quantity;
                                                     
                                                     return (
                                                         <div key={product.key}>
@@ -1084,22 +1079,15 @@ const AdminOrdersPage = () => {
                                                                 <span>{formatPrice(productTotal).bgn} лв ({formatPrice(productTotal).eur}€)</span>
                                                             </div>
                                                             {/* Show packaging items on separate lines */}
-                                                            {linkedPackaging.map(pack => {
-                                                                const packPrice = parseFloat(pack.value || 0);
-                                                                const packTotal = packPrice * pack.quantity;
-                                                                return (
+                                                            {linkedPackaging.map(pack => (
                                                                     <div key={pack.key} style={{ 
-                                                                        display: 'flex', 
-                                                                        justifyContent: 'space-between',
                                                                         padding: '8px 0 8px 20px',
                                                                         borderBottom: '1px solid #f0f0f0',
                                                                         opacity: 0.8
                                                                     }}>
-                                                                        <span>└ {pack.name} x{pack.quantity}</span>
-                                                                        <span>{formatPrice(packTotal).bgn} лв ({formatPrice(packTotal).eur}€)</span>
+                                                                        <span>└ {pack.name} x{pack.quantity} <em style={{ fontWeight: 400 }}>(включена в цената)</em></span>
                                                                     </div>
-                                                                );
-                                                            })}
+                                                                ))}
                                                         </div>
                                                     );
                                                 });
