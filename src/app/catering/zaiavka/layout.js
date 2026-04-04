@@ -13,6 +13,21 @@ export const metadata = {
     siteName: 'Ресторант-пицария Централ Добрич',
     locale: 'bg_BG',
     type: 'website',
+    images: [
+      {
+        url: `${baseUrl}/images/catering/1000032298.jpg`,
+        width: 1200,
+        height: 630,
+        alt: 'Кетъринг – Ресторант-пицария Централ',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Заяви кетъринг | Ресторант-пицария Централ',
+    description:
+      'Попълнете формата за заявка. Ще уточним менюто, обема и цените за вашето събитие.',
+    images: [`${baseUrl}/images/catering/1000032298.jpg`],
   },
   robots: {
     index: true,

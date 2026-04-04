@@ -75,6 +75,17 @@ const nextConfig = {
         destination: '/',
         permanent: true,
       },
+      // Старо меню URL → ресторантско меню
+      {
+        source: '/our-menu',
+        destination: '/central-menu',
+        permanent: true,
+      },
+      {
+        source: '/our-menu/:path*',
+        destination: '/central-menu',
+        permanent: true,
+      },
       // Стари URL-и пренасочени към нови
       {
         source: '/reservations',
