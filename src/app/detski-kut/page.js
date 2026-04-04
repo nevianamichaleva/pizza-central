@@ -1,5 +1,6 @@
 'use client';
 
+import EditorialSectionIntro from '@/components/EditorialSectionIntro';
 
 const DetskiKutPage = () => {
   return (
@@ -12,6 +13,11 @@ const DetskiKutPage = () => {
         </p>
       </div>
       {/* End Section Title */}
+
+      <EditorialSectionIntro
+        kicker="Семейство · детски кът"
+        lead="Отделна зона за игра — вие се наслаждавате на обяда, децата на своето безопасно приключение."
+      />
 
       <div className="container">
         {/* Introduction Section */}
@@ -36,7 +42,7 @@ const DetskiKutPage = () => {
           }}>
             Резервирай маса
           </a>
-          <a href="/bg/central-menu" className="btn btn-primary" style={{
+          <a href="/central-menu" className="btn btn-primary" style={{
             backgroundColor: '#ce1212',
             color: '#fff',
             padding: '12px 30px',

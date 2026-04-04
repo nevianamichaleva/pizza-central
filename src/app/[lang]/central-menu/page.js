@@ -10,7 +10,6 @@ import { Button, Image, Select } from "antd";
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import MobileProductsSlider from '@/components/MobileProductsSlider';
 
 export default function CentralMenuPage({ params }) {
   const router = useRouter();
@@ -343,7 +342,7 @@ export default function CentralMenuPage({ params }) {
                         <h3 className="central-menu-subcategory-title">
                           {t(subcategory.name.charAt(0).toUpperCase() + subcategory.name.slice(1))}
                         </h3>
-                        <MobileProductsSlider scrollClassName="central-menu-items" wrapperClassName="central-menu-items-with-bar">
+                        <div className="central-menu-items central-menu-items--list">
                           {subcategoryProducts.map((item, index) => (
                             <div key={index} className="central-menu-item">
                               <div className="central-menu-item-image">
@@ -365,7 +364,7 @@ export default function CentralMenuPage({ params }) {
                                   )}
                                 </div>
                                 {item.weight && (
-                                  <div style={{ marginBottom: (item.ingredients || item.description) ? "12px" : 0, fontSize: '16px' }}>
+                                  <div className="central-menu-item-meta" style={{ marginBottom: (item.ingredients || item.description) ? '8px' : 0 }}>
                                     <strong>{t("Грамаж")}:</strong> {item.weight} {item.weightUnit || t("г")}
                                   </div>
                                 )}
@@ -387,7 +386,7 @@ export default function CentralMenuPage({ params }) {
                                   </>
                                 )}
                                 {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
-                                  <div style={{ marginTop: '12px', fontSize: '14px' }}>
+                                  <div className="central-menu-item-allergens">
                                     <strong>{t("Алергени")}:</strong>{' '}
                                     <span style={{ color: '#d32f2f' }}>
                                       {item.allergens.map(allergenValue => getAllergenLabel(allergenValue)).join(', ')}
@@ -409,12 +408,12 @@ export default function CentralMenuPage({ params }) {
                               </div>
                             </div>
                           ))}
-                        </MobileProductsSlider>
+                        </div>
                       </div>
                     );
                   })
                 ) : (
-                  <MobileProductsSlider scrollClassName="central-menu-items" wrapperClassName="central-menu-items-with-bar">
+                  <div className="central-menu-items central-menu-items--list">
                     {categoryProducts.map((item, index) => (
                       <div key={index} className="central-menu-item">
                         <div className="central-menu-item-image">
@@ -436,7 +435,7 @@ export default function CentralMenuPage({ params }) {
                             )}
                           </div>
                           {item.weight && (
-                            <div style={{ marginBottom: (item.ingredients || item.description) ? "12px" : 0, fontSize: '16px' }}>
+                            <div className="central-menu-item-meta" style={{ marginBottom: (item.ingredients || item.description) ? '8px' : 0 }}>
                               <strong>{t("Грамаж")}:</strong> {item.weight} {item.weightUnit || t("г")}
                             </div>
                           )}
@@ -458,7 +457,7 @@ export default function CentralMenuPage({ params }) {
                             </>
                           )}
                           {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
-                            <div style={{ marginTop: '12px', fontSize: '14px' }}>
+                            <div className="central-menu-item-allergens">
                               <strong>{t("Алергени")}:</strong>{' '}
                               <span style={{ color: '#d32f2f' }}>
                                 {item.allergens.map(allergenValue => getAllergenLabel(allergenValue)).join(', ')}
@@ -480,7 +479,7 @@ export default function CentralMenuPage({ params }) {
                         </div>
                       </div>
                     ))}
-                  </MobileProductsSlider>
+                  </div>
                 )}
               </div>
             );

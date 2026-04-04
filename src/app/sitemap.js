@@ -149,7 +149,7 @@ export default async function sitemap() {
       priority: 1,
     },
     {
-      url: `${baseUrl}/our-menu`,
+      url: `${baseUrl}/central-menu`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
@@ -174,12 +174,6 @@ export default async function sitemap() {
     },
     {
       url: `${baseUrl}/new-dishes`,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/launch-menu`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.8,

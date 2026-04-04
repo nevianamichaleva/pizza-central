@@ -469,7 +469,7 @@ const AddCategory = () => {
                       checked={forDelivery}
                       onChange={setForDelivery}
                     />
-                    <span>Доставка (ще се показва в our-menu)</span>
+                    <span>Доставка (ще се показва в for-home)</span>
                   </div>
                 </div>
                 <div className="col-md-12">

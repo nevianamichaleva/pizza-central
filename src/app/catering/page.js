@@ -1,5 +1,6 @@
 'use client';
 
+import EditorialSectionIntro from '@/components/EditorialSectionIntro';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -96,6 +97,11 @@ export default function CateringPage() {
         </p>
       </div>
       {/* End Section Title */}
+
+      <EditorialSectionIntro
+        kicker="Кетъринг · Добрич и област"
+        lead="Професионално обслужване и меню, съобразено с повода — от фирмено събитие до личен празник."
+      />
 
       <div className="container">
         {/* Introduction Section */}

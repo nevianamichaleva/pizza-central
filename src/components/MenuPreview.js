@@ -395,6 +395,10 @@ const MenuPreview = () => {
         </p>
       </div>
 
+      <p className="editorial-lead menu-section-intro">
+        Подбрани предложения за ресторанта и за дома — приготвени с внимание към вкуса и качеството.
+      </p>
+
       <div className="container">
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <Link href="/for-home">

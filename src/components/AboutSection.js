@@ -1,3 +1,4 @@
+import EditorialSectionIntro from '@/components/EditorialSectionIntro';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -12,6 +13,11 @@ const AboutSection = () => {
         </p>
       </div>
       {/* End Section Title */}
+
+      <EditorialSectionIntro
+        kicker="За нас · Централ, Добрич"
+        lead="Повече от десетилетие посрещаме гости с отношение към храната и уютната трапеза в сърцето на града."
+      />
 
       <div className="container">
         <div className="row gy-4">

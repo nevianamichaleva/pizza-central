@@ -9,31 +9,41 @@ const ModernHero = () => {
 
                     {/* Left Content */}
                     <div className="col-lg-5 order-2 order-lg-1 d-flex flex-column justify-content-center">
-                        <h1 data-aos="fade-up" className="hero-title">
+                        <p className="hero-kicker editorial-kicker" data-aos="fade-up">
+                            Добрич · ул. „Независимост“ 4
+                        </p>
+                        <div className="editorial-rule hero-editorial-rule" data-aos="fade-up" data-aos-delay="50" aria-hidden="true" />
+
+                        <h1 data-aos="fade-up" data-aos-delay="80" className="hero-title">
                             Вкус, който остава
                             <span className="hero-brand"
                                 data-aos="fade-up"
                                 data-aos-delay="150">
                                 Ресторант-пицария Централ
                             </span>
-                            {/* <span className="hero-valentine-overlay" aria-hidden="true" data-aos="fade-up" data-aos-delay="200">
-                                Happy Valentine&apos;s Day
-                            </span> */}
                         </h1>
 
                         <p
+                            className="hero-lead editorial-lead"
+                            data-aos="fade-up"
+                            data-aos-delay="120"
+                        >
+                            Съчетаваме италианските традиции с българските продукти — вкус, който усещаш още с първата хапка.
+                        </p>
+
+                        {/* <p
                             className="hero-subtitle"
                             data-aos="fade-up"
-                            data-aos-delay="100"
+                            data-aos-delay="160"
                         >
                             Авторска кухня, подбрани продукти
-                            и уютна атмосфера в сърцето на Добрич{' '}
+                            и уютна атмосфера в сърцето на града{' '}
                             <span className="hero-heart" aria-hidden="true" title="С любов">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="heart-pulse">
                                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                                 </svg>
                             </span>
-                        </p>
+                        </p> */}
 
                         <div
                             className="d-flex flex-wrap hero-actions"
@@ -83,10 +93,18 @@ const ModernHero = () => {
             <style jsx>{`
         .hero-with-love {
           position: relative;
+          background: linear-gradient(168deg, #f8f6f3 0%, #fdfcfb 42%, #ffffff 100%);
         }
         .hero-with-love .container {
           position: relative;
           z-index: 1;
+        }
+        .hero-kicker {
+          margin-top: 0;
+          font-size: 1.3rem !important;
+        }
+        .hero-editorial-rule {
+          margin-top: 0;
         }
         .hero-valentine-overlay {
           display: block;
@@ -130,6 +148,9 @@ const ModernHero = () => {
             color: #666;
             }
 
+        .hero-lead {
+          margin-bottom: 14px;
+        }
         .hero-subtitle {
           font-size: 1.05rem;
           color: #555;
@@ -245,6 +266,21 @@ const ModernHero = () => {
           }
 
           .hero-title {
+            text-align: center;
+          }
+
+          .hero-kicker {
+            text-align: center;
+          }
+
+          .hero-editorial-rule {
+            margin-left: auto;
+            margin-right: auto;
+          }
+
+          .hero-lead {
+            margin-left: auto;
+            margin-right: auto;
             text-align: center;
           }
 

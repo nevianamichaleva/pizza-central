@@ -7,6 +7,7 @@ import { Dropdown, Space } from 'antd';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { onValue, ref } from 'firebase/database';
 // import Lottie from 'lottie-react';
+import { hasLaunchMenuForToday } from '@/lib/launchMenuToday';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from "next/navigation";
@@ -173,16 +174,7 @@ const Header = () => {
 
   useEffect(() => {
     const checkLaunchMenuToday = (data) => {
-      if (data) {
-        const today = new Date();
-        const todayStr = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-        
-        // Check if there's a menu for today
-        const hasMenu = Object.values(data).some((menu) => menu.date === todayStr);
-        setHasLaunchMenuToday(hasMenu);
-      } else {
-        setHasLaunchMenuToday(false);
-      }
+      setHasLaunchMenuToday(hasLaunchMenuForToday(data));
     };
 
     const menuRef = ref(rtdb, "launch-menu");
@@ -343,14 +335,14 @@ const Header = () => {
               onMouseLeave={handleMouseLeave}
             >
               <a
-                href="/our-menu"
+                href="/central-menu"
                 onClick={(e) => {
                   e.preventDefault(); 
                   if (typeof window !== "undefined") {
-                     window.location.href = "/our-menu"; 
+                     window.location.href = "/central-menu"; 
                   }
                 }}
-                className={pathname == '/our-menu' ? 'active dropdown-toggle' : 'dropdown-toggle'}
+                className={pathname === '/central-menu' || (typeof pathname === 'string' && /^\/(bg|en|ro|de)\/central-menu$/.test(pathname)) ? 'active dropdown-toggle' : 'dropdown-toggle'}
               >
                 <span>Меню</span>
               </a>
@@ -360,7 +352,7 @@ const Header = () => {
                     <div key={category.id}>
                       {category?.children?.length ? (
                         <li className="dropdown" key={category.id}>
-                          <a href={`/our-menu/${category.name}`} onClick={toggleDeepDropdown}>
+                          <a href={`/central-menu`} onClick={toggleDeepDropdown}>
                             <span>{category.name}</span>
                             <i className={`bi bi-chevron-down toggle-dropdown ${deepDropdownOpen ? 'active' : ''}`} />
                           </a>
@@ -368,7 +360,7 @@ const Header = () => {
                             <ul>
                               {category?.children.map((subcategory) => (
                                 <li key={subcategory.name+subcategory.id}>
-                                  <Link href={`/our-menu/${category.name}/${subcategory.name}`}>{subcategory.name}</Link>
+                                  <Link href={`/central-menu`}>{subcategory.name}</Link>
                                 </li>
                               ))}
                             </ul>
@@ -376,7 +368,7 @@ const Header = () => {
                         </li>
                       ) : (
                         <li key={category.id}>
-                          <Link href={`/our-menu/${category.name}`}>{category.name}</Link>
+                          <Link href={`/central-menu`}>{category.name}</Link>
                         </li>
                       )}
                     </div>
@@ -429,10 +421,20 @@ const Header = () => {
               <MenuLink href="/reservation" className={pathname == '/reservation' ? 'active' : ''}>Резервации</MenuLink>
             </li>
             <li>
-              <MenuLink href="/our-menu" className={pathname == '/our-menu' ? 'active' : ''}>Меню</MenuLink>
+              <MenuLink
+                href="/central-menu"
+                className={
+                  pathname === '/central-menu' ||
+                  (typeof pathname === 'string' && /^\/(bg|en|ro|de)\/central-menu$/.test(pathname))
+                    ? 'active'
+                    : ''
+                }
+              >
+                Меню
+              </MenuLink>
             </li>
             <li>
-              <MenuLink href={hasLaunchMenuToday ? "/launch-menu" : "/obedno-menu"} className={pathname == '/launch-menu' || pathname == '/obedno-menu' ? 'active' : ''}>Обедно меню</MenuLink>
+              <MenuLink href={"/obedno-menu"} className={pathname == '/obedno-menu' ? 'active' : ''}>Обедно меню</MenuLink>
             </li>
             <li>
               <MenuLink href="/catering" className={pathname == '/catering' ? 'active' : ''}>Кетъринг</MenuLink>

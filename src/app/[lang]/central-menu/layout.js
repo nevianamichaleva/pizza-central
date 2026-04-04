@@ -60,7 +60,7 @@ export async function generateMetadata({ params }) {
   languages.forEach(l => {
     alternates.languages[l] = `${baseUrl}/${l}/central-menu`;
   });
-  alternates.languages['x-default'] = `${baseUrl}/bg/central-menu`;
+  alternates.languages['x-default'] = `${baseUrl}/central-menu`;
 
   return {
     title,
