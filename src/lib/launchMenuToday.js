@@ -20,6 +20,23 @@ export function getTodayLaunchMenuDateString() {
   return `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
 }
 
+/**
+ * DD/MM/YYYY за „днес“ в Europe/Sofia — за SSR/OG и за страницата,
+ * за да съвпада дневното меню с работния ден в Добрич.
+ */
+export function getTodayLaunchMenuDateStringEuropeSofia() {
+  const formatted = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Sofia',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date());
+  const parts = formatted.split('/');
+  if (parts.length !== 3) return getTodayLaunchMenuDateString();
+  const [day, month, year] = parts;
+  return normalizeLaunchMenuDate(`${day}/${month}/${year}`);
+}
+
 /** За показване: 04.04.2026 */
 export function formatMenuDateForDisplay(ddmmyyyy) {
   const n = normalizeLaunchMenuDate(ddmmyyyy);

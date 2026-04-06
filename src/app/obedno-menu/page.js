@@ -1,12 +1,22 @@
 'use client';
 
 import EditorialSectionIntro from '@/components/EditorialSectionIntro';
-import { findLaunchMenuForDate, formatMenuDateForDisplay, getTodayLaunchMenuDateString } from '@/lib/launchMenuToday';
-import { rtdb } from '../../../lib/firebase';
+import {
+  findLaunchMenuForDate,
+  formatMenuDateForDisplay,
+  getTodayLaunchMenuDateStringEuropeSofia,
+} from '@/lib/launchMenuToday';
+import { onValue, ref } from 'firebase/database';
 import Image from 'next/image';
 import Link from 'next/link';
-import { onValue, ref } from 'firebase/database';
 import { useEffect, useState } from 'react';
+import { rtdb } from '../../../lib/firebase';
+
+function weekDayLeadingLower(raw) {
+  const s = raw == null ? '' : String(raw).trim();
+  if (!s) return '';
+  return s.charAt(0).toLowerCase() + s.slice(1);
+}
 
 function hasRenderableDailyContent(menu) {
   if (!menu) return false;
@@ -60,7 +70,7 @@ function ObednoMenuDailyView({ menu }) {
     <div className="container">
       <div className="row justify-content-center">
         <div className="col-lg-10 col-xl-9">
-          <EditorialSectionIntro kicker="Днешно обедно меню" fullWidth={false} />
+          {/* <EditorialSectionIntro kicker={menu.weekDay} fullWidth={false} /> */}
           <div className="content text-center mb-4">
             <h3
               style={{
@@ -70,10 +80,10 @@ function ObednoMenuDailyView({ menu }) {
                 marginBottom: '12px',
               }}
             >
-              Обедно меню за {dateLabel}
+              {dateLabel} {menu.weekDay ? `- ${weekDayLeadingLower(menu.weekDay)}` : ''}
               {menu.weekDay ? (
                 <span style={{ display: 'block', fontSize: '1rem', fontWeight: 400, marginTop: '8px', color: 'var(--default-color)' }}>
-                  {menu.weekDay} · 11:00 – 15:00
+                  от 11:00 – 15:00
                 </span>
               ) : (
                 <span style={{ display: 'block', fontSize: '1rem', fontWeight: 400, marginTop: '8px', color: 'var(--default-color)' }}>
@@ -518,7 +528,7 @@ const ObednoMenuPage = () => {
 
     const unsubscribe = onValue(menuRef, (snapshot) => {
       try {
-        const todayStr = getTodayLaunchMenuDateString();
+        const todayStr = getTodayLaunchMenuDateStringEuropeSofia();
         if (!snapshot.exists()) {
           setTodayMenu(null);
           return;
