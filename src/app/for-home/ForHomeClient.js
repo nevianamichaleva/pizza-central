@@ -26,8 +26,8 @@ export default function ForHomeClient() {
               fontWeight: '600',
             }}
           >
-            Поръчайте директно от нас – без посредник. <strong>5% отстъпка</strong> за регистрирани при
-            доставка · <strong>10%</strong> при вземане от място
+            Поръчайте директно от нас – без посредник. <strong>Такса за доставка 1,53 €.</strong>{' '}
+            <strong>5% отстъпка</strong> за регистрирани при доставка · <strong>10%</strong> при вземане от място
           </p>
           {!user && (
             <p style={{ marginTop: '8px' }}>
@@ -92,6 +92,12 @@ export default function ForHomeClient() {
                 color: '#444',
               }}
             >
+              <li style={{ marginBottom: '10px' }}>
+                <strong>Такса за доставка:</strong> 1,53 €
+                <Link href="/order" style={{ color: '#ce1212', fontWeight: 600 }}>
+                  количката
+                </Link>
+              </li>
               <li style={{ marginBottom: '0' }}>
                 Предпочитате да не ползвате сайта?{' '}
                 <strong>Приемаме поръчки и по телефон</strong> – на номерата по-долу.
