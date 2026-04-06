@@ -99,7 +99,7 @@ export default function CateringPage() {
       {/* End Section Title */}
 
       <EditorialSectionIntro
-        kicker="Кетъринг · Добрич и област"
+        kicker="Кетъринг · Добрич и Варна"
         lead="Професионално обслужване и меню, съобразено с повода — от фирмено събитие до личен празник."
       />
 
