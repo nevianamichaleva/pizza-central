@@ -17,8 +17,20 @@ function launchMenuJsonUrl() {
 export function absolutizeOgImageUrl(imageUrl, siteBase) {
   const u = String(imageUrl ?? '').trim();
   if (!u) return null;
-  if (/^https:\/\//i.test(u)) return u;
-  if (/^http:\/\//i.test(u)) return u.replace(/^http:\/\//i, 'https://');
+  if (/^https:\/\//i.test(u)) {
+    try {
+      return new URL(u).href;
+    } catch {
+      return u;
+    }
+  }
+  if (/^http:\/\//i.test(u)) {
+    try {
+      return new URL(u.replace(/^http:\/\//i, 'https://')).href;
+    } catch {
+      return u.replace(/^http:\/\//i, 'https://');
+    }
+  }
   if (u.startsWith('//')) return `https:${u}`;
   const base = String(siteBase).replace(/\/$/, '');
   if (u.startsWith('/')) return `${base}${u}`;
@@ -31,7 +43,7 @@ export function absolutizeOgImageUrl(imageUrl, siteBase) {
 export async function fetchTodayLaunchMenuImageRawUrl() {
   try {
     const res = await fetch(launchMenuJsonUrl(), {
-      next: { revalidate: 300 },
+      cache: 'no-store',
       headers: { Accept: 'application/json' },
     });
     if (!res.ok) return null;
