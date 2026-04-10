@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { rtdb } from "../../lib/firebase";
 import showAToast from "../components/common/showAToast";
 import MobileProductsSlider from "./MobileProductsSlider";
+import SpicyBadge from "./SpicyBadge";
 const { Search } = Input;
 
 // 14 основни алергена според ЕС регулациите
@@ -184,7 +185,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
 
     const priceInLv = normalized.toFixed(2);
     const priceInEuro = (normalized / 1.95583).toFixed(2);
-    return `${priceInLv} лв. / ${priceInEuro} €`;
+    return `${priceInEuro} € / ${priceInLv} лв.`;
   };
 
   // Get display price (product price + packaging price for delivery items)
@@ -505,36 +506,50 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
           </div>
         </div>
         <div className="menu-card-content">
-          <div className="menu-card-title" style={{ fontSize: '20px', fontWeight: 600, marginBottom: '10px', fontFamily: 'var(--heading-font)' }}>{item.name}</div>
-          {item.weight && (
-            <p style={{ fontSize: '14px', color: '#666', marginBottom: '10px' }}>
-              <strong>Грамаж:</strong> {item.weight} г.
-            </p>
-          )}
-          {(item.ingredients || item.description) && (
-            <div style={{ marginBottom: "16px" }}>
-              {item.ingredients && (
-                <p className="menu-card-description" style={{ marginBottom: "6px" }}>
-                  {item.ingredients.length > 60
-                    ? `${item.ingredients.substring(0, 60)}...` 
-                    : item.ingredients}
-                </p>
+          <div className="menu-card-body-top">
+            <div className="menu-card-title" style={{ fontSize: '20px', fontWeight: 600, marginBottom: '10px', fontFamily: 'var(--heading-font)' }}>{item.name}</div>
+            {item.weight && (
+              <p style={{ fontSize: '14px', color: '#666', marginBottom: '10px' }}>
+                <strong>Грамаж:</strong> {item.weight} г.
+              </p>
+            )}
+            {(item.ingredients || item.description) && (
+              <div style={{ marginBottom: "16px" }}>
+                {item.ingredients && (
+                  <p className="menu-card-description" style={{ marginBottom: "6px" }}>
+                    {item.ingredients.length > 60
+                      ? `${item.ingredients.substring(0, 60)}...` 
+                      : item.ingredients}
+                  </p>
+                )}
+                {item.description && (
+                  <p className="menu-card-description" style={{ marginBottom: 0 }}>
+                    {item.description.length > 100 
+                      ? `${item.description.substring(0, 100)}...` 
+                      : item.description}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+          {((item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0) || item.spicy === true) && (
+            <div className="menu-card-allergens-row">
+              {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                <>
+                  <strong>Алергени:</strong>{' '}
+                  <span style={{ color: '#d32f2f' }}>
+                    {item.allergens.map(allergenValue => getAllergenLabel(allergenValue)).join(', ')}
+                  </span>
+                </>
               )}
-              {item.description && (
-                <p className="menu-card-description" style={{ marginBottom: 0 }}>
-                  {item.description.length > 100 
-                    ? `${item.description.substring(0, 100)}...` 
-                    : item.description}
-                </p>
+              {item.spicy === true && (
+                <>
+                  {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                    <span style={{ color: '#bdbdbd' }} aria-hidden="true">·</span>
+                  )}
+                  <SpicyBadge spicy />
+                </>
               )}
-            </div>
-          )}
-          {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
-            <div style={{ marginBottom: "16px", fontSize: '14px' }}>
-              <strong>Алергени:</strong>{' '}
-              <span style={{ color: '#d32f2f' }}>
-                {item.allergens.map(allergenValue => getAllergenLabel(allergenValue)).join(', ')}
-              </span>
             </div>
           )}
           <div className="menu-card-footer">
@@ -870,8 +885,28 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                           style={{ textDecoration: 'none', color: 'inherit' }}
                         >
                           <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
-                          <div style={{ fontSize: '16px', fontWeight: 400, marginBottom: '10px', fontFamily: 'var(--default-font)', lineHeight: '1.3' }}>{item.name}</div>
-                          <div style={{ flex: 1 }}></div>
+                          <div style={{ fontSize: '16px', fontWeight: 400, marginBottom: '8px', fontFamily: 'var(--default-font)', lineHeight: '1.3' }}>{item.name}</div>
+                          <div style={{ flex: 1, minHeight: 0 }} aria-hidden="true" />
+                          {((item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0) || item.spicy === true) && (
+                            <div style={{ fontSize: '12px', lineHeight: 1.35, marginBottom: '4px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px' }}>
+                              {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                                <>
+                                  <strong>Алергени:</strong>
+                                  <span style={{ color: '#d32f2f' }}>
+                                    {item.allergens.map((allergenValue) => getAllergenLabel(allergenValue)).join(', ')}
+                                  </span>
+                                </>
+                              )}
+                              {item.spicy === true && (
+                                <>
+                                  {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                                    <span style={{ color: '#bdbdbd' }} aria-hidden="true">·</span>
+                                  )}
+                                  <SpicyBadge spicy />
+                                </>
+                              )}
+                            </div>
+                          )}
                           {getDisplayPrice(item) && (() => {
                             const price = getDisplayPrice(item);
                             const priceInLv = price.toFixed(2);
@@ -971,6 +1006,26 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                                 ? `${item.description.substring(0, 60)}...` 
                                 : item.description}
                             </p>
+                          )}
+                          {((item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0) || item.spicy === true) && (
+                            <div style={{ fontSize: '13px', lineHeight: 1.35, marginBottom: '8px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px' }}>
+                              {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                                <>
+                                  <strong>Алергени:</strong>
+                                  <span style={{ color: '#d32f2f' }}>
+                                    {item.allergens.map((allergenValue) => getAllergenLabel(allergenValue)).join(', ')}
+                                  </span>
+                                </>
+                              )}
+                              {item.spicy === true && (
+                                <>
+                                  {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                                    <span style={{ color: '#bdbdbd' }} aria-hidden="true">·</span>
+                                  )}
+                                  <SpicyBadge spicy />
+                                </>
+                              )}
+                            </div>
                           )}
                           {formatPrice(getDisplayPrice(item)) && (
                             <p className="price">{formatPrice(getDisplayPrice(item))}</p>
@@ -1083,8 +1138,28 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                         style={{ textDecoration: 'none', color: 'inherit' }}
                       >
                         <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
-                        <div style={{ fontSize: '16px', fontWeight: 400, marginBottom: '10px', fontFamily: 'var(--default-font)', lineHeight: '1.3' }}>{item.name}</div>
-                        <div style={{ flex: 1 }}></div>
+                        <div style={{ fontSize: '16px', fontWeight: 400, marginBottom: '8px', fontFamily: 'var(--default-font)', lineHeight: '1.3' }}>{item.name}</div>
+                        <div style={{ flex: 1, minHeight: 0 }} aria-hidden="true" />
+                        {((item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0) || item.spicy === true) && (
+                          <div style={{ fontSize: '12px', lineHeight: 1.35, marginBottom: '4px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px' }}>
+                            {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                              <>
+                                <strong>Алергени:</strong>
+                                <span style={{ color: '#d32f2f' }}>
+                                  {item.allergens.map((allergenValue) => getAllergenLabel(allergenValue)).join(', ')}
+                                </span>
+                              </>
+                            )}
+                            {item.spicy === true && (
+                              <>
+                                {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                                  <span style={{ color: '#bdbdbd' }} aria-hidden="true">·</span>
+                                )}
+                                <SpicyBadge spicy />
+                              </>
+                            )}
+                          </div>
+                        )}
                         {getDisplayPrice(item) && (() => {
                           const price = getDisplayPrice(item);
                           const priceInLv = price.toFixed(2);
@@ -1219,8 +1294,28 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                       style={{ textDecoration: 'none', color: 'inherit' }}
                     >
                       <img src={item.image ? item.image : '/images/no-image.png'} className="menu-img img-fluid" alt={item.name} />
-                      <div style={{ fontSize: '16px', fontWeight: 400, marginBottom: '10px', fontFamily: 'var(--default-font)', lineHeight: '1.3' }}>{item.name}</div>
-                      <div style={{ flex: 1 }}></div>
+                      <div style={{ fontSize: '16px', fontWeight: 400, marginBottom: '8px', fontFamily: 'var(--default-font)', lineHeight: '1.3' }}>{item.name}</div>
+                      <div style={{ flex: 1, minHeight: 0 }} aria-hidden="true" />
+                      {((item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0) || item.spicy === true) && (
+                        <div style={{ fontSize: '12px', lineHeight: 1.35, marginBottom: '4px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px' }}>
+                          {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                            <>
+                              <strong>Алергени:</strong>
+                              <span style={{ color: '#d32f2f' }}>
+                                {item.allergens.map((allergenValue) => getAllergenLabel(allergenValue)).join(', ')}
+                              </span>
+                            </>
+                          )}
+                          {item.spicy === true && (
+                            <>
+                              {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                                <span style={{ color: '#bdbdbd' }} aria-hidden="true">·</span>
+                              )}
+                              <SpicyBadge spicy />
+                            </>
+                          )}
+                        </div>
+                      )}
                       {getDisplayPrice(item) && (() => {
                         const price = getDisplayPrice(item);
                         const priceInLv = price.toFixed(2);

@@ -29,7 +29,13 @@ export async function POST(request) {
     const formatPrice = (priceInBGN) => {
       const bgn = parseFloat(priceInBGN || 0);
       const eur = (bgn / EUR_RATE).toFixed(2);
-      return { bgn: bgn.toFixed(2), eur };
+      const bgnStr = bgn.toFixed(2);
+      return {
+        bgn: bgnStr,
+        eur,
+        both: `${eur}€ (${bgnStr} лв)`,
+        bothNeg: `-${eur}€ (-${bgnStr} лв)`,
+      };
     };
 
     // Format order details
@@ -61,7 +67,7 @@ export async function POST(request) {
           const priceFormatted = formatPrice(unitPrice);
           const totalFormatted = formatPrice(productTotal);
           
-          let itemLine = `- ${product.name} x${product.quantity} - ${priceFormatted.bgn} лв (${priceFormatted.eur}€) | Общо: ${totalFormatted.bgn} лв (${totalFormatted.eur}€)`;
+          let itemLine = `- ${product.name} x${product.quantity} - ${priceFormatted.both} | Общо: ${totalFormatted.both}`;
           
           // If side dish is stored separately, show it explicitly
           if (product.sideDishName && !product.name.includes(product.sideDishName)) {
@@ -117,11 +123,11 @@ ${orderData.special_notes}
 ` : ''}Начин на получаване: ${orderType === 'pickup' ? 'Вземане от ресторанта' : 'Доставка'}
 ${orderData.delivery_time && orderType === 'delivery' ? `Желан час за доставка: ${orderData.delivery_time}
 
-` : ''}Сума: ${formatPrice(subtotal).bgn} лв (${formatPrice(subtotal).eur}€)
-${orderType === 'delivery' ? `Доставка: ${formatPrice(deliveryFee).bgn} лв (${formatPrice(deliveryFee).eur}€)
-` : ''}${registeredUserDiscount > 0 ? `Отстъпка за регистрирани (-${registeredUserDiscountPercent != null ? registeredUserDiscountPercent : ''}% върху продукти и доставка): -${formatPrice(registeredUserDiscount).bgn} лв (-${formatPrice(registeredUserDiscount).eur}€)
-` : ''}${pickupDiscount > 0 ? `Отстъпка за вземане (-10%): -${formatPrice(pickupDiscount).bgn} лв (-${formatPrice(pickupDiscount).eur}€)
-` : ''}Общо: ${formatPrice(grandTotal).bgn} лв (${formatPrice(grandTotal).eur}€)
+` : ''}Сума: ${formatPrice(subtotal).both}
+${orderType === 'delivery' ? `Доставка: ${formatPrice(deliveryFee).both}
+` : ''}${registeredUserDiscount > 0 ? `Отстъпка за регистрирани (-${registeredUserDiscountPercent != null ? registeredUserDiscountPercent : ''}% върху продукти и доставка): ${formatPrice(registeredUserDiscount).bothNeg}
+` : ''}${pickupDiscount > 0 ? `Отстъпка за вземане (-10%): ${formatPrice(pickupDiscount).bothNeg}
+` : ''}Общо: ${formatPrice(grandTotal).both}
     `.trim();
 
     // Try to send email using nodemailer

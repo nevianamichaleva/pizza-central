@@ -1,0 +1,14 @@
+.blogPostCardImage {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+/* 320px височина на десктоп (Bootstrap lg и нагоре) */
+@media (min-width: 992px) {
+  .blogPostCardImage {
+    height: 320px;
+  }
+}

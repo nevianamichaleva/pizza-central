@@ -1555,7 +1555,6 @@ section,
     font-weight: 600;
     color: #333;
     margin: 0;
-    flex: 1;
     line-height: 1.4;
   }
 
@@ -2207,5 +2206,74 @@ section,
 	.shopping-cart .items .product .info .quantity .quantity-input {
 		padding: 4px 10px;
 		text-align: center; 
+	}
+}
+
+/* Пикантно — емоджи чушка до реда с алергени (подсилен червен тон чрез филтър) */
+.menu-spicy-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+	vertical-align: middle;
+	flex-shrink: 0;
+}
+
+.menu-spicy-badge--emoji {
+	font-size: 1.2em;
+	/* Емоджито не приема color; филтърът измества към по-топъл/червен вид на повечето системи */
+	filter: saturate(1.55) contrast(1.12) brightness(0.97);
+}
+
+/* Десктоп: алергените в средата на картата (между текст и цена/бутони) */
+.menu-card-allergens-row {
+	margin-bottom: 16px;
+	font-size: 14px;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+}
+
+@media (min-width: 992px) {
+	/* Колоната се разтяга по реда; картата запълва височината за вертикално центриране на алергените */
+	.menu-item-desktop {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+
+	.menu-item-desktop .menu-card-wrapper {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		min-height: 0;
+	}
+
+	.menu-item-desktop .menu-card-content {
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		min-height: 0;
+	}
+
+	.menu-item-desktop .menu-card-body-top {
+		flex-shrink: 0;
+	}
+
+	.menu-item-desktop .menu-card-allergens-row {
+		flex: 1;
+		margin-bottom: 0;
+		justify-content: center;
+		align-content: center;
+		align-items: center;
+		text-align: center;
+		padding: 10px 4px;
+		min-height: 0;
+	}
+
+	.menu-item-desktop .menu-card-footer {
+		flex-shrink: 0;
+		margin-top: auto;
 	}
 }

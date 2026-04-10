@@ -620,11 +620,17 @@ export default function Order() {
   // Currency conversion rate
   const EUR_RATE = 1.95583;
   
-  // Format price in BGN and EUR
+  // Format price in BGN and EUR (евро първо навсякъде)
   const formatPrice = (priceInBGN) => {
     const bgn = parseFloat(priceInBGN || 0);
     const eur = (bgn / EUR_RATE).toFixed(2);
-    return { bgn: bgn.toFixed(2), eur };
+    const bgnStr = bgn.toFixed(2);
+    return {
+      bgn: bgnStr,
+      eur,
+      both: `${eur}€ (${bgnStr} лв)`,
+      bothNeg: `-${eur}€ (-${bgnStr} лв)`,
+    };
   };
   
   // Delivery fee from admin tiers (based on order value before discounts)
@@ -686,11 +692,11 @@ export default function Order() {
                             <span>{item.quantity}</span>
                           </div>
                           <div className="col-md-2 price d-flex align-items-center justify-content-center">
-                            <span>{item.value ? formatPrice(parseFloat(item.value)).bgn : "0.00"} лв ({item.value ? formatPrice(parseFloat(item.value)).eur : "0.00"}€)</span>
+                            <span>{item.value ? formatPrice(parseFloat(item.value)).both : "0.00€ (0.00 лв)"}</span>
                           </div>
                           <div className="col-md-2 total-price d-flex align-items-center justify-content-center">
                             <span>
-                              {Number.isFinite(item.value * item.quantity) ? formatPrice(item.value * item.quantity).bgn : "0.00"} лв ({Number.isFinite(item.value * item.quantity) ? formatPrice(item.value * item.quantity).eur : "0.00"}€)
+                              {Number.isFinite(item.value * item.quantity) ? formatPrice(item.value * item.quantity).both : "0.00€ (0.00 лв)"}
                             </span>
                           </div>
                         </div>
@@ -748,10 +754,10 @@ export default function Order() {
                             />
                           </div>
                           <div className="col-md-2 price d-flex align-items-center justify-content-center">
-                            <span>{originalPriceFormatted.bgn} лв ({originalPriceFormatted.eur}€)</span>
+                            <span>{originalPriceFormatted.both}</span>
                           </div>
                           <div className="col-md-2 total-price d-flex align-items-center justify-content-center">
-                            <span>{formatPrice(originalTotal).bgn} лв ({formatPrice(originalTotal).eur}€)</span>
+                            <span>{formatPrice(originalTotal).both}</span>
                             {!orderCompleted &&
                               <FaTimes
                                 onClick={() => deleteItem(item.id)}
@@ -843,10 +849,10 @@ export default function Order() {
                             <div style={{ textAlign: "right" }}>
                               <div>
                                 <div style={{ fontSize: "16px", fontWeight: "600" }}>
-                                  {originalPriceFormatted.bgn} лв ({originalPriceFormatted.eur}€)
+                                  {originalPriceFormatted.both}
                                 </div>
                                 <div style={{ fontSize: "14px", fontWeight: "600", color: "#333", marginTop: "4px" }}>
-                                  Общо: {formatPrice(originalTotal).bgn} лв ({formatPrice(originalTotal).eur}€)
+                                  Общо: {formatPrice(originalTotal).both}
                                 </div>
                               </div>
                             </div>
@@ -880,10 +886,10 @@ export default function Order() {
                                     </div>
                                     <div style={{ textAlign: "right" }}>
                                       <div style={{ fontSize: "14px", fontWeight: "600" }}>
-                                        {packPriceFormatted.bgn} лв ({packPriceFormatted.eur}€)
+                                        {packPriceFormatted.both}
                                       </div>
                                       <div style={{ fontSize: "12px", color: "#666", marginTop: "2px" }}>
-                                        Общо: {packTotalFormatted.bgn} лв ({packTotalFormatted.eur}€)
+                                        Общо: {packTotalFormatted.both}
                                       </div>
                                     </div>
                                   </div>
@@ -976,7 +982,7 @@ export default function Order() {
                             Доставка
                           </div>
                           <div style={{ fontSize: "11px", marginTop: "2px", opacity: 0.9 }}>
-                            {formatPrice(3.00).bgn}лв
+                            {formatPrice(3.00).both}
                           </div>
                           {orderType === 'delivery' && (
                             <div style={{
@@ -1007,29 +1013,29 @@ export default function Order() {
                   <h3>Обобщение</h3>
                   <div className="summary-item">
                     <span>Сума:</span>
-                    <span>{formatPrice(calculatedTotal).bgn} лв ({formatPrice(calculatedTotal).eur}€)</span>
+                    <span>{formatPrice(calculatedTotal).both}</span>
                   </div>
                   {orderType === 'pickup' && pickupDiscount > 0 && (
                     <div className="summary-item" style={{ color: "#ce1212" }}>
                       <span>Отстъпка за вземане (-10%):</span>
-                      <span>-{formatPrice(pickupDiscount).bgn} лв ({formatPrice(pickupDiscount).eur}€)</span>
+                      <span>{formatPrice(pickupDiscount).bothNeg}</span>
                     </div>
                   )}
                   {orderType === 'delivery' && (
                     <div className="summary-item">
                       <span>Доставка:</span>
-                      <span>{formatPrice(deliveryFee).bgn} лв ({formatPrice(deliveryFee).eur}€)</span>
+                      <span>{formatPrice(deliveryFee).both}</span>
                     </div>
                   )}
                   {registeredUserDiscountAmount > 0 && (
                     <div className="summary-item" style={{ color: "#ce1212" }}>
                       <span>Отстъпка за регистрирани (-{registeredUserDiscountPercent}%):</span>
-                      <span>-{formatPrice(registeredUserDiscountAmount).bgn} лв ({formatPrice(registeredUserDiscountAmount).eur}€)</span>
+                      <span>{formatPrice(registeredUserDiscountAmount).bothNeg}</span>
                     </div>
                   )}
                   <div className="summary-item" style={{ fontWeight: "bold", fontSize: "18px", borderTop: "2px solid #e0e0e0", paddingTop: "10px", marginTop: "10px" }}>
                     <span>Общо:</span>
-                    <span>{finalTotal.toFixed(2)} лева ({formatPrice(finalTotal).eur}€)</span>
+                    <span>{formatPrice(finalTotal).both}</span>
                   </div>
                   
                   {/* Mobile Summary */}
@@ -1044,14 +1050,14 @@ export default function Order() {
                       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
                         <span style={{ fontSize: "16px" }}>Сума:</span>
                         <span style={{ fontSize: "16px", fontWeight: "600" }}>
-                          {formatPrice(calculatedTotal).bgn} лв ({formatPrice(calculatedTotal).eur}€)
+                          {formatPrice(calculatedTotal).both}
                         </span>
                       </div>
                       {orderType === 'pickup' && pickupDiscount > 0 && (
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", color: "#ce1212" }}>
                           <span style={{ fontSize: "16px" }}>Общо отстъпка:</span>
                           <span style={{ fontSize: "16px", fontWeight: "600" }}>
-                            -{formatPrice(pickupDiscount).bgn} лв ({formatPrice(pickupDiscount).eur}€)
+                            {formatPrice(pickupDiscount).bothNeg}
                           </span>
                         </div>
                       )}
@@ -1059,7 +1065,7 @@ export default function Order() {
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
                           <span style={{ fontSize: "16px" }}>Доставка:</span>
                           <span style={{ fontSize: "16px", fontWeight: "600" }}>
-                            {formatPrice(deliveryFee).bgn} лв ({formatPrice(deliveryFee).eur}€)
+                            {formatPrice(deliveryFee).both}
                           </span>
                         </div>
                       )}
@@ -1067,7 +1073,7 @@ export default function Order() {
                         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", color: "#ce1212" }}>
                           <span style={{ fontSize: "16px" }}>Отстъпка регистрирани (-{registeredUserDiscountPercent}%, пр.+дост.):</span>
                           <span style={{ fontSize: "16px", fontWeight: "600" }}>
-                            -{formatPrice(registeredUserDiscountAmount).bgn} лв ({formatPrice(registeredUserDiscountAmount).eur}€)
+                            {formatPrice(registeredUserDiscountAmount).bothNeg}
                           </span>
                         </div>
                       )}
@@ -1075,7 +1081,7 @@ export default function Order() {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "12px" }}>
                       <span style={{ fontSize: "20px", fontWeight: "bold" }}>Общо:</span>
                       <span style={{ fontSize: "20px", fontWeight: "bold", color: "#ce1212" }}>
-                        {formatPrice(finalTotal).bgn} лв ({formatPrice(finalTotal).eur}€)
+                        {formatPrice(finalTotal).both}
                       </span>
                     </div>
                   </div>
@@ -1127,7 +1133,7 @@ export default function Order() {
                           />
                           <div>
                             <div style={{ fontWeight: "600" }}>
-                              С доставка ({formatPrice(deliveryFee).bgn} лв / {formatPrice(deliveryFee).eur}€)
+                              С доставка ({formatPrice(deliveryFee).both})
                             </div>
                           </div>
                         </label>
@@ -1180,7 +1186,7 @@ export default function Order() {
                       {orderType === 'delivery' && calculatedTotal < minOrderForDelivery && (
                         <>
                         <p style={{ fontSize: '15px', textAlign: 'left', color: 'red' }}>
-                          Минимална сума за доставка {formatPrice(minOrderForDelivery).bgn} лв ({formatPrice(minOrderForDelivery).eur}€), добавете продукти за още {formatPrice(minOrderForDelivery - calculatedTotal).bgn} лв ({formatPrice(minOrderForDelivery - calculatedTotal).eur}€).
+                          Минимална сума за доставка {formatPrice(minOrderForDelivery).both}, добавете продукти за още {formatPrice(minOrderForDelivery - calculatedTotal).both}.
                         </p>
                         <Link href='/for-home' className="btn btn-primary w-auto text-center py-1 px-3">Към меню</Link>
                         </>

@@ -29,6 +29,7 @@ const AddProduct = () => {
   const [isSideDish, setIsSideDish] = useState(false);
   const [forDelivery, setForDelivery] = useState(true);
   const [forRestaurant, setForRestaurant] = useState(true);
+  const [spicy, setSpicy] = useState(false);
   const [product, setProduct] = useState(false);
   const [products, setProducts] = useState([]);
   const [parent, setParent] = useState('');
@@ -181,6 +182,13 @@ const AddProduct = () => {
         return <span>{allergenLabels.join(', ') || 'Няма'}</span>;
       },
     },
+    {
+      title: "Пикантно",
+      dataIndex: "spicy",
+      key: "spicy",
+      width: 100,
+      render: (v) => (v === true ? <span>Да</span> : <span style={{ color: "#999" }}>Не</span>),
+    },
   ];
 
   useEffect(() => {
@@ -211,6 +219,7 @@ const AddProduct = () => {
     setIsSideDish(false);
     setForDelivery(true);
     setForRestaurant(true);
+    setSpicy(false);
     setSelectedPackaging([]);
     setSelectedCategories([]);
     setSelectedAllergens([]);
@@ -240,6 +249,7 @@ const AddProduct = () => {
       isSideDish: isSideDish || false,
       forDelivery: forDelivery !== false,
       forRestaurant: forRestaurant !== false,
+      spicy: spicy === true,
       packagingIds: selectedPackaging && selectedPackaging.length > 0 ? selectedPackaging : [],
       allergens: selectedAllergens && selectedAllergens.length > 0 ? selectedAllergens : []
     };
@@ -407,6 +417,7 @@ const AddProduct = () => {
       isSideDish: isSideDish || false,
       forDelivery: forDelivery !== false,
       forRestaurant: forRestaurant !== false,
+      spicy: spicy === true,
       packagingIds: selectedPackaging && selectedPackaging.length > 0 ? selectedPackaging : [],
       allergens: selectedAllergens && selectedAllergens.length > 0 ? selectedAllergens : []
     };
@@ -447,6 +458,7 @@ const AddProduct = () => {
       isSideDish = false,
       forDelivery = true,
       forRestaurant = true,
+      spicy = false,
       packagingIds = [],
       allergens = []
     } = values || {};
@@ -472,6 +484,7 @@ const AddProduct = () => {
     setIsSideDish(isSideDish);
     setForDelivery(forDelivery !== false);
     setForRestaurant(forRestaurant !== false);
+    setSpicy(spicy === true);
     setSelectedPackaging(Array.isArray(packagingIds) ? packagingIds : (packagingIds ? [packagingIds] : []));
     setSelectedAllergens(Array.isArray(allergens) ? allergens : (allergens ? [allergens] : []));
 
@@ -520,7 +533,13 @@ const AddProduct = () => {
           
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4" style={{ gap: "15px" }}>
             <div className="d-flex flex-wrap gap-2">
-              <Button type="primary" onClick={openDrawer}>
+              <Button
+                type="primary"
+                onClick={() => {
+                  handleViewProduct(null, null);
+                  openDrawer();
+                }}
+              >
                 Добави продукт
               </Button>
               <Button type="primary" onClick={openMenuDrawer}>
@@ -764,6 +783,17 @@ const AddProduct = () => {
                       onChange={setForRestaurant}
                     />
                     <span>Ресторант (ще се показва в central-menu)</span>
+                  </div>
+                </div>
+              </div>
+              <div className="row gy-4">
+                <div className="col-md-6">
+                  <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <Switch
+                      checked={spicy}
+                      onChange={setSpicy}
+                    />
+                    <span>Пикантно</span>
                   </div>
                 </div>
               </div>

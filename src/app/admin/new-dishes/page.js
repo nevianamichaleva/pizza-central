@@ -12,6 +12,13 @@ import { rtdb } from '../../../../lib/firebase';
 
 const { Option } = Select;
 
+const EUR_RATE = 1.95583;
+
+const formatDualPriceBgn = (bgn) => {
+  const v = parseFloat(bgn || 0);
+  return `${(v / EUR_RATE).toFixed(2)} € / ${v.toFixed(2)} лв`;
+};
+
 const AdminNewDishesPage = () => {
   const { isAdmin } = useUser();
   const [dishes, setDishes] = useState([]);
@@ -56,7 +63,7 @@ const AdminNewDishesPage = () => {
       render: (productId, record) => {
         if (!productId) return '-';
         const product = products.find(p => p.id === productId);
-        return product ? `${product.name} (${parseFloat(product.price || 0).toFixed(2)} лв)` : '-';
+        return product ? `${product.name} (${formatDualPriceBgn(product.price)})` : '-';
       },
     },
     {
@@ -372,7 +379,7 @@ const AdminNewDishesPage = () => {
                   }
                 >
                   {products.map((product) => {
-                    const label = `${product.name} - ${parseFloat(product.price || 0).toFixed(2)} лв`;
+                    const label = `${product.name} - ${formatDualPriceBgn(product.price)}`;
                     return (
                       <Option key={product.id} value={product.id} label={label}>
                         {label}

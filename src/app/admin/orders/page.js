@@ -20,7 +20,13 @@ const AdminOrdersPage = () => {
     const formatPrice = (priceInBGN) => {
         const bgn = parseFloat(priceInBGN || 0);
         const eur = (bgn / EUR_RATE).toFixed(2);
-        return { bgn: bgn.toFixed(2), eur };
+        const bgnStr = bgn.toFixed(2);
+        return {
+            bgn: bgnStr,
+            eur,
+            both: `${eur}€ (${bgnStr} лв)`,
+            bothNeg: `-${eur}€ (-${bgnStr} лв)`,
+        };
     };
     const [workingHours, setWorkingHours] = useState({ startHour: 10, endHour: 22 });
     const [editingHours, setEditingHours] = useState({ startHour: 10, endHour: 22 });
@@ -119,7 +125,7 @@ const AdminOrdersPage = () => {
             key: 'total',
             render: (total) => {
                 const price = formatPrice(total);
-                return total ? `${price.bgn} лв (${price.eur}€)` : '0.00 лв (0.00€)';
+                return total ? price.both : '0.00€ (0.00 лв)';
             },
         },
         {
@@ -1076,7 +1082,7 @@ const AdminOrdersPage = () => {
                                                                 borderBottom: '1px solid #f0f0f0'
                                                             }}>
                                                                 <span><strong>{product.name}</strong> x{product.quantity}</span>
-                                                                <span>{formatPrice(productTotal).bgn} лв ({formatPrice(productTotal).eur}€)</span>
+                                                                <span>{formatPrice(productTotal).both}</span>
                                                             </div>
                                                             {/* Show packaging items on separate lines */}
                                                             {linkedPackaging.map(pack => (
@@ -1124,24 +1130,24 @@ const AdminOrdersPage = () => {
                                                 <>
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                                                         <span>Сума на продукти:</span>
-                                                        <span>{subtotalFormatted.bgn} лв ({subtotalFormatted.eur}€)</span>
+                                                        <span>{subtotalFormatted.both}</span>
                                                     </div>
                                                     {pickupDiscount > 0 && (
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: '#52c41a' }}>
                                                             <span>Отстъпка за вземане (10%):</span>
-                                                            <span>-{pickupDiscountFormatted.bgn} лв (-{pickupDiscountFormatted.eur}€)</span>
+                                                            <span>{pickupDiscountFormatted.bothNeg}</span>
                                                         </div>
                                                     )}
                                                     {(deliveryFee > 0 || selectedOrder.order_type === 'delivery') && (
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                                                             <span>Такса за доставка:</span>
-                                                            <span>{deliveryFeeFormatted.bgn} лв ({deliveryFeeFormatted.eur}€)</span>
+                                                            <span>{deliveryFeeFormatted.both}</span>
                                                         </div>
                                                     )}
                                                     {registeredUserDiscount > 0 && (
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: '#52c41a' }}>
                                                             <span>Отстъпка регистрирани ({selectedOrder.registered_user_discount_percent != null ? selectedOrder.registered_user_discount_percent : ''}% пр.+дост.):</span>
-                                                            <span>-{registeredUserDiscountFormatted.bgn} лв (-{registeredUserDiscountFormatted.eur}€)</span>
+                                                            <span>{registeredUserDiscountFormatted.bothNeg}</span>
                                                         </div>
                                                     )}
                                                     <div style={{ 
@@ -1153,7 +1159,7 @@ const AdminOrdersPage = () => {
                                                         paddingTop: '5px'
                                                     }}>
                                                         <span>Общо:</span>
-                                                        <span>{totalFormatted.bgn} лв ({totalFormatted.eur}€)</span>
+                                                        <span>{totalFormatted.both}</span>
                                                     </div>
                                                 </>
                                             );

@@ -92,12 +92,12 @@ export default function ForHomeClient() {
                 color: '#444',
               }}
             >
-              <li style={{ marginBottom: '10px' }}>
+              {/* <li style={{ marginBottom: '10px' }}>
                 <strong>Такса за доставка:</strong> 1,53 €
                 <Link href="/order" style={{ color: '#ce1212', fontWeight: 600 }}>
                   количката
                 </Link>
-              </li>
+              </li> */}
               <li style={{ marginBottom: '0' }}>
                 Предпочитате да не ползвате сайта?{' '}
                 <strong>Приемаме поръчки и по телефон</strong> – на номерата по-долу.

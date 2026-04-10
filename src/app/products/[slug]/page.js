@@ -1,4 +1,5 @@
 import ProductAddToCart from '@/components/ProductAddToCart';
+import SpicyBadge from '@/components/SpicyBadge';
 import { get, ref } from 'firebase/database';
 import Image from "next/image";
 import Link from "next/link";
@@ -241,7 +242,7 @@ export default async function ProductDetailsPage({ params }) {
             
             {displayPrice !== null && (
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#c41d7f', marginBottom: '15px' }}>
-                {displayPrice.toFixed(2)} лв / {(displayPrice / 1.95583).toFixed(2)} €
+                {(displayPrice / 1.95583).toFixed(2)} € / {displayPrice.toFixed(2)} лв
               </div>
             )}
             
@@ -265,12 +266,26 @@ export default async function ProductDetailsPage({ params }) {
               </div>
             )}
             
-            {product.allergens && Array.isArray(product.allergens) && product.allergens.length > 0 && (
+            {((product.allergens && Array.isArray(product.allergens) && product.allergens.length > 0) || product.spicy === true) && (
               <div style={{ marginBottom: '15px' }}>
-                <strong>Алергени:</strong>
-                <p style={{ marginTop: '5px', lineHeight: '1.6', color: '#d32f2f' }}>
-                  {product.allergens.map(allergenValue => getAllergenLabel(allergenValue)).join(', ')}
-                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px' }}>
+                  {product.allergens && Array.isArray(product.allergens) && product.allergens.length > 0 && (
+                    <>
+                      <strong>Алергени:</strong>
+                      <span style={{ lineHeight: '1.6', color: '#d32f2f' }}>
+                        {product.allergens.map(allergenValue => getAllergenLabel(allergenValue)).join(', ')}
+                      </span>
+                    </>
+                  )}
+                  {product.spicy === true && (
+                    <>
+                      {product.allergens && Array.isArray(product.allergens) && product.allergens.length > 0 && (
+                        <span style={{ color: '#bdbdbd' }} aria-hidden="true">·</span>
+                      )}
+                      <SpicyBadge spicy />
+                    </>
+                  )}
+                </div>
               </div>
             )}
             

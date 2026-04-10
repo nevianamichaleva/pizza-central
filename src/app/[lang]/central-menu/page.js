@@ -7,6 +7,7 @@ import { useProducts } from '@/context/ProductsContext';
 import translations from '@/locales/central-menu.json';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { Button, Image, Select } from "antd";
+import SpicyBadge from '@/components/SpicyBadge';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -69,7 +70,7 @@ export default function CentralMenuPage({ params }) {
 
     const priceInLv = normalized.toFixed(2);
     const priceInEuro = (normalized / 1.95583).toFixed(2);
-    return `${priceInLv} лв. / ${priceInEuro} €`;
+    return `${priceInEuro} € / ${priceInLv} лв.`;
   };
 
   // Мапване на стойностите на алергените към техните български имена (за търсене в JSON)
@@ -385,12 +386,24 @@ export default function CentralMenuPage({ params }) {
                                     )}
                                   </>
                                 )}
-                                {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
-                                  <div className="central-menu-item-allergens">
-                                    <strong>{t("Алергени")}:</strong>{' '}
-                                    <span style={{ color: '#d32f2f' }}>
-                                      {item.allergens.map(allergenValue => getAllergenLabel(allergenValue)).join(', ')}
-                                    </span>
+                                {((item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0) || item.spicy === true) && (
+                                  <div className="central-menu-item-allergens" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px' }}>
+                                    {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                                      <>
+                                        <strong>{t("Алергени")}:</strong>{' '}
+                                        <span style={{ color: '#d32f2f' }}>
+                                          {item.allergens.map(allergenValue => getAllergenLabel(allergenValue)).join(', ')}
+                                        </span>
+                                      </>
+                                    )}
+                                    {item.spicy === true && (
+                                      <>
+                                        {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                                          <span style={{ color: '#bdbdbd' }} aria-hidden="true">·</span>
+                                        )}
+                                        <SpicyBadge spicy={item.spicy} title={t('Пикантно')} />
+                                      </>
+                                    )}
                                   </div>
                                 )}
                                 {/* {item.slug && (
@@ -456,12 +469,24 @@ export default function CentralMenuPage({ params }) {
                               )}
                             </>
                           )}
-                          {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
-                            <div className="central-menu-item-allergens">
-                              <strong>{t("Алергени")}:</strong>{' '}
-                              <span style={{ color: '#d32f2f' }}>
-                                {item.allergens.map(allergenValue => getAllergenLabel(allergenValue)).join(', ')}
-                              </span>
+                          {((item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0) || item.spicy === true) && (
+                            <div className="central-menu-item-allergens" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px' }}>
+                              {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                                <>
+                                  <strong>{t("Алергени")}:</strong>{' '}
+                                  <span style={{ color: '#d32f2f' }}>
+                                    {item.allergens.map(allergenValue => getAllergenLabel(allergenValue)).join(', ')}
+                                  </span>
+                                </>
+                              )}
+                              {item.spicy === true && (
+                                <>
+                                  {item.allergens && Array.isArray(item.allergens) && item.allergens.length > 0 && (
+                                    <span style={{ color: '#bdbdbd' }} aria-hidden="true">·</span>
+                                  )}
+                                  <SpicyBadge spicy={item.spicy} title={t('Пикантно')} />
+                                </>
+                              )}
                             </div>
                           )}
                           {/* {item.slug && (

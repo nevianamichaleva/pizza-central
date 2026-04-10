@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { rtdb } from '../../../lib/firebase';
+import styles from './page.module.css';
 
 const BlogPage = () => {
   const [posts, setPosts] = useState([]);
@@ -90,7 +91,7 @@ const BlogPage = () => {
                   className="team-member" 
                   style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}
                 >
-                  <div className="member-img" style={{ position: 'relative', width: '100%', height: '250px', overflow: 'hidden', borderRadius: '8px' }}>
+                  <div className={`member-img ${styles.blogPostCardImage}`}>
                     <Image
                       src={post.image || "/images/no-image.png"}
                       alt={post.title}

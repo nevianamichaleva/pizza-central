@@ -229,7 +229,7 @@ export default async function NewDishDetailsPage({ params }) {
               <>
                 {(displayPrice != null) && (
                   <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#c41d7f', marginBottom: '15px' }}>
-                    {parseFloat(displayPrice).toFixed(2)} лв / {(parseFloat(displayPrice) / 1.95583).toFixed(2)} €
+                    {(parseFloat(displayPrice) / 1.95583).toFixed(2)} € / {parseFloat(displayPrice).toFixed(2)} лв
                   </div>
                 )}
                 
