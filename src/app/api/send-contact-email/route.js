@@ -1,15 +1,25 @@
+import { validateContactAntiBot } from '@/lib/contactAntiBot';
 import nodemailer from 'nodemailer';
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { contactData, adminEmail: adminEmailFromRequest, smtpConfig: smtpConfigFromRequest } = body;
+    const { contactData, adminEmail: adminEmailFromRequest, smtpConfig: smtpConfigFromRequest, antiBot } =
+      body;
 
     if (!contactData) {
       return Response.json(
         { error: 'Missing contact data' },
         { status: 400 }
       );
+    }
+
+    const botCheck = validateContactAntiBot(antiBot);
+    if (!botCheck.ok) {
+      if (botCheck.code === 'honeypot') {
+        return Response.json({ success: true, message: 'OK' });
+      }
+      return Response.json({ error: 'Invalid request' }, { status: 400 });
     }
 
     // Get recipient email from request or environment

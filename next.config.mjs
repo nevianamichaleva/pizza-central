@@ -98,6 +98,11 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: '/dostavka',
+        destination: '/for-home',
+        permanent: true,
+      },
+      {
         source: '/about',
         destination: '/about-us',
         permanent: true,
@@ -150,6 +155,16 @@ const nextConfig = {
       {
         source: '/blog/central-dostavka',
         destination: '/for-home',
+        permanent: true,
+      },
+      {
+        source: '/obedn',
+        destination: '/obedno-menu',
+        permanent: true,
+      },
+      {
+        source: '/obedno',
+        destination: '/obedno-menu',
         permanent: true,
       },
       // Пренасочване на грешен URL с многоточие към статията за пица каперси

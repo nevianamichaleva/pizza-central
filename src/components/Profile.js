@@ -1,8 +1,9 @@
 'use client';
 
 import { useUser } from "@/context/UserContext";
+import { validateContactAntiBot } from '@/lib/contactAntiBot';
 import { get, push, ref, set } from 'firebase/database';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { rtdb } from '../../lib/firebase';
 import showAToast from "./common/showAToast";
 
@@ -18,6 +19,12 @@ const Profile = () => {
   });
 
   const [status, setStatus] = useState('');
+  const formOpenedAtRef = useRef(0);
+  const honeypotRef = useRef(null);
+
+  useEffect(() => {
+    formOpenedAtRef.current = Date.now();
+  }, []);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -50,6 +57,31 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const openedAt = formOpenedAtRef.current;
+    const antiBot = {
+      hpWebsite: (honeypotRef.current?.value ?? '').trim(),
+      formOpenedAt: openedAt,
+    };
+    const gate = validateContactAntiBot(antiBot);
+    if (!gate.ok) {
+      if (gate.code === 'honeypot') {
+        showAToast('success', 'Благодарим, че се свързахте с нас. Очаквайте нашето обаждане за да обсъдим подробностите!');
+        setStatus('success');
+        return;
+      }
+      if (gate.code === 'fast') {
+        showAToast('error', 'Моля изчакайте няколко секунди и опитайте отново.');
+        return;
+      }
+      if (gate.code === 'stale') {
+        showAToast('error', 'Формата е изтекла. Презаредете страницата и опитайте отново.');
+        return;
+      }
+      showAToast('error', 'Невалидна заявка. Презаредете страницата и опитайте отново.');
+      return;
+    }
+
     const contactData = {
       name: formData.name,
       email: formData.email,
@@ -102,6 +134,7 @@ const Profile = () => {
               contactData: contactData,
               adminEmail: adminEmail,
               smtpConfig: smtpConfig,
+              antiBot,
             }),
           });
 
@@ -120,6 +153,8 @@ const Profile = () => {
       showAToast('success', 'Благодарим, че се свързахте с нас. Очаквайте нашето обаждане за да обсъдим подробностите!');
       setStatus('success');
       setFormData({ name: '', email: '', subject: '', message: '', phone: '' });
+      if (honeypotRef.current) honeypotRef.current.value = '';
+      formOpenedAtRef.current = Date.now();
     } catch (error) {
       console.error('Грешка при изпращане на съобщение: ', error);
       setStatus('error');
@@ -189,7 +224,23 @@ const Profile = () => {
             <h2>Искаш ли да споделиш нещо с нас?</h2>
 
           </div>
-          <form onSubmit={handleSubmit} className="php-email-form">
+          <form onSubmit={handleSubmit} className="php-email-form" style={{ position: 'relative' }}>
+            <input
+              ref={honeypotRef}
+              type="text"
+              name="company_website"
+              autoComplete="off"
+              tabIndex={-1}
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                left: '-9999px',
+                width: 1,
+                height: 1,
+                opacity: 0,
+                pointerEvents: 'none',
+              }}
+            />
             <div className="row gy-4">
               <div className="col-md-6">
                 <input

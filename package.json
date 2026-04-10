@@ -11,12 +11,14 @@
   "dependencies": {
     "@ant-design/icons": "^5.5.2",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "@marsidev/react-turnstile": "^1.5.0",
     "antd": "^5.22.7",
     "aos": "^2.3.4",
     "axios": "^1.12.0",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
     "firebase": "^11.0.2",
+    "firebase-admin": "^13.8.0",
     "formidable": "^3.5.2",
     "glightbox": "^3.3.0",
     "lottie-react": "^2.4.1",
@@ -32,6 +34,7 @@
     "react-time-picker": "^7.0.0",
     "react-toastify": "^11.0.3",
     "recharts": "^3.6.0",
+    "sharp": "^0.34.5",
     "swiper": "^9.4.1"
   },
   "devDependencies": {
