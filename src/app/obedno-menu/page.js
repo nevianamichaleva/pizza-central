@@ -1,6 +1,7 @@
 import ObednoMenuPageClient from './ObednoMenuPageClient';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
+const facebookAppId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '123456789012345';
 
 /** Винаги пресметнати meta/og при заявка (вкл. Facebook crawler), не само при build. */
 export const dynamic = 'force-dynamic';
@@ -57,6 +58,9 @@ export async function generateMetadata() {
       locale: 'bg_BG',
       type: 'website',
       images: ogImages,
+    },
+    other: {
+      'fb:app_id': facebookAppId,
     },
     twitter: {
       card: 'summary_large_image',

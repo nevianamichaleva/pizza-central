@@ -54,7 +54,7 @@
         "Вариант пица Класик": "Variant Pizza Classic",
         "Вариант пица Класик за деца.": "Variant Pizza Classic for children.",
         "Витаминозна салата": "Vitamin Salad",
-        "Вълча": "Wolf",
+        "Вълча пица": "Wolf Pizza",
         "Вълча пица – за истинските гладници! Домати, шунка, луканка, пилешко и бекон се събират с кашкавал в един вкусен вой, който ще ви накара да заухате от удоволствие. 🐺🍕": "Wolf Pizza – for the true hungry ones! Tomatoes, ham, lukanka, chicken, and bacon come together with cheese in a delicious howl that will make you howl with delight. 🐺🍕",
         "Горчица": "Mustard",
         "Горчица.": "Mustard.",
@@ -315,12 +315,18 @@
         "Пърленка със сирене": "Flatbread with Cheese",
         "Ориз басмати": "Basmati Rice",
         "Розмаринови картофи": "Rosemary Potatoes",
+        "Пица Барбекю": "Pizza Barbecue",
         "Пица Барбекю – сладко-опушена наслада на всяка хапка! Сос Барбекю, пилешко филе, бекон и червен лук се срещат с моцарела и кашкавал за вкус, който кара вкусовите ви рецептори да танцуват.": "Барbecue Pizza – a sweet-smoky delight in every bite! BBQ sauce, chicken fillet, bacon, and red onion meet mozzarella and yellow cheese for a flavor that makes your taste buds dance.",
         "Сочен телешки бургер с хрупкави картофки, приготвен с най-добрите съставки.": "Juicy beef burger with crispy fries, made with the finest ingredients.",
         "Сочен пилешки бургер с хрупкави картофки, приготвен с най-добрите съставки.": "Juicy chicken burger with crispy fries, made with the finest ingredients.",
         "Сос \"Барбекю\"": "Barbecue Sauce",
         "Сос \"Барбекю\".": "Barbecue Sauce.",
-        "Спагети Карбонара в домашен стил – приготвени с домашно направени спагети, бекон и леко запържен лук, обгърнати от кремообразен сос със сметана и яйце, завършен с разтопен български кашкавал. По-богат, плътен вкус и уютно домашно усещане.": "Homestyle Spaghetti Carbonara – made with homemade spaghetti, bacon, and lightly sautéed onions, coated in a creamy sauce with cream and egg, finished with melted Bulgarian yellow cheese. A richer, fuller flavor with a cozy homemade feel."
+        "Спагети Карбонара в домашен стил – приготвени с домашно направени спагети, бекон и леко запържен лук, обгърнати от кремообразен сос със сметана и яйце, завършен с разтопен български кашкавал. По-богат, плътен вкус и уютно домашно усещане.": "Homestyle Spaghetti Carbonara – made with homemade spaghetti, bacon, and lightly sautéed onions, coated in a creamy sauce with cream and egg, finished with melted Bulgarian yellow cheese. A richer, fuller flavor with a cozy homemade feel.",
+        "Пица с каперси, чери домати и рукола": "Pizza with capers, cherry tomatoes, and arugula",
+        "доматен сос, кашкавал, моцарела, каперси, чери домати, рукола, зехтин, орехи": "Tomato sauce, yellow cheese, mozzarella, capers, cherry tomatoes, arugula, olive oil, walnuts",
+        "Пицата с каперси, чери домати и рукола е класическо средиземноморско съчетание, което балансира солените и кисели нотки на каперсите със сладостта на доматите и леката пикантност на свежата рукола. Добавихме и орехи за хрупкав завършек.": "Tomato sauce, yellow cheese, mozzarella, capers, cherry tomatoes, arugula, olive oil, walnuts. The pizza with capers, cherry tomatoes, and arugula is a classic Mediterranean combination that balances the salty and tangy notes of the capers with the sweetness of the tomatoes and the light spiciness of fresh arugula. We have also added walnuts for a crunchy finish.",
+        "Пица Наполи": "Pizza Napoli",
+        "Пица Чикен": "Pizza Chicken"
     },
     "ro": {
         "Меню на Ресторант-пицария Централ град Добрич": "Meniul Restaurantului-Pizzeriei Central, Dobrich",
@@ -377,7 +383,7 @@
         "Вариант пица Класик": "Variantă pizza Clasică",
         "Вариант пица Класик за деца.": "Variantă pizza Clasică pentru copii.",
         "Витаминозна салата": "Salată vitaminizantă",
-        "Вълча": "Lupului",
+        "Вълча пица": "Pizza Lupului",
         "Вълча пица – за истинските гладници! Домати, шунка, луканка, пилешко и бекон се събират с кашкавал в един вкусен вой, който ще ви накара да заухате от удоволствие. 🐺🍕": "Pizza Lupului – pentru adevărații flămânzi! Roșii, șuncă, cârnați uscați, pui și bacon se întâlnesc cu cașcavalul într-un urlet gustos care vă va face să urlați de plăcere. 🐺🍕",
         "Горчица": "Muștar",
         "Горчица.": "Muștar.",
@@ -517,6 +523,7 @@
         "Телешки жулиени": "Julienne de vită",
         "Телешки жулиени - деликатно и вкусно ястие.": "Julienne de vită – preparat delicat și gustos.",
         "Топла гарнитура": "Garnitură caldă",
+        "Пица Барбекю": "Pizza Barbecue",
         "Фамилна пица Барбекю XL": "Pizza Barbecue de familie XL",
         "Фамилна пица Барбекю XXL": "Pizza Barbecue de familie XXL",
         "Фамилна пица Вълча XL": "Pizza Lupului de familie XL",
@@ -645,7 +652,12 @@
         "чийзкейк, шоколад": "cheesecake, ciocolată",
         "шоколад": "ciocolată",
         "шоколад, сладолед": "ciocolată, înghețată",
-        "Спагети Карбонара в домашен стил – приготвени с домашно направени спагети, бекон и леко запържен лук, обгърнати от кремообразен сос със сметана и яйце, завършен с разтопен български кашкавал. По-богат, плътен вкус и уютно домашно усещане.": "Spaghetti Carbonara în stil de casă – preparate cu spaghetti făcute în casă, bacon și ceapă ușor călită, învelite într-un sos cremos cu smântână și ou, finalizate cu cașcaval bulgăresc topit. Un gust mai bogat și mai consistent, cu o senzație plăcută de mâncare gătită acasă."
+        "Спагети Карбонара в домашен стил – приготвени с домашно направени спагети, бекон и леко запържен лук, обгърнати от кремообразен сос със сметана и яйце, завършен с разтопен български кашкавал. По-богат, плътен вкус и уютно домашно усещане.": "Spaghetti Carbonara în stil de casă – preparate cu spaghetti făcute în casă, bacon și ceapă ușor călită, învelite într-un sos cremos cu smântână și ou, finalizate cu cașcaval bulgăresc topit. Un gust mai bogat și mai consistent, cu o senzație plăcută de mâncare gătită acasă.",
+        "Пица с каперси, чери домати и рукола_ro": "Pizza cu capere, roșii cherry și rucola",
+        "доматен сос, кашкавал, моцарела, каперси, чери домати, рукола, зехтин, орехи": "Sos de roșii, cașcaval, mozzarella, capere, roșii cherry, rucola, ulei de măsline, nuci",
+        "Пицата с каперси, чери домати и рукола е класическо средиземноморско съчетание, което балансира солените и кисели нотки на каперсите със сладостта на доматите и леката пикантност на свежата рукола. Добавихме и орехи за хрупкав завършек.": "Sos de roșii, cașcaval, mozzarella, capere, roșii cherry, rucola, ulei de măsline, nuci. Pizza cu capere, roșii cherry și rucola este o combinație mediteraneană clasică, care echilibrează notele sărate și ușor acrișoare ale caperelor cu dulceața roșiilor și ușoara iuțeală a rucolei proaspete. Am adăugat și nuci pentru un finisaj crocant.",
+        "Пица Наполи": "Pizza Napoli",
+        "Пица Чикен": "Pizza cu pui"
     },
     "de": {
         "Меню на Ресторант-пицария Централ град Добрич": "Menü des Restaurants & Pizzeria Central, Dobritsch",
@@ -702,7 +714,7 @@
         "Вариант пица Класик": "Variante Pizza Klassik",
         "Вариант пица Класик за деца.": "Variante Pizza Klassik für Kinder.",
         "Витаминозна салата": "Vitaminsalat",
-        "Вълча": "Wolf",
+        "Вълча пица": "Wolf",
         "Вълча пица – за истинските гладници! Домати, шунка, луканка, пилешко и бекон се събират с кашкавал в един вкусен вой, който ще ви накара да заухате от удоволствие. 🐺🍕": "Wolfspizza – für echte Hungrige! Tomaten, Schinken, Lukanka, Hähnchen und Bacon vereinen sich mit Käse zu einem köstlichen Heulen, das euch vor Genuss aufjaulen lässt. 🐺🍕",
         "Горчица": "Senf",
         "Горчица.": "Senf.",
@@ -765,6 +777,7 @@
         "Пилешки сач - горещо, ароматно и неустоимо вкусно ястие.": "Hähnchen-Satsch – heiß, aromatisch und unwiderstehlich lecker.",
         "Пилешки сърца с пресни гъби и лук": "Hühnerherzen mit frischen Champignons und Zwiebeln",
         "Пилешки сърца с пресни гъби и лук.": "Hühnerherzen mit frischen Champignons und Zwiebeln.",
+        "Пица Барбекю": "Pizza Barbecue",
         "Пица Барбекю – сладко-опушена наслада на всяка хапка! Сос Барбекю, пилешко филе, бекон и червен лук се срещат с моцарела и кашкавал за вкус, който кара вкусовите ви рецептори да танцуват.": "Pizza Barbecue – süß-rauchiger Genuss bei jedem Bissen! Barbecue-Sauce, Hähnchenfilet, Bacon und rote Zwiebeln treffen auf Mozzarella und Käse für einen Geschmack, der die Sinne tanzen lässt.",
         "Пица Наполи XL – класическа италианска рецепта с тънка хрупкава основа, богат доматен сос и ароматен риган. Перфектният избор за споделяне, когато искате автентичен вкус и истинско пица изживяване. 🍕": "Pizza Napoli XL – klassisches italienisches Rezept mit dünnem, knusprigem Boden, reichhaltiger Tomatensauce und aromatischem Oregano. Die perfekte Wahl zum Teilen, wenn Sie authentischen Geschmack und ein echtes Pizza-Erlebnis suchen. 🍕",
         "Пица Наполи XXL – класическа италианска рецепта с тънка хрупкава основа, богат доматен сос и ароматен риган. Перфектният избор за споделяне, когато искате автентичен вкус и истинско пица изживяване. 🍕": "Pizza Napoli XXL – klassisches italienisches Rezept mit dünnem, knusprigem Boden, reichhaltiger Tomatensauce und aromatischem Oregano. Die perfekte Wahl zum Teilen, wenn Sie authentischen Geschmack und ein echtes Pizza-Erlebnis suchen. 🍕",
@@ -970,6 +983,11 @@
         "чийзкейк, шоколад": "Cheesecake, Schokolade",
         "шоколад": "Schokolade",
         "шоколад, сладолед": "Schokolade, Eis",
-        "Спагети Карбонара в домашен стил – приготвени с домашно направени спагети, бекон и леко запържен лук, обгърнати от кремообразен сос със сметана и яйце, завършен с разтопен български кашкавал. По-богат, плътен вкус и уютно домашно усещане.": "Spaghetti Carbonara nach Hausart – zubereitet mit hausgemachten Spaghetti, Speck und leicht angebratenen Zwiebeln, umhüllt von einer cremigen Sauce aus Sahne und Ei, verfeinert mit geschmolzenem bulgarischem Schnittkäse. Ein reichhaltiger, intensiver Geschmack und ein gemütliches Hausgefühl."
+        "Спагети Карбонара в домашен стил – приготвени с домашно направени спагети, бекон и леко запържен лук, обгърнати от кремообразен сос със сметана и яйце, завършен с разтопен български кашкавал. По-богат, плътен вкус и уютно домашно усещане.": "Spaghetti Carbonara nach Hausart – zubereitet mit hausgemachten Spaghetti, Speck und leicht angebratenen Zwiebeln, umhüllt von einer cremigen Sauce aus Sahne und Ei, verfeinert mit geschmolzenem bulgarischem Schnittkäse. Ein reichhaltiger, intensiver Geschmack und ein gemütliches Hausgefühl.",
+        "Пица с каперси, чери домати и рукола": "Pizza mit Kapern, Cherrytomaten und Rucola",
+        "доматен сос, кашкавал, моцарела, каперси, чери домати, рукола, зехтин, орехи": "Tomatensauce, gelber Käse, Mozzarella, Kapern, Cherrytomaten, Rucola, Olivenöl, Walnüsse",
+        "Пицата с каперси, чери домати и рукола е класическо средиземноморско съчетание, което балансира солените и кисели нотки на каперсите със сладостта на доматите и леката пикантност на свежата рукола. Добавихме и орехи за хрупкав завършек.": "Tomatensauce, gelber Käse, Mozzarella, Kapern, Cherrytomaten, Rucola, Olivenöl, Walnüsse. Die Pizza mit Kapern, Cherrytomaten und Rucola ist eine klassische mediterrane Kombination, die die salzigen und säuerlichen Noten der Kapern mit der Süße der Tomaten und der leichten Schärfe des frischen Rucolas ausbalanciert. Für einen knusprigen Abschluss haben wir auch Walnüsse hinzugefügt.",
+        "Пица Наполи": "Pizza Napoli",
+        "Пица Чикен": "Pizza mit Hähnchen"
     }
 }
