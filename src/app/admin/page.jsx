@@ -6,13 +6,14 @@ import moment from 'moment';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, LabelList, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { rtdb } from '../../../lib/firebase';
 
 const AdministrationPage = () => {
     const { isAdmin } = useUser();
     const pathname = usePathname();
     const [ordersData, setOrdersData] = useState([]);
+    const [ordersByMonthData, setOrdersByMonthData] = useState([]);
     const [bookingsData, setBookingsData] = useState([]);
     const [blogViews, setBlogViews] = useState(0);
     const [monthlyOrdersCount, setMonthlyOrdersCount] = useState(0);
@@ -31,6 +32,7 @@ const AdministrationPage = () => {
         try {
             await Promise.all([
                 fetchOrdersData(),
+                fetchOrdersByMonthData(),
                 fetchBookingsData(),
                 fetchBlogViewsData(),
                 fetchMonthlyOrdersData(),
@@ -71,6 +73,7 @@ const AdministrationPage = () => {
                 // Count orders per day
                 ordersArray.forEach(order => {
                     if (!order.order_date) return;
+                    if (isWaitingOrder(order)) return;
                     
                     // Try to parse the date - handle different formats
                     let orderDate = null;
@@ -210,6 +213,68 @@ const AdministrationPage = () => {
         }
     };
 
+    const fetchOrdersByMonthData = async () => {
+        try {
+            const ordersRef = ref(rtdb, "orders");
+            const snapshot = await get(ordersRef);
+
+            const last6Months = [];
+            for (let i = 5; i >= 0; i--) {
+                const month = moment().subtract(i, 'months').startOf('month');
+                last6Months.push({
+                    monthKey: month.format('YYYY-MM'),
+                    monthLabel: month.format('MM.YYYY'),
+                    count: 0,
+                    totalValue: 0
+                });
+            }
+
+            if (!snapshot.exists()) {
+                setOrdersByMonthData(
+                    last6Months.map(({ monthLabel, count, totalValue }) => ({
+                        month: monthLabel,
+                        count,
+                        totalValueEur: totalValue / 1.95583
+                    }))
+                );
+                return;
+            }
+
+            const data = snapshot.val();
+            const ordersArray = Object.entries(data)
+                .map(([key, value]) => ({
+                    id: key,
+                    ...value,
+                }))
+                .filter(order => order.order_date);
+
+            ordersArray.forEach(order => {
+                const orderDate = parseOrderDate(order);
+                if (!orderDate) return;
+                if (isWaitingOrder(order)) return;
+
+                const monthKey = orderDate.startOf('month').format('YYYY-MM');
+                const monthIndex = last6Months.findIndex(month => month.monthKey === monthKey);
+
+                if (monthIndex !== -1) {
+                    last6Months[monthIndex].count++;
+                    last6Months[monthIndex].totalValue += parseFloat(order.total) || 0;
+                }
+            });
+
+            setOrdersByMonthData(
+                last6Months.map(({ monthLabel, count, totalValue }) => ({
+                    month: monthLabel,
+                    count,
+                    totalValueEur: totalValue / 1.95583
+                }))
+            );
+        } catch (error) {
+            console.error("Грешка при зареждане на поръчки по месеци:", error);
+            setOrdersByMonthData([]);
+        }
+    };
+
     const fetchBlogViewsData = async () => {
         try {
             const postsRef = ref(rtdb, "blog_posts");
@@ -251,6 +316,11 @@ const AdministrationPage = () => {
         return (orderDate && orderDate.isValid()) ? orderDate : null;
     };
 
+    const isWaitingOrder = (order) => {
+        const status = (order?.status || '').toString().trim().toLowerCase();
+        return status === 'чакаща' || status === 'pending';
+    };
+
     const fetchMonthlyOrdersData = async () => {
         try {
             const ordersRef = ref(rtdb, "orders");
@@ -265,12 +335,10 @@ const AdministrationPage = () => {
             const thisMonth = moment().startOf('month');
             let count = 0;
             let totalValue = 0;
-            const excludedStatuses = ['pending', 'cancelled']; // чака изпращане, отказана
             ordersArray.forEach(order => {
                 const orderDate = parseOrderDate(order);
                 if (!orderDate || !orderDate.isSame(thisMonth, 'month')) return;
-                const status = (order.status || '').toLowerCase();
-                if (excludedStatuses.includes(status)) return;
+                if (isWaitingOrder(order)) return;
                 count++;
                 totalValue += parseFloat(order.total) || 0;
             });
@@ -770,60 +838,6 @@ const AdministrationPage = () => {
                             </div>
                         ) : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-                                {/* Orders Chart */}
-                                <div style={{ 
-                                    background: '#fff', 
-                                    padding: '24px', 
-                                    borderRadius: '8px',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                                }}>
-                                    <h3 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: '600' }}>
-                                        Поръчки - Последна седмица
-                                    </h3>
-                                    <ResponsiveContainer width="100%" height={300}>
-                                        <LineChart data={ordersData}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="date" />
-                                            <YAxis allowDecimals={false} />
-                                            <Tooltip />
-                                            <Legend />
-                                            <Line 
-                                                type="monotone" 
-                                                dataKey="count" 
-                                                stroke="#1890ff" 
-                                                strokeWidth={2}
-                                                name="Брой поръчки"
-                                            />
-                                        </LineChart>
-                                    </ResponsiveContainer>
-                                </div>
-
-                                {/* Bookings Chart */}
-                                <div style={{ 
-                                    background: '#fff', 
-                                    padding: '24px', 
-                                    borderRadius: '8px',
-                                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                                }}>
-                                    <h3 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: '600' }}>
-                                        Резервации - Последна седмица
-                                    </h3>
-                                    <ResponsiveContainer width="100%" height={300}>
-                                        <BarChart data={bookingsData}>
-                                            <CartesianGrid strokeDasharray="3 3" />
-                                            <XAxis dataKey="date" />
-                                            <YAxis allowDecimals={false} />
-                                            <Tooltip />
-                                            <Legend />
-                                            <Bar 
-                                                dataKey="count" 
-                                                fill="#52c41a" 
-                                                name="Брой резервации"
-                                            />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
-
                                 {/* Monthly Orders, Blog Views and Catering Requests */}
                                 <div style={{ display: 'flex', gap: '30px', flexWrap: 'wrap' }}>
                                     <div style={{ 
@@ -904,6 +918,118 @@ const AdministrationPage = () => {
                                         </p>
                                     </div>
                                 </div>
+
+                                {/* Orders Chart */}
+                                <div style={{ 
+                                    background: '#fff', 
+                                    padding: '24px', 
+                                    borderRadius: '8px',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                }}>
+                                    <h3 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: '600' }}>
+                                        Поръчки - Последна седмица
+                                    </h3>
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <LineChart data={ordersData}>
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey="date" />
+                                            <YAxis allowDecimals={false} />
+                                            <Tooltip />
+                                            <Legend />
+                                            <Line 
+                                                type="monotone" 
+                                                dataKey="count" 
+                                                stroke="#1890ff" 
+                                                strokeWidth={2}
+                                                name="Брой поръчки"
+                                            />
+                                        </LineChart>
+                                    </ResponsiveContainer>
+                                </div>
+
+                                {/* Orders by Month Chart */}
+                                <div style={{ 
+                                    background: '#fff', 
+                                    padding: '24px', 
+                                    borderRadius: '8px',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                }}>
+                                    <h3 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: '600' }}>
+                                        Поръчки по месеци - Последни 6 месеца
+                                    </h3>
+                                    <ResponsiveContainer width="100%" height={300}>
+                                        <BarChart data={ordersByMonthData} margin={{ top: 30, right: 24, left: 8, bottom: 0 }}>
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey="month" />
+                                            <YAxis allowDecimals={false} />
+                                            <Tooltip
+                                                formatter={(value, name) => {
+                                                    if (name === "Сума (евро)") {
+                                                        return `${Number(value).toLocaleString('bg-BG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+                                                    }
+                                                    return value;
+                                                }}
+                                            />
+                                            <Legend />
+                                            <Bar
+                                                dataKey="count"
+                                                fill="#fa8c16"
+                                                name="Брой поръчки"
+                                            >
+                                                <LabelList
+                                                    dataKey="totalValueEur"
+                                                    position="top"
+                                                    formatter={(value) =>
+                                                        `${Number(value).toLocaleString('bg-BG', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} €`
+                                                    }
+                                                />
+                                            </Bar>
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                    <p style={{ textAlign: 'center', color: '#666', fontSize: '14px', marginTop: '8px' }}>
+                                        Сумата за месеца е показана над всяко стълбче
+                                    </p>
+                                </div>
+
+                                <div style={{ 
+                                    background: '#fff', 
+                                    padding: '24px', 
+                                    borderRadius: '8px',
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                                }}>
+                                    <h3 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: '600' }}>
+                                        Резервации - Последна седмица
+                                    </h3>
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
+                                        gap: '10px'
+                                    }}>
+                                        {bookingsData.map((day) => (
+                                            <div
+                                                key={day.fullDate}
+                                                style={{
+                                                    border: '1px solid #f0f0f0',
+                                                    borderRadius: '8px',
+                                                    padding: '10px 8px',
+                                                    textAlign: 'center',
+                                                    background: '#fafafa'
+                                                }}
+                                            >
+                                                <p style={{ margin: '0 0 8px', fontSize: '12px', color: '#666' }}>
+                                                    {day.date}
+                                                </p>
+                                                <div style={{ fontSize: '24px', fontWeight: '700', color: '#52c41a' }}>
+                                                    {day.count}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p style={{ textAlign: 'center', color: '#666', fontSize: '14px', marginTop: '14px' }}>
+                                        Календарен изглед с брой резервации за всеки ден
+                                    </p>
+                                </div>
+
                             </div>
                         )}
                     </div>
