@@ -66,13 +66,12 @@ export const metadata = {
   },
   icons: {
     icon: [
-      { url: '/images/favicon.ico?v=2', sizes: 'any' },
-      { url: '/images/favicon.png?v=2', type: 'image/png', sizes: '32x32' },
+      { url: '/favicon.ico?v=4', sizes: 'any', type: 'image/x-icon' },
     ],
     apple: [
       { url: '/images/apple-touch-icon.png?v=2', sizes: '180x180', type: 'image/png' },
     ],
-    shortcut: '/images/favicon.ico?v=2',
+    shortcut: '/favicon.ico?v=4',
   },
   verification: {
     google: 'vnY1LkfeFWmqka-8vSVYvovLtVjN30rrzLRFiz0qMbA',
