@@ -55,6 +55,24 @@ const DetskiKutPage = () => {
           </a>
         </div>
 
+        <div className="row gy-4 mb-4">
+          <div className="col-lg-12">
+            <div
+              className="content"
+              style={{
+                padding: '18px 24px',
+                backgroundColor: 'rgba(206, 18, 18, 0.08)',
+                borderLeft: '4px solid #ce1212',
+                borderRadius: '8px',
+                fontSize: '18px',
+                lineHeight: '1.7',
+              }}
+            >
+              <strong>Важно:</strong> деца под 3 години влизат в детския кът само с придружител (родител или настойник).
+            </div>
+          </div>
+        </div>
+
         {/* Main Image */}
         <div className="row gy-4 mb-5">
           <div className="col-lg-12">
