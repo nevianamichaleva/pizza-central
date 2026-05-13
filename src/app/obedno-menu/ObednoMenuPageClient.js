@@ -9,13 +9,63 @@ import {
 import { onValue, ref } from 'firebase/database';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { rtdb } from '../../../lib/firebase';
 
 function weekDayLeadingLower(raw) {
   const s = raw == null ? '' : String(raw).trim();
   if (!s) return '';
   return s.charAt(0).toLowerCase() + s.slice(1);
+}
+
+/** Премахва пунктуация в края, която често е извън самия URL (напр. „вижте …).“). */
+function safeHttpUrlFromLooseString(s) {
+  let t = s;
+  while (t.length > 0) {
+    try {
+      const u = new URL(t);
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+      return { href: u.href, core: t, rest: s.slice(t.length) };
+    } catch {
+      const last = t[t.length - 1];
+      if (last && '),.;:!?'.includes(last)) {
+        t = t.slice(0, -1);
+      } else {
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
+/** Текст с нов редове; URL-и с http(s) стават кликаеми. */
+function descriptionWithClickableUrls(text) {
+  const raw = text == null ? '' : String(text);
+  const re = /(https?:\/\/\S+)/gi;
+  const parts = raw.split(re);
+  return parts.map((part, i) => {
+    if (part === '') return null;
+    if (!/^https?:\/\//i.test(part)) {
+      return part;
+    }
+    const resolved = safeHttpUrlFromLooseString(part);
+    if (!resolved) {
+      return part;
+    }
+    return (
+      <Fragment key={`obed-desc-link-${i}`}>
+        <a
+          href={resolved.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: '#ce1212', textDecoration: 'underline', wordBreak: 'break-word' }}
+        >
+          {resolved.core}
+        </a>
+        {resolved.rest}
+      </Fragment>
+    );
+  });
 }
 
 function hasRenderableDailyContent(menu) {
@@ -93,7 +143,7 @@ function ObednoMenuDailyView({ menu }) {
             </h3>
             {menu.description ? (
               <p className="lead mb-0" style={{ fontSize: '1.2rem', lineHeight: 1.7, maxWidth: 640, margin: '0 auto', whiteSpace: 'pre-line' }}>
-                {menu.description}
+                {descriptionWithClickableUrls(menu.description)}
               </p>
             ) : null}
           </div>
