@@ -7,7 +7,12 @@ import { get, ref, remove, set } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useState } from "react";
 import { rtdb } from '../../../../lib/firebase';
-import { generateOrderNumber } from '../../../utils/orderNumberUtils';
+import {
+    compareOrdersByDate,
+    generateOrderNumber,
+    getOrderNumberSortValue,
+    parseOrderDateTimestamp,
+} from '../../../utils/orderNumberUtils';
 
 const AdminOrdersPage = () => {
     const { isAdmin } = useUser();
@@ -61,6 +66,9 @@ const AdminOrdersPage = () => {
             title: 'Номер на поръчка',
             key: 'order_number',
             width: 150,
+            sorter: (a, b) => getOrderNumberSortValue(a) - getOrderNumberSortValue(b),
+            sortDirections: ['descend', 'ascend'],
+            showSorterTooltip: { title: 'Сортирай по номер' },
             render: (_, record) => (
                 <div>
                     <strong style={{ color: '#1890ff' }}>
@@ -78,7 +86,12 @@ const AdminOrdersPage = () => {
             title: 'Дата на поръчката',
             dataIndex: 'order_date',
             key: 'order_date',
-            width: 150,
+            width: 180,
+            sorter: (a, b) => parseOrderDateTimestamp(a) - parseOrderDateTimestamp(b),
+            defaultSortOrder: 'descend',
+            sortDirections: ['descend', 'ascend'],
+            showSorterTooltip: { title: 'Сортирай по дата' },
+            render: (value) => value || '—',
         },
         {
             title: 'Адрес за доставка',
@@ -536,24 +549,7 @@ const AdminOrdersPage = () => {
                         id: key,
                         ...value,
                     }))
-                    .sort((a, b) => {
-                        // Sort by order_date in descending order (newest first)
-                        const dateA = a.order_date ? new Date(a.order_date).getTime() : 0;
-                        const dateB = b.order_date ? new Date(b.order_date).getTime() : 0;
-                        
-                        // If both have dates, sort by date (newest first)
-                        if (dateA > 0 && dateB > 0) {
-                            return dateB - dateA; // Descending order (newest first)
-                        }
-                        
-                        // If only one has date, prioritize it
-                        if (dateA > 0 && dateB === 0) return -1;
-                        if (dateB > 0 && dateA === 0) return 1;
-                        
-                        // If neither has date, sort by Firebase key (which is chronologically sorted)
-                        // Firebase keys are lexicographically sortable and newer keys come after older ones
-                        return b.id.localeCompare(a.id); // Descending order (newest first)
-                    });
+                    .sort((a, b) => compareOrdersByDate(a, b, 'desc'));
                 setOrders(array);
             } else {
                 message.error("Няма поръчки.");
