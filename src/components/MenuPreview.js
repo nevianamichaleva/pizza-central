@@ -3,6 +3,12 @@
 import { useCategories } from '@/context/CategoriesContext';
 import { useProducts } from '@/context/ProductsContext';
 import { useUser } from '@/context/UserContext';
+import { useObednoMenuSchedule } from '@/hooks/useObednoMenuSchedule';
+import {
+  canOrderObednoProduct,
+  getObednoMenuClosedMessage,
+  isProductVisibleInDeliverySearch,
+} from '@/lib/obednoMenuSchedule';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 import { Button, Modal, Radio } from "antd";
 import { get, push, ref, set, update } from "firebase/database";
@@ -39,6 +45,7 @@ const MenuPreview = () => {
   const { products } = useProducts();
   const { categories } = useCategories();
   const { user, userDetails } = useUser();
+  const { isObednoOpen } = useObednoMenuSchedule();
   const [packagingData, setPackagingData] = useState({});
   const [sideDishModalVisible, setSideDishModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -82,27 +89,17 @@ const MenuPreview = () => {
     const productsWithImages = products.filter((item) => {
       if (item.isSideDish) return false;
       if (!item.image || item.image === '/images/no-image.png') return false;
-      
-      // Exclude products from "Сосове" category
       if (saucesCategoryId && productBelongsToCategory(item, saucesCategoryId)) {
         return false;
       }
-      
-      // If both fields are missing, show the product in both menus
-      const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
-      const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
-      if (!hasDeliveryField && !hasRestaurantField) {
-        return true;
-      }
-      // Show if forDelivery is true
-      return item.forDelivery === true;
+      return isProductVisibleInDeliverySearch(item, categories, isObednoOpen);
     });
 
     // Shuffle and take 6 random items (or all available if less than 6)
     const shuffled = [...productsWithImages].sort(() => Math.random() - 0.5);
     const count = Math.min(6, shuffled.length);
     return shuffled.slice(0, count);
-  }, [products, categories]);
+  }, [products, categories, isObednoOpen]);
 
   const normalizePrice = (rawPrice) => {
     if (rawPrice === undefined || rawPrice === null) {
@@ -167,6 +164,10 @@ const MenuPreview = () => {
   };
 
   const handleProductClick = (product) => {
+    if (!canOrderObednoProduct(product, categories, isObednoOpen)) {
+      showAToast('warning', getObednoMenuClosedMessage());
+      return;
+    }
     if (product.requiresSideDish) {
       setSelectedProduct(product);
       setSideDishModalVisible(true);
@@ -190,6 +191,10 @@ const MenuPreview = () => {
   };
 
   async function handleAddProduct(product, sideDish) {
+    if (!canOrderObednoProduct(product, categories, isObednoOpen)) {
+      showAToast('warning', getObednoMenuClosedMessage());
+      return;
+    }
     const ordersRef = ref(rtdb, 'orders');
     const productPrice = normalizePrice(product.price ?? product.value ?? product.basePrice);
 

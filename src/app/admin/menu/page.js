@@ -6,6 +6,7 @@ import { Button, Drawer, Image, Input, Select, Switch, message } from "antd";
 import { get, push, ref, remove, set, update } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { OBEDNO_SCHEDULE_FIELD } from '@/lib/obednoMenuSchedule';
 import { rtdb } from '../../../../lib/firebase';
 
 const { Option } = Select;
@@ -25,6 +26,7 @@ const AddCategory = () => {
   const [slug, setSlug] = useState('');
   const [forDelivery, setForDelivery] = useState(true);
   const [forRestaurant, setForRestaurant] = useState(true);
+  const [obednoSchedule, setObednoSchedule] = useState(false);
   const [order, setOrder] = useState(0);
   const [status, setStatus] = useState('active');
   const [selectedImage, setSelectedImage] = useState(null);
@@ -48,6 +50,7 @@ const AddCategory = () => {
   const openMenuDrawer = () => {
     setForDelivery(true);
     setForRestaurant(true);
+    setObednoSchedule(false);
     setOrder(0);
     setStatus('active');
     setMenuDrawerVisible(true);
@@ -58,6 +61,7 @@ const AddCategory = () => {
     setSlug('');
     setForDelivery(true);
     setForRestaurant(true);
+    setObednoSchedule(false);
     setOrder(0);
     setStatus('active');
     setH1Title('');
@@ -113,7 +117,8 @@ const AddCategory = () => {
       forDelivery: forDelivery !== false,
       forRestaurant: forRestaurant !== false,
       order: order || 0,
-      status: status || 'active'
+      status: status || 'active',
+      ...(obednoSchedule ? { schedule: OBEDNO_SCHEDULE_FIELD } : {}),
     };
     
     // Add SEO fields if they have values
@@ -213,8 +218,14 @@ const AddCategory = () => {
       forDelivery: updatedRecord.forDelivery !== false,
       forRestaurant: updatedRecord.forRestaurant !== false,
       order: orderValue,
-      status: updatedRecord.status || 'active'
+      status: updatedRecord.status || 'active',
     };
+
+    if (updatedRecord.schedule === OBEDNO_SCHEDULE_FIELD || updatedRecord.obednoSchedule === true) {
+      updatedData.schedule = OBEDNO_SCHEDULE_FIELD;
+    } else if (updatedRecord.schedule !== undefined || updatedRecord.obednoSchedule !== undefined) {
+      updatedData.schedule = null;
+    }
     
     // Add SEO fields if they exist in the record
     if (updatedRecord.h1Title !== undefined) {
@@ -233,8 +244,9 @@ const AddCategory = () => {
       updatedData.menuDescription = updatedRecord.menuDescription && updatedRecord.menuDescription.trim() ? updatedRecord.menuDescription.trim() : null;
     }
     
-    // Remove any undefined or null values that might have slipped through
+    // Remove any undefined or null values that might have slipped through (schedule: null премахва полето в RTDB)
     Object.keys(updatedData).forEach(key => {
+      if (key === 'schedule' && updatedData[key] === null) return;
       if (updatedData[key] === undefined || updatedData[key] === null || updatedData[key] === '') {
         delete updatedData[key];
       }
@@ -479,6 +491,12 @@ const AddCategory = () => {
                       onChange={setForRestaurant}
                     />
                     <span>Ресторант (ще се показва в central-menu)</span>
+                  </div>
+                </div>
+                <div className="col-md-12">
+                  <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <Switch checked={obednoSchedule} onChange={setObednoSchedule} />
+                    <span>Обедно меню (пн–пт, 11:00–15:30 — само в този интервал се поръчва)</span>
                   </div>
                 </div>
                 <div className="col-md-12">

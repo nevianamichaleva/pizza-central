@@ -1,4 +1,5 @@
 import { CloseOutlined, DeleteOutlined, EditOutlined, SaveOutlined, GlobalOutlined } from "@ant-design/icons";
+import { OBEDNO_SCHEDULE_FIELD } from '@/lib/obednoMenuSchedule';
 import { Button, Drawer, Input, Select, Space, Switch, Table, Tag } from "antd";
 import { useState } from "react";
 
@@ -180,6 +181,26 @@ const EditableTable = ({ data, categories, onSave, onDelete }) => {
           />
         ) : (
           record.forRestaurant !== false ? "Да" : "Не"
+        );
+      },
+    },
+    {
+      title: "Обеден график",
+      dataIndex: "schedule",
+      key: "schedule",
+      render: (_, record) => {
+        const isEditing = editingId === record.id;
+        const isObedno =
+          (isEditing ? editingRecord.schedule : record.schedule) === OBEDNO_SCHEDULE_FIELD;
+        return isEditing ? (
+          <Switch
+            checked={isObedno}
+            onChange={(checked) =>
+              handleChange("schedule", checked ? OBEDNO_SCHEDULE_FIELD : null)
+            }
+          />
+        ) : (
+          isObedno ? "пн–пт 11–15:30" : "—"
         );
       },
     },

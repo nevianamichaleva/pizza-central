@@ -10,6 +10,8 @@ import { Button, Image, Select } from "antd";
 import SpicyBadge from '@/components/SpicyBadge';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { useObednoMenuSchedule } from '@/hooks/useObednoMenuSchedule';
+import { categoryUsesObednoSchedule } from '@/lib/obednoMenuSchedule';
 import { useEffect, useRef, useState } from 'react';
 
 export default function CentralMenuPage({ params }) {
@@ -17,6 +19,7 @@ export default function CentralMenuPage({ params }) {
   const urlParams = useParams();
   const { products } = useProducts();
   const { categories } = useCategories();
+  const { isObednoOpen } = useObednoMenuSchedule();
   // const { translations } = useTranslations();
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const categoriesSliderRef = useRef(null);
@@ -114,7 +117,9 @@ export default function CentralMenuPage({ params }) {
     }
     // If only forDelivery exists, show if not explicitly marked as delivery-only
     return category.forDelivery !== true;
-  }).sort((a, b) => {
+  })
+  .filter((category) => isObednoOpen || !categoryUsesObednoSchedule(category))
+  .sort((a, b) => {
     const orderA = a.order !== undefined ? a.order : 0;
     const orderB = b.order !== undefined ? b.order : 0;
     return orderA - orderB;

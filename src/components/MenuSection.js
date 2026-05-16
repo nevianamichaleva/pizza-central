@@ -3,11 +3,20 @@
 import { useCategories } from '@/context/CategoriesContext';
 import { useProducts } from '@/context/ProductsContext';
 import { useUser } from '@/context/UserContext';
+import { useObednoMenuSchedule } from '@/hooks/useObednoMenuSchedule';
+import {
+  canOrderObednoProduct,
+  categoryUsesObednoSchedule,
+  filterDeliveryCategories,
+  getObednoMenuClosedMessage,
+  getObednoMenuHoursLabel,
+  isProductVisibleInDeliverySearch,
+} from '@/lib/obednoMenuSchedule';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 import { Button, Input, Modal, Radio } from "antd";
 import { get, push, ref, set, update } from "firebase/database";
 import Link from "next/link";
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { rtdb } from "../../lib/firebase";
 import showAToast from "../components/common/showAToast";
 import MobileProductsSlider from "./MobileProductsSlider";
@@ -60,18 +69,43 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
   const { products } = useProducts();
   const { categories } = useCategories();
   const { user, userDetails } = useUser();
+  const { isObednoOpen } = useObednoMenuSchedule();
+
+  const visibleDeliveryCategories = useMemo(
+    () => filterDeliveryCategories(categories, isObednoOpen),
+    [categories, isObednoOpen],
+  );
 
   // Find category by slug if categorySlug is provided
-  const selectedCategory = categorySlug 
-    ? categories.find(cat => cat.slug === categorySlug && (cat.forDelivery === true || (cat.forDelivery === undefined && cat.forRestaurant === undefined)))
+  const selectedCategory = categorySlug
+    ? visibleDeliveryCategories.find((cat) => cat.slug === categorySlug) ||
+      categories.find((cat) => cat.slug === categorySlug && categoryUsesObednoSchedule(cat))
     : null;
+
+  const selectedCategoryObednoClosed =
+    Boolean(categorySlug && selectedCategory && categoryUsesObednoSchedule(selectedCategory) && !isObednoOpen);
 
   // Set active tab to selected category when categorySlug is provided
   useEffect(() => {
-    if (categorySlug && selectedCategory) {
+    if (categorySlug && selectedCategory && !selectedCategoryObednoClosed) {
       setActiveTab(`menu-${selectedCategory.name}`);
     }
-  }, [categorySlug, selectedCategory]);
+  }, [categorySlug, selectedCategory, selectedCategoryObednoClosed]);
+
+  useEffect(() => {
+    if (categorySlug || visibleDeliveryCategories.length === 0) return;
+    const activeStillVisible = visibleDeliveryCategories.some(
+      (cat) => activeTab === `menu-${cat.name}`,
+    );
+    if (!activeStillVisible) {
+      const first = visibleDeliveryCategories[0];
+      const nextTab = `menu-${first.name}`;
+      setActiveTab(nextTab);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY, nextTab);
+      }
+    }
+  }, [activeTab, categorySlug, visibleDeliveryCategories]);
 
   // Helper function to check if product belongs to a category
   // Supports both old format (category) and new format (categories array)
@@ -235,6 +269,10 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
 
 
   const handleProductClick = (product) => {
+    if (!canOrderObednoProduct(product, categories, isObednoOpen)) {
+      showAToast('warning', getObednoMenuClosedMessage());
+      return;
+    }
     if (product.requiresSideDish) {
       setSelectedProduct(product);
       setSideDishModalVisible(true);
@@ -259,6 +297,10 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
   };
 
   async function handleAddProduct(product, sideDish) {
+    if (!canOrderObednoProduct(product, categories, isObednoOpen)) {
+      showAToast('warning', getObednoMenuClosedMessage());
+      return;
+    }
     const ordersRef = ref(rtdb, 'orders');
     const productPrice = normalizePrice(product.price ?? product.value ?? product.basePrice);
 
@@ -585,8 +627,34 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
   );
 
   // If categorySlug is provided and category not found, return null
-  if (categorySlug && !selectedCategory) {
+  if (categorySlug && !selectedCategory && !categories.some((c) => c.slug === categorySlug)) {
     return null;
+  }
+
+  if (selectedCategoryObednoClosed) {
+    return (
+      <section id="menu" className="menu section">
+        <div className="container py-5">
+          <div
+            className="text-center px-3 py-4"
+            style={{
+              backgroundColor: 'var(--surface-color)',
+              borderRadius: '12px',
+              border: '1px solid rgba(206, 18, 18, 0.2)',
+              maxWidth: 640,
+              margin: '0 auto',
+            }}
+          >
+            <p style={{ fontSize: '1.1rem', marginBottom: '8px', fontWeight: 600 }}>
+              Обедното меню не е активно в момента
+            </p>
+            <p style={{ fontSize: '1rem', marginBottom: 0, color: 'var(--default-color)' }}>
+              Поръчки от тази категория приемаме само {getObednoMenuHoursLabel()}.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -630,23 +698,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
         {/* Desktop Tab Navigation - Hide if single category or when searching (min 3 chars) */}
         {!categorySlug && (!activeSearchQuery || activeSearchQuery.trim().length < 3) && (
           <ul className="nav nav-tabs d-flex justify-content-center menu-desktop-tabs" role="tablist">
-          {categories
-            .filter((category) => {
-              // If both fields are missing, show the category in both menus
-              const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
-              const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
-              if (!hasDeliveryField && !hasRestaurantField) {
-                return true;
-              }
-              // Show if forDelivery is true
-              return category.forDelivery === true;
-            })
-            .sort((a, b) => {
-              const orderA = a.order !== undefined ? a.order : 0;
-              const orderB = b.order !== undefined ? b.order : 0;
-              return orderA - orderB;
-            })
-            .map((category) => {
+          {visibleDeliveryCategories.map((category) => {
               const tabId = `menu-${category.name}`;
               const isActive = activeTab === tabId;
               return (
@@ -673,17 +725,10 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
           {(() => {
             // If searching (at least 3 characters), show all products from all categories
             if (activeSearchQuery && activeSearchQuery.trim().length >= 3) {
-              const allFilteredProducts = filterProductsBySearch(products.filter((item) => {
-                if (item.isSideDish) return false;
-                // If both fields are missing, show the product in both menus
-                const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
-                const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
-                if (!hasDeliveryField && !hasRestaurantField) {
-                  return true;
-                }
-                // Show if forDelivery is true
-                return item.forDelivery === true;
-              }), activeSearchQuery);
+              const allFilteredProducts = filterProductsBySearch(
+                products.filter((item) => isProductVisibleInDeliverySearch(item, categories, isObednoOpen)),
+                activeSearchQuery,
+              );
 
               return (
                 <div className="tab-pane fade active show">
@@ -702,24 +747,12 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
             }
 
             // Normal category-based display
-            const filteredCategories = categories.filter((category) => {
-              // If both fields are missing, show the category in both menus
-              const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
-              const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
-              if (!hasDeliveryField && !hasRestaurantField) {
-                return true;
-              }
-              // Show if forDelivery is true
-              return category.forDelivery === true;
-            }).sort((a, b) => {
-              const orderA = a.order !== undefined ? a.order : 0;
-              const orderB = b.order !== undefined ? b.order : 0;
-              return orderA - orderB;
-            });
+            const filteredCategories = visibleDeliveryCategories;
 
-            const categoriesToDisplay = categorySlug && selectedCategory 
-              ? [selectedCategory] 
-              : filteredCategories;
+            const categoriesToDisplay =
+              categorySlug && selectedCategory && !selectedCategoryObednoClosed
+                ? [selectedCategory]
+                : filteredCategories;
 
             return categoriesToDisplay.map((category, index) => {
               // Find next category in the filtered list
@@ -1073,22 +1106,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
               }
 
               // Normal category-based display
-              const filteredCategories = categories
-                .filter((category) => {
-                  // If both fields are missing, show the category in both menus
-                  const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
-                  const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
-                  if (!hasDeliveryField && !hasRestaurantField) {
-                    return true;
-                  }
-                  // Show if forDelivery is true
-                  return category.forDelivery === true;
-                })
-                .sort((a, b) => {
-                  const orderA = a.order !== undefined ? a.order : 0;
-                  const orderB = b.order !== undefined ? b.order : 0;
-                  return orderA - orderB;
-                });
+              const filteredCategories = visibleDeliveryCategories;
 
               return filteredCategories.map((category, index) => {
                 const categoryProducts = filterProductsBySearch(products.filter((item) => {
@@ -1209,20 +1227,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
 
         {/* Mobile view for single category */}
         {categorySlug && selectedCategory && (() => {
-          const filteredCategories = categories
-            .filter((category) => {
-              const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
-              const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
-              if (!hasDeliveryField && !hasRestaurantField) {
-                return true;
-              }
-              return category.forDelivery === true;
-            })
-            .sort((a, b) => {
-              const orderA = a.order !== undefined ? a.order : 0;
-              const orderB = b.order !== undefined ? b.order : 0;
-              return orderA - orderB;
-            });
+          const filteredCategories = visibleDeliveryCategories;
 
           const currentIndex = filteredCategories.findIndex(cat => cat.id === selectedCategory.id);
           const nextCategory = currentIndex >= 0 && currentIndex < filteredCategories.length - 1

@@ -8,6 +8,8 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { onValue, ref } from 'firebase/database';
 // import Lottie from 'lottie-react';
 import { hasLaunchMenuForToday } from '@/lib/launchMenuToday';
+import { filterDeliveryCategories } from '@/lib/obednoMenuSchedule';
+import { useObednoMenuSchedule } from '@/hooks/useObednoMenuSchedule';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from "next/navigation";
@@ -27,6 +29,7 @@ const Header = () => {
   const [isMobile, setIsMobile] = useState(false);
   const { user, setUser, isAdmin } = useUser();
   const { categories } = useCategories();
+  const { isObednoOpen } = useObednoMenuSchedule();
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hasLaunchMenuToday, setHasLaunchMenuToday] = useState(false);
@@ -128,20 +131,10 @@ const Header = () => {
   };
 
   // Get categories for delivery (for-home)
-  const deliveryCategories = categories.filter((category) => {
-    // Only show categories with slug and forDelivery === true
-    if (!category.slug || category.slug.trim() === '') return false;
-    const hasDeliveryField = category.forDelivery !== undefined && category.forDelivery !== null;
-    const hasRestaurantField = category.forRestaurant !== undefined && category.forRestaurant !== null;
-    if (!hasDeliveryField && !hasRestaurantField) {
-      return true; // Show if both fields are missing (backward compatibility)
-    }
-    return category.forDelivery === true;
-  }).sort((a, b) => {
-    const orderA = a.order !== undefined ? a.order : 0;
-    const orderB = b.order !== undefined ? b.order : 0;
-    return orderA - orderB;
-  });
+  const deliveryCategories = filterDeliveryCategories(
+    categories.filter((category) => category.slug && category.slug.trim() !== ''),
+    isObednoOpen,
+  );
 
   useEffect(() => {
     const handleResize = () => {

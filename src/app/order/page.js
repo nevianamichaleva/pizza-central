@@ -1,6 +1,10 @@
 "use client"
 
+import { useCategories } from "@/context/CategoriesContext";
+import { useProducts } from "@/context/ProductsContext";
 import { useUser } from "@/context/UserContext";
+import { useObednoMenuSchedule } from "@/hooks/useObednoMenuSchedule";
+import { getObednoMenuClosedMessage, orderContainsUnavailableObednoItems } from "@/lib/obednoMenuSchedule";
 import { Input, message, Select, Tooltip } from "antd";
 import { get, onValue, ref, update } from "firebase/database";
 import Image from "next/image";
@@ -13,6 +17,9 @@ const { TextArea } = Input;
 
 export default function Order() {
   const { user, userDetails } = useUser();
+  const { products } = useProducts();
+  const { categories } = useCategories();
+  const { isObednoOpen } = useObednoMenuSchedule();
   const [cartId, setCartId] = useState(null);
   const [orderId, setOrderId] = useState(null);
   const [order, setOrder] = useState(null);
@@ -364,6 +371,11 @@ export default function Order() {
 
     if (deliveryTime && !validateDeliveryTime(deliveryTime)) {
       message.error("Часът за доставка трябва да е минимум 1 час от сега и в рамките на работното време.");
+      return;
+    }
+
+    if (orderContainsUnavailableObednoItems(order.items, products, categories, isObednoOpen)) {
+      message.error(getObednoMenuClosedMessage());
       return;
     }
 

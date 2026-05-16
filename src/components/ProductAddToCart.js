@@ -1,8 +1,11 @@
 'use client';
 
 import { default as showAToast } from '@/components/common/showAToast';
+import { useCategories } from '@/context/CategoriesContext';
 import { useProducts } from '@/context/ProductsContext';
 import { useUser } from '@/context/UserContext';
+import { useObednoMenuSchedule } from '@/hooks/useObednoMenuSchedule';
+import { canOrderObednoProduct, getObednoMenuClosedMessage } from '@/lib/obednoMenuSchedule';
 import { Button, Modal, Radio } from 'antd';
 import { get, push, ref, set } from 'firebase/database';
 import { useState } from "react";
@@ -11,6 +14,8 @@ import { rtdb } from '../../lib/firebase';
 const ProductAddToCart = ({ product }) => {
   const { user, userDetails } = useUser();
   const { products } = useProducts();
+  const { categories } = useCategories();
+  const { isObednoOpen } = useObednoMenuSchedule();
   const [addingToCart, setAddingToCart] = useState(false);
   const [sideDishModalVisible, setSideDishModalVisible] = useState(false);
   const [selectedSideDish, setSelectedSideDish] = useState(null);
@@ -25,6 +30,11 @@ const ProductAddToCart = ({ product }) => {
       return;
     }
 
+    if (!canOrderObednoProduct(product, categories, isObednoOpen)) {
+      showAToast('warning', getObednoMenuClosedMessage());
+      return;
+    }
+
     if (product.requiresSideDish) {
       setSideDishModalVisible(true);
       return;
@@ -35,6 +45,11 @@ const ProductAddToCart = ({ product }) => {
 
   const handleAddToCart = async (sideDish) => {
     if (!product) return;
+
+    if (!canOrderObednoProduct(product, categories, isObednoOpen)) {
+      showAToast('warning', getObednoMenuClosedMessage());
+      return;
+    }
 
     setAddingToCart(true);
     try {
