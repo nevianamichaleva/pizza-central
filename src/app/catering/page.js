@@ -151,6 +151,137 @@ export default function CateringPage() {
           </Link>
         </div>
 
+        {/* Актуално меню и цени — нови каталози */}
+        <div
+          className="row gy-4 mb-5"
+          id="catering-menu-prices"
+          style={{
+            padding: '36px 24px',
+            backgroundColor: 'var(--surface-color)',
+            borderRadius: '16px',
+            border: '2px solid rgba(206, 18, 18, 0.2)',
+            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.06)',
+          }}
+        >
+          <div className="col-lg-12 text-center">
+            <span
+              style={{
+                display: 'inline-block',
+                backgroundColor: '#ce1212',
+                color: '#fff',
+                fontSize: '13px',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                padding: '6px 14px',
+                borderRadius: '20px',
+                marginBottom: '16px',
+              }}
+            >
+              Ново
+            </span>
+            <h3
+              style={{
+                fontSize: 'clamp(1.5rem, 4vw, 2rem)',
+                color: 'var(--heading-color)',
+                marginBottom: '12px',
+                fontFamily: 'var(--heading-font)',
+              }}
+            >
+              Актуално меню и цени
+            </h3>
+            <p style={{ fontSize: '18px', lineHeight: 1.7, maxWidth: 720, margin: '0 auto 28px', color: 'var(--default-color)' }}>
+              Разгледайте нашите нови кетъринг предложения — плата, солени и сладки хапки с цени в евро.
+              За поръчка и индивидуално меню{' '}
+              <Link href="/catering/zaiavka" style={{ color: '#ce1212', fontWeight: 600 }}>
+                изпратете заявка
+              </Link>
+              .
+            </p>
+          </div>
+
+          <div className="col-lg-12">
+            <figure style={{ margin: 0, maxWidth: 920, marginLeft: 'auto', marginRight: 'auto' }}>
+              <figcaption
+                style={{
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  color: 'var(--heading-color)',
+                  marginBottom: '14px',
+                  textAlign: 'center',
+                  fontFamily: 'var(--heading-font)',
+                }}
+              >
+                Плата и вегетариански предложения
+              </figcaption>
+              <Image
+                src="/images/catering/catering_prices1.png"
+                alt="Кетъринг меню — плата мезета, сирена, топло плато, плодове и вегетариански хапки с цени в евро"
+                width={842}
+                height={1264}
+                priority
+                sizes="(max-width: 920px) 100vw, 920px"
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 28px rgba(0, 0, 0, 0.1)',
+                }}
+              />
+            </figure>
+          </div>
+
+          <div className="col-lg-12" style={{ marginTop: '8px' }}>
+            <figure style={{ margin: 0, maxWidth: 920, marginLeft: 'auto', marginRight: 'auto' }}>
+              <figcaption
+                style={{
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  color: 'var(--heading-color)',
+                  marginBottom: '14px',
+                  textAlign: 'center',
+                  fontFamily: 'var(--heading-font)',
+                }}
+              >
+                Солени и сладки хапки
+              </figcaption>
+              <Image
+                src="/images/catering/catering_prices.png"
+                alt="Кетъринг меню — мини бургери, брускети, тарталети, десерти и сладки изкушения с цени в евро"
+                width={843}
+                height={1264}
+                sizes="(max-width: 920px) 100vw, 920px"
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 28px rgba(0, 0, 0, 0.1)',
+                }}
+              />
+            </figure>
+          </div>
+
+          <div className="col-lg-12 text-center" style={{ marginTop: '8px' }}>
+            <p style={{ fontSize: '16px', color: 'var(--default-color)', marginBottom: '16px' }}>
+              Цените са ориентировъчни за бройка. За събития с повече гости подготвяме индивидуална оферта.
+            </p>
+            <Link
+              href="/catering/zaiavka"
+              className="btn btn-primary"
+              style={{
+                backgroundColor: '#ce1212',
+                color: '#fff',
+                padding: '12px 30px',
+                borderRadius: '25px',
+                textDecoration: 'none',
+                display: 'inline-block',
+              }}
+            >
+              Заяви оферта за вашето събитие
+            </Link>
+          </div>
+        </div>
+
         {/* Main Image */}
         <div className="row gy-4 mb-5">
           <div className="col-lg-12">
@@ -240,9 +371,14 @@ export default function CateringPage() {
         <div className="row gy-4 mb-5">
           <div className="col-lg-12">
             <div className="content text-center" style={{ padding: '30px', backgroundColor: 'var(--surface-color)', borderRadius: '8px' }}>
-              <h3 style={{ fontSize: '24px', color: 'var(--heading-color)', marginBottom: '20px', fontFamily: 'var(--heading-font)' }}>
+              <h3 style={{ fontSize: '24px', color: 'var(--heading-color)', marginBottom: '12px', fontFamily: 'var(--heading-font)' }}>
                 Нашите кетъринг предложения
               </h3>
+              <p style={{ fontSize: '17px', marginBottom: '24px' }}>
+                <Link href="#catering-menu-prices" style={{ color: '#ce1212', fontWeight: 600 }}>
+                  Вижте пълното меню с цени ↑
+                </Link>
+              </p>
               <div className="row gy-4 mt-4">
                 <div className="col-md-4">
                   <div style={{ padding: '20px' }}>
