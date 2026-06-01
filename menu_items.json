@@ -1,0 +1,863 @@
+{
+  "salad_1": {
+    "category": "-OEhzObMeqYeGuU2o9LI",
+    "description": "Гурманска салата, приготвена с подбрани свежи продукти и ароматни подправки.",
+    "image": "",
+    "ingredients": "домати, печен пипер, прясна люта чушка, зелена салата, чесън, печено сирене",
+    "name": "Гурманска салата",
+    "price": "13.90",
+    "weight": "450",
+    "subcategory": ""
+  },
+  "salad_2": {
+    "category": "-OEhzObMeqYeGuU2o9LI",
+    "description": "Микс от салати със запечено козе сирене и меден дресинг.",
+    "image": "",
+    "ingredients": "зелена салата, айсберг, рукола, орехи, сушени домати, козе сирене, меден дресинг",
+    "name": "Микс от салати със запечено козе сирене",
+    "price": "13.90",
+    "weight": "350",
+    "subcategory": ""
+  },
+  "salad_3": {
+    "category": "-OEhzObMeqYeGuU2o9LI",
+    "description": "Салата със скариди и авокадо с меден дресинг.",
+    "image": "",
+    "ingredients": "зелена салата, айсберг, чери домати, авокадо, скариди, пармезан, микс семки, меден дресинг",
+    "name": "Салата със скариди и авокадо",
+    "price": "16.90",
+    "weight": "350",
+    "subcategory": ""
+  },
+  "salad_4": {
+    "category": "-OEhzObMeqYeGuU2o9LI",
+    "description": "Салата с бурата и киноа, приготвена с внимание към детайла.",
+    "image": "",
+    "ingredients": "зелена салата, чери домати, сирене \"Бурата\", киноа, печен пипер, яйце, рукола, меден дресинг",
+    "name": "Салата с бурата и киноа",
+    "price": "13.90",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "salad_5": {
+    "category": "-OEhzObMeqYeGuU2o9LI",
+    "description": "Овчарска салата с класически вкус.",
+    "image": "",
+    "ingredients": "краставици, домати, сирене, шунка, кашкавал, печен пипер, червен лук, яйце",
+    "name": "Овчарска салата",
+    "price": "11.90",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "salad_6": {
+    "category": "-OEhzObMeqYeGuU2o9LI",
+    "description": "Салата Цезар с пиле, класическа рецепта.",
+    "image": "",
+    "ingredients": "зелена салата, айсберг, пилешко филе, пармезан, крутони, сос „Цезар\"",
+    "name": "Салата Цезар с пиле",
+    "price": "13.90",
+    "weight": "350",
+    "subcategory": ""
+  },
+  "salad_7": {
+    "category": "-OEhzObMeqYeGuU2o9LI",
+    "description": "Микс от салати с моцарела и песто.",
+    "image": "",
+    "ingredients": "зелена салата, айсберг, рукола, чери домати, пармезан, маслини, сирене \"Моцарела\", сос \"Песто\", микс семена",
+    "name": "Микс от салати с моцарела и песто",
+    "price": "13.90",
+    "weight": "350",
+    "subcategory": ""
+  },
+  "salad_8": {
+    "category": "-OEhzObMeqYeGuU2o9LI",
+    "description": "Салата \"Снежанка\" - традиционна българска салата.",
+    "image": "",
+    "ingredients": "цедено кисело мляко, кисели краставички, орехи, копър, чесън",
+    "name": "Салата \"Снежанка\"",
+    "price": "8.90",
+    "weight": "300",
+    "subcategory": ""
+  },
+  "pizza_1": {
+    "category": "-OEhzRc5baXhiax_qZsk",
+    "description": "Пеперони пица с тънко и хрупкаво тесто.",
+    "image": "",
+    "ingredients": "доматен сос, салама \"Пепероне\", кашкавал, зелен лук",
+    "name": "Пеперони",
+    "price": "13.90",
+    "weight": "380",
+    "subcategory": ""
+  },
+  "pizza_2": {
+    "category": "-OEhzRc5baXhiax_qZsk",
+    "description": "Вълча пица с разнообразие от меса.",
+    "image": "",
+    "ingredients": "доматен сос, шунка, луканка, пилешко филе, бекон, кашкавал",
+    "name": "Вълча",
+    "price": "13.90",
+    "weight": "450",
+    "subcategory": ""
+  },
+  "pizza_3": {
+    "category": "-OEhzRc5baXhiax_qZsk",
+    "description": "Барбекю пица с пиле и бекон.",
+    "image": "",
+    "ingredients": "сос \"Барбекю\", пилешко филе, бекон, червен лук, сирене \"Моцарела\", кашкавал",
+    "name": "Барбекю",
+    "price": "13.90",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "pizza_4": {
+    "category": "-OEhzRc5baXhiax_qZsk",
+    "description": "Любимата на шефа - специална комбинация.",
+    "image": "",
+    "ingredients": "доматен сос, шунка, бекон, пресни гъби, яйце, маслини, кашкавал, пресни домати",
+    "name": "Любимата на шефа",
+    "price": "13.90",
+    "weight": "420",
+    "subcategory": ""
+  },
+  "pizza_5": {
+    "category": "-OEhzRc5baXhiax_qZsk",
+    "description": "Куатро Формаджи - четири вида сирена.",
+    "image": "",
+    "ingredients": "сметана, синьо сирене, топено сирене, сирене \"Моцарела\", кашкавал, чери домати, рукола",
+    "name": "Куатро Формаджи",
+    "price": "13.90",
+    "weight": "370",
+    "subcategory": ""
+  },
+  "pizza_6": {
+    "category": "-OEhzRc5baXhiax_qZsk",
+    "description": "Маргарита - класическа италианска пица.",
+    "image": "",
+    "ingredients": "доматен сос, кашкавал",
+    "name": "Маргарита",
+    "price": "10.90",
+    "weight": "350",
+    "subcategory": ""
+  },
+  "pizza_7": {
+    "category": "-OEhzRc5baXhiax_qZsk",
+    "description": "Капричоза \"Централ\" - фирмено предложение.",
+    "image": "",
+    "ingredients": "доматен сос, шунка, луканка, бекон, кашкавал, пресни гъби, маслини, зелен лук",
+    "name": "Капричоза \"Централ\"",
+    "price": "13.90",
+    "weight": "450",
+    "subcategory": ""
+  },
+  "pizza_8": {
+    "category": "-OEhzRc5baXhiax_qZsk",
+    "description": "Чикен пица с пилешко филе.",
+    "image": "",
+    "ingredients": "доматен сос, пилешко филе, топено сирене, кашкавал, пресен пипер, царевица",
+    "name": "Чикен",
+    "price": "13.90",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "pizza_9": {
+    "category": "-OEhzRc5baXhiax_qZsk",
+    "description": "Наполи пица с луканка и гъби.",
+    "image": "",
+    "ingredients": "доматен сос, луканка, пресни гъби, кашкавал, царевица",
+    "name": "Наполи",
+    "price": "13.90",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "burger_1": {
+    "category": "-OQEb-yE0ndsbM46H5_y",
+    "description": "Сочен телешки бургер с хрупкави картофки, приготвен с най-добрите съставки.",
+    "image": "",
+    "ingredients": "телешки бургер, зелена салата, пресни гъби, пържени картофи, чедър, червен лук, сос бургер, кетчуп",
+    "name": "Телешки бургер с хрупкави картофки",
+    "price": "13.90",
+    "weight": "450",
+    "subcategory": ""
+  },
+  "burger_2": {
+    "category": "-OQEb-yE0ndsbM46H5_y",
+    "description": "Сочен пилешки бургер с хрупкави картофки, приготвен с най-добрите съставки.",
+    "image": "",
+    "ingredients": "пилешки бургер, чедър, зелена салата, пресни гъби, пържени картофи, червен карамелизиран лук, сос бургер, кетчуп",
+    "name": "Пилешки бургер с хрупкави картофки",
+    "price": "13.90",
+    "weight": "450",
+    "subcategory": ""
+  },
+  "kids_1": {
+    "category": "-OQEb4WQwxllJ6Fm5b88",
+    "description": "Вариант пица Класик за деца.",
+    "image": "",
+    "ingredients": "доматен сос, шунка, кашкавал",
+    "name": "Вариант пица Класик",
+    "price": "12.90",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "kids_2": {
+    "category": "-OQEb4WQwxllJ6Fm5b88",
+    "description": "Вариант пилешки криспи бургер за деца.",
+    "image": "",
+    "ingredients": "пилешка кайма, сос бургер",
+    "name": "Вариант пилешки криспи бургер",
+    "price": "12.90",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "kids_3": {
+    "category": "-OQEb4WQwxllJ6Fm5b88",
+    "description": "Вариант пене Миланезе за деца.",
+    "image": "",
+    "ingredients": "пене, кайма, шунка, доматен сос, кашкавал",
+    "name": "Вариант пене Миланезе",
+    "price": "12.90",
+    "weight": "440",
+    "subcategory": ""
+  },
+  "sauce_1": {
+    "category": "-OQEb6hrSQtW-50msmEG",
+    "description": "Майонеза.",
+    "image": "",
+    "ingredients": "",
+    "name": "Майонеза",
+    "price": "1.20",
+    "weight": "80",
+    "subcategory": ""
+  },
+  "sauce_2": {
+    "category": "-OQEb6hrSQtW-50msmEG",
+    "description": "Кетчуп.",
+    "image": "",
+    "ingredients": "",
+    "name": "Кетчуп",
+    "price": "1.20",
+    "weight": "80",
+    "subcategory": ""
+  },
+  "sauce_3": {
+    "category": "-OQEb6hrSQtW-50msmEG",
+    "description": "Сос \"Барбекю\".",
+    "image": "",
+    "ingredients": "",
+    "name": "Сос \"Барбекю\"",
+    "price": "1.20",
+    "weight": "80",
+    "subcategory": ""
+  },
+  "sauce_4": {
+    "category": "-OQEb6hrSQtW-50msmEG",
+    "description": "Пикантен сос.",
+    "image": "",
+    "ingredients": "",
+    "name": "Пикантен сос",
+    "price": "1.20",
+    "weight": "80",
+    "subcategory": ""
+  },
+  "sauce_5": {
+    "category": "-OQEb6hrSQtW-50msmEG",
+    "description": "Бял сос.",
+    "image": "",
+    "ingredients": "",
+    "name": "Бял сос",
+    "price": "1.20",
+    "weight": "80",
+    "subcategory": ""
+  },
+  "sauce_6": {
+    "category": "-OQEb6hrSQtW-50msmEG",
+    "description": "Горчица.",
+    "image": "",
+    "ingredients": "",
+    "name": "Горчица",
+    "price": "1.20",
+    "weight": "80",
+    "subcategory": ""
+  },
+  "sauce_7": {
+    "category": "-OQEb6hrSQtW-50msmEG",
+    "description": "Чили сос.",
+    "image": "",
+    "ingredients": "",
+    "name": "Чили сос",
+    "price": "1.20",
+    "weight": "80",
+    "subcategory": ""
+  },
+  "sauce_8": {
+    "category": "-OQEb6hrSQtW-50msmEG",
+    "description": "Чеснов сос.",
+    "image": "",
+    "ingredients": "",
+    "name": "Чеснов сос",
+    "price": "1.20",
+    "weight": "80",
+    "subcategory": ""
+  },
+  "pasta_1": {
+    "category": "-OQEbA1TjmmWT8NsHNTe",
+    "description": "Спагети \"Болонезе\" - автентична италианска паста.",
+    "image": "",
+    "ingredients": "домашно приготвени спагети, сос „Болонезе\", кашкавал",
+    "name": "Спагети \"Болонезе\"",
+    "price": "11.90",
+    "weight": "500",
+    "subcategory": ""
+  },
+  "pasta_2": {
+    "category": "-OQEbA1TjmmWT8NsHNTe",
+    "description": "Спагети Карбонара - класическа италианска паста.",
+    "image": "",
+    "ingredients": "домашно приготвени спагети, бекон, лук, сметана, яйце, кашкавал",
+    "name": "Спагети Карбонара",
+    "price": "11.90",
+    "weight": "500",
+    "subcategory": ""
+  },
+  "pasta_3": {
+    "category": "-OQEbA1TjmmWT8NsHNTe",
+    "description": "Спагети Чочара с шунка и гъби.",
+    "image": "",
+    "ingredients": "домашно приготвени спагети, шунка, сметана, пресни гъби, кетчуп, кашкавал",
+    "name": "Спагети Чочара",
+    "price": "11.90",
+    "weight": "500",
+    "subcategory": ""
+  },
+  "pasta_4": {
+    "category": "-OQEbA1TjmmWT8NsHNTe",
+    "description": "Талиатели с пилешко филе и броколи.",
+    "image": "",
+    "ingredients": "талиатели, пилешко филе, броколи, сметана, сос „Песто\", пармезан",
+    "name": "Талиатели с пилешко филе и броколи",
+    "price": "12.90",
+    "weight": "350",
+    "subcategory": ""
+  },
+  "pasta_5": {
+    "category": "-OQEbA1TjmmWT8NsHNTe",
+    "description": "Талиатели \"Вегетариана\" - вегетарианска паста.",
+    "image": "",
+    "ingredients": "талиатели, доматен сос, спанак, пресни гъби, сушени домати, пармезан, риган, чесън",
+    "name": "Талиатели \"Вегетариана\"",
+    "price": "11.90",
+    "weight": "350",
+    "subcategory": ""
+  },
+  "pasta_6": {
+    "category": "-OQEbA1TjmmWT8NsHNTe",
+    "description": "Ризото с пилешко и гъби - кремово и ароматно.",
+    "image": "",
+    "ingredients": "ориз „Арборио\", пилешко филе, пресни гъби, сметана, пармезан",
+    "name": "Ризото с пилешко и гъби",
+    "price": "12.90",
+    "weight": "350",
+    "subcategory": ""
+  },
+  "pasta_7": {
+    "category": "-OQEbA1TjmmWT8NsHNTe",
+    "description": "Ризото със скариди - деликатно и вкусно.",
+    "image": "",
+    "ingredients": "ориз „Арборио\", скариди, сметана, пармезан",
+    "name": "Ризото със скариди",
+    "price": "16.90",
+    "weight": "350",
+    "subcategory": ""
+  },
+  "appetizer_1": {
+    "category": "-OQEbD-1NKzddOupWcGe",
+    "description": "Панирани кашкавалчета със сладко от боровинки.",
+    "image": "",
+    "ingredients": "кашкавал, сладко от боровинки",
+    "name": "Панирани кашкавалчета със сладко от боровинки",
+    "price": "10.90",
+    "weight": "200",
+    "subcategory": ""
+  },
+  "appetizer_2": {
+    "category": "-OQEbD-1NKzddOupWcGe",
+    "description": "Хрупкави топени сиренца със сладко от боровинки.",
+    "image": "",
+    "ingredients": "топено сирене, сладко от боровинки",
+    "name": "Хрупкави топени сиренца със сладко от боровинки",
+    "price": "10.90",
+    "weight": "200",
+    "subcategory": ""
+  },
+  "appetizer_3": {
+    "category": "-OQEbD-1NKzddOupWcGe",
+    "description": "Хрупкави пилешки филенца с чеснов сос.",
+    "image": "",
+    "ingredients": "пилешко филе, чеснов сос",
+    "name": "Хрупкави пилешки филенца с чеснов сос",
+    "price": "12.90",
+    "weight": "200",
+    "subcategory": ""
+  },
+  "appetizer_4": {
+    "category": "-OQEbD-1NKzddOupWcGe",
+    "description": "Пилешки дробчета на тиган с лук.",
+    "image": "",
+    "ingredients": "пилешки дробчета, лук",
+    "name": "Пилешки дробчета на тиган с лук",
+    "price": "10.90",
+    "weight": "250",
+    "subcategory": ""
+  },
+  "appetizer_5": {
+    "category": "-OQEbD-1NKzddOupWcGe",
+    "description": "Пилешки сърца с пресни гъби и лук.",
+    "image": "",
+    "ingredients": "пилешки сърца, пресни гъби, лук",
+    "name": "Пилешки сърца с пресни гъби и лук",
+    "price": "10.90",
+    "weight": "250",
+    "subcategory": ""
+  },
+  "appetizer_6": {
+    "category": "-OQEbD-1NKzddOupWcGe",
+    "description": "Пържени пилешки крилца със сос барбекю.",
+    "image": "",
+    "ingredients": "пилешки крилца, сос барбекю",
+    "name": "Пържени пилешки крилца със сос барбекю",
+    "price": "12.90",
+    "weight": "350",
+    "subcategory": ""
+  },
+  "appetizer_7": {
+    "category": "-OQEbD-1NKzddOupWcGe",
+    "description": "Телешки език в масло.",
+    "image": "",
+    "ingredients": "телешки език, масло",
+    "name": "Телешки език в масло",
+    "price": "16.90",
+    "weight": "200",
+    "subcategory": ""
+  },
+  "appetizer_8": {
+    "category": "-OQEbD-1NKzddOupWcGe",
+    "description": "Свински уши с чесън и чили сос.",
+    "image": "",
+    "ingredients": "свински уши, чесън, чили сос",
+    "name": "Свински уши с чесън и чили сос",
+    "price": "10.90",
+    "weight": "200",
+    "subcategory": ""
+  },
+  "appetizer_9": {
+    "category": "-OQEbD-1NKzddOupWcGe",
+    "description": "Свински ребра на туч със сос барбекю.",
+    "image": "",
+    "ingredients": "свински ребра, сос барбекю",
+    "name": "Свински ребра на туч със сос барбекю",
+    "price": "16.90",
+    "weight": "350",
+    "subcategory": ""
+  },
+  "appetizer_10": {
+    "category": "-OQEbD-1NKzddOupWcGe",
+    "description": "Скариди с бяло вино, сладко чили и чесън.",
+    "image": "",
+    "ingredients": "скариди, бяло вино, сладко чили, чесън",
+    "name": "Скариди с бяло вино, сладко чили и чесън",
+    "price": "17.90",
+    "weight": "200",
+    "subcategory": ""
+  },
+  "appetizer_11": {
+    "category": "-OQEbD-1NKzddOupWcGe",
+    "description": "Фиш & чипс - класическо ястие.",
+    "image": "",
+    "ingredients": "риба, картофи",
+    "name": "Фиш & чипс",
+    "price": "13.90",
+    "weight": "350",
+    "subcategory": ""
+  },
+  "appetizer_12": {
+    "category": "-OQEbD-1NKzddOupWcGe",
+    "description": "Пържени картофи.",
+    "image": "",
+    "ingredients": "картофи",
+    "name": "Пържени картофи",
+    "price": "5.50",
+    "weight": "200",
+    "subcategory": ""
+  },
+  "appetizer_13": {
+    "category": "-OQEbD-1NKzddOupWcGe",
+    "description": "Пържени картофи със сирене.",
+    "image": "",
+    "ingredients": "картофи, сирене",
+    "name": "Пържени картофи със сирене",
+    "price": "5.90",
+    "weight": "250",
+    "subcategory": ""
+  },
+  "appetizer_14": {
+    "category": "-OQEbD-1NKzddOupWcGe",
+    "description": "Картофи по селски.",
+    "image": "",
+    "ingredients": "картофи",
+    "name": "Картофи по селски",
+    "price": "6.90",
+    "weight": "250",
+    "subcategory": ""
+  },
+  "main_1": {
+    "category": "-OQEbEZGKz6SiNC2jrC6",
+    "description": "Пилешки късчета със сушени домати и гъби - сочно и ароматно ястие.",
+    "image": "",
+    "ingredients": "пилешко филе, пресни гъби, сушени домати, сметана",
+    "name": "Пилешки късчета със сушени домати и гъби",
+    "price": "14.80",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "main_2": {
+    "category": "-OQEbEZGKz6SiNC2jrC6",
+    "description": "Пиле с гъби и бекон - истинска наслада за сетивата.",
+    "image": "",
+    "ingredients": "пилешко филе, гъби, бекон, соев сос, сметана",
+    "name": "Пиле с гъби и бекон",
+    "price": "14.80",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "main_3": {
+    "category": "-OQEbEZGKz6SiNC2jrC6",
+    "description": "Свински жулиени с ароматен сос и гъби.",
+    "image": "",
+    "ingredients": "свински врат, печен сос, горски гъби",
+    "name": "Свински жулиени с ароматен сос и гъби",
+    "price": "17.90",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "main_4": {
+    "category": "-OQEbEZGKz6SiNC2jrC6",
+    "description": "Запечено свинско бонфиле на фурна.",
+    "image": "",
+    "ingredients": "свинско бонфиле, гъби, кашкавал, сметана",
+    "name": "Запечено свинско бонфиле на фурна",
+    "price": "18.90",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "main_5": {
+    "category": "-OQEbEZGKz6SiNC2jrC6",
+    "description": "Сочно свинско бонфиле с хрупкава коричка.",
+    "image": "",
+    "ingredients": "свинско бонфиле",
+    "name": "Сочно свинско бонфиле с хрупкава коричка",
+    "price": "18.90",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "main_6": {
+    "category": "-OQEbEZGKz6SiNC2jrC6",
+    "description": "Шарено месце - микс от различни меса.",
+    "image": "",
+    "ingredients": "свински врат, пилешка пържола от бут, пресни гъби, лук, магданоз, сумак",
+    "name": "Шарено месце",
+    "price": "18.90",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "main_7": {
+    "category": "-OQEbEZGKz6SiNC2jrC6",
+    "description": "Телешки жулиени - деликатно и вкусно ястие.",
+    "image": "",
+    "ingredients": "телешко месо, лук, чесън, сметана, доматено пюре",
+    "name": "Телешки жулиени",
+    "price": "26.90",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "main_8": {
+    "category": "-OQEbEZGKz6SiNC2jrC6",
+    "description": "Сьомга филе - премиум ястие.",
+    "image": "",
+    "ingredients": "сьомга филе",
+    "name": "Сьомга филе",
+    "price": "29.90",
+    "weight": "450",
+    "subcategory": ""
+  },
+  "sach_1": {
+    "category": "-OQEbH4VmwbiahFVIuMs",
+    "description": "Пилешки сач - горещо, ароматно и неустоимо вкусно ястие.",
+    "image": "",
+    "ingredients": "пилешко месо, картофи, пресни гъби, лук, лимон, кашкавал",
+    "name": "Пилешки сач",
+    "price": "33.50",
+    "weight": "1400",
+    "subcategory": ""
+  },
+  "sach_1_small": {
+    "category": "-OQEbH4VmwbiahFVIuMs",
+    "description": "Пилешки сач - горещо, ароматно и неустоимо вкусно ястие (малка порция).",
+    "image": "",
+    "ingredients": "пилешко месо, картофи, пресни гъби, лук, лимон, кашкавал",
+    "name": "Пилешки сач (малка порция)",
+    "price": "22.50",
+    "weight": "700",
+    "subcategory": ""
+  },
+  "sach_2": {
+    "category": "-OQEbH4VmwbiahFVIuMs",
+    "description": "Смесен сач - горещо, ароматно и неустоимо вкусно ястие.",
+    "image": "",
+    "ingredients": "свинско месо, пилешко месо, бекон, пресни гъби, картофи, лук, моркови, пресен пипер, тиквички, чесън, лимон, кашкавал",
+    "name": "Смесен сач",
+    "price": "37.50",
+    "weight": "1800",
+    "subcategory": ""
+  },
+  "sach_2_small": {
+    "category": "-OQEbH4VmwbiahFVIuMs",
+    "description": "Смесен сач - горещо, ароматно и неустоимо вкусно ястие (малка порция).",
+    "image": "",
+    "ingredients": "свинско месо, пилешко месо, бекон, пресни гъби, картофи, лук, моркови, пресен пипер, тиквички, чесън, лимон, кашкавал",
+    "name": "Смесен сач (малка порция)",
+    "price": "26.50",
+    "weight": "800",
+    "subcategory": ""
+  },
+  "platter_1": {
+    "category": "-OQEbI06pI3hAwUgdWCN",
+    "description": "Плато мезета - селекция от месни деликатеси.",
+    "image": "",
+    "ingredients": "филе „Елена\", кайзер пастърма, луканка, суджук, пепероне",
+    "name": "Плато мезета",
+    "price": "22.50",
+    "weight": "230",
+    "subcategory": ""
+  },
+  "flatbread_1": {
+    "category": "-OQEbJx-ZyWt8nBJ0mVP",
+    "description": "Чеснова пърленка.",
+    "image": "",
+    "ingredients": "тесто, чесън",
+    "name": "Чеснова пърленка",
+    "price": "3.80",
+    "weight": "100",
+    "subcategory": ""
+  },
+  "flatbread_2": {
+    "category": "-OQEbJx-ZyWt8nBJ0mVP",
+    "description": "Пърленка със сирене.",
+    "image": "",
+    "ingredients": "тесто, сирене",
+    "name": "Пърленка със сирене",
+    "price": "4.50",
+    "weight": "120",
+    "subcategory": ""
+  },
+  "flatbread_3": {
+    "category": "-OQEbJx-ZyWt8nBJ0mVP",
+    "description": "Пърленка със кашкавал.",
+    "image": "",
+    "ingredients": "тесто, кашкавал",
+    "name": "Пърленка със кашкавал",
+    "price": "4.90",
+    "weight": "120",
+    "subcategory": ""
+  },
+  "flatbread_4": {
+    "category": "-OQEbJx-ZyWt8nBJ0mVP",
+    "description": "Комбинирана пърленка.",
+    "image": "",
+    "ingredients": "тесто, сирене, кашкавал",
+    "name": "Комбинирана пърленка",
+    "price": "5.50",
+    "weight": "150",
+    "subcategory": ""
+  },
+  "dessert_1": {
+    "category": "-OQEbLK598uk2wzVsrK1",
+    "description": "Шоколадова трилогия - сладък завършек на всяко хапване.",
+    "image": "",
+    "ingredients": "шоколад",
+    "name": "Шоколадова трилогия",
+    "price": "7.90",
+    "weight": "120",
+    "subcategory": ""
+  },
+  "dessert_2": {
+    "category": "-OQEbLK598uk2wzVsrK1",
+    "description": "Шоколадово суфле с топка сладолед - домашно приготвен десерт.",
+    "image": "",
+    "ingredients": "шоколад, сладолед",
+    "name": "Шоколадово суфле с топка сладолед",
+    "price": "7.90",
+    "weight": "130",
+    "subcategory": ""
+  },
+  "dessert_3": {
+    "category": "-OQEbLK598uk2wzVsrK1",
+    "description": "Бисквитена торта с маскарпоне - домашно приготвен десерт.",
+    "image": "",
+    "ingredients": "бисквити, маскарпоне",
+    "name": "Бисквитена торта с маскарпоне",
+    "price": "5.90",
+    "weight": "120",
+    "subcategory": ""
+  },
+  "dessert_4": {
+    "category": "-OQEbLK598uk2wzVsrK1",
+    "description": "Чийзкейк с боровинки и филиран бадем - домашно приготвен десерт.",
+    "image": "",
+    "ingredients": "чийзкейк, боровинки, бадем",
+    "name": "Чийзкейк с боровинки и филиран бадем",
+    "price": "6.90",
+    "weight": "120",
+    "subcategory": ""
+  },
+  "dessert_5": {
+    "category": "-OQEbLK598uk2wzVsrK1",
+    "description": "Шоколадов чийзкейк - домашно приготвен десерт.",
+    "image": "",
+    "ingredients": "чийзкейк, шоколад",
+    "name": "Шоколадов чийзкейк",
+    "price": "6.90",
+    "weight": "120",
+    "subcategory": ""
+  },
+  "dessert_6": {
+    "category": "-OQEbLK598uk2wzVsrK1",
+    "description": "Сладолед - ванилия, шоколад, ягода, горски плодове, пъпеш.",
+    "image": "",
+    "ingredients": "",
+    "name": "Сладолед",
+    "price": "4.90",
+    "weight": "200",
+    "subcategory": ""
+  },
+  "new_1": {
+    "category": "-OQEc-_ozYkdNOM2khXP",
+    "description": "Салата с бурата и круша - ексклузивно ново предложение, създадено с вдъхновение и свежи продукти.",
+    "image": "",
+    "ingredients": "зелена салата, айсберг, рукола, бурата, глазирана круша, карамелизиран лук, орехи, меден дресинг",
+    "name": "Салата с бурата и круша",
+    "price": "13.90",
+    "weight": "400",
+    "subcategory": ""
+  },
+  "new_2": {
+    "category": "-OQEc-_ozYkdNOM2khXP",
+    "description": "Витаминозна салата - ексклузивно ново предложение, създадено с вдъхновение и свежи продукти.",
+    "image": "",
+    "ingredients": "цвекло, моркови, ябълка, меден дресинг, сусам",
+    "name": "Витаминозна салата",
+    "price": "9.90",
+    "weight": "300",
+    "subcategory": ""
+  },
+  "new_3": {
+    "category": "-OQEc-_ozYkdNOM2khXP",
+    "description": "Солен чийзкейк капрезе - ексклузивно ново предложение, създадено с вдъхновение и свежи продукти.",
+    "image": "",
+    "ingredients": "солена бисквита, сирене \"Филаделфия\", сос \"Песто\", чери домати, балсамико",
+    "name": "Солен чийзкейк капрезе",
+    "price": "10.90",
+    "weight": "200",
+    "subcategory": ""
+  },
+  "new_4": {
+    "category": "-OQEc-_ozYkdNOM2khXP",
+    "description": "Ориенталско ризото - ексклузивно ново предложение, създадено с вдъхновение и свежи продукти.",
+    "image": "",
+    "ingredients": "ризони, пилешко филе, сушени домати, спанак, доматен сос, сметана, пармезан, рукола",
+    "name": "Ориенталско ризото",
+    "price": "14.90",
+    "weight": "450",
+    "subcategory": ""
+  },
+  "new_5": {
+    "category": "-OQEc-_ozYkdNOM2khXP",
+    "description": "Дует от свинско и пилешко роле с пухкава киноа - ексклузивно ново предложение, създадено с вдъхновение и свежи продукти.",
+    "image": "",
+    "ingredients": "пилешка кайма, сушени домати, топено сирене, свинско бон филе, мащерка, чесън, киноа, сос от ягоди, пюре от грах, сотирани картофи",
+    "name": "Дует от свинско и пилешко роле с пухкава киноа",
+    "price": "24.90",
+    "weight": "450",
+    "subcategory": ""
+  },
+  "new_6": {
+    "category": "-OQEc-_ozYkdNOM2khXP",
+    "description": "Броколи със синьо сирене - ексклузивно ново предложение, създадено с вдъхновение и свежи продукти.",
+    "image": "",
+    "ingredients": "броколи, сметана, синьо сирене, кашкавал",
+    "name": "Броколи със синьо сирене",
+    "price": "10.90",
+    "weight": "450",
+    "subcategory": ""
+  },
+  "new_7": {
+    "category": "-OQEc-_ozYkdNOM2khXP",
+    "description": "Бургер-сандвич с хрупкави картофки - ексклузивно ново предложение, създадено с вдъхновение и свежи продукти.",
+    "image": "",
+    "ingredients": "селски хляб, телешка кайма, бекон, печен лук, чедър, сос коктейл, кетчуп \"Heinz\"",
+    "name": "Бургер-сандвич с хрупкави картофки",
+    "price": "13.90",
+    "weight": "450",
+    "subcategory": ""
+  },
+  "new_8": {
+    "category": "-OQEc-_ozYkdNOM2khXP",
+    "description": "Пица с бурата - ексклузивно ново предложение, създадено с вдъхновение и свежи продукти.",
+    "image": "",
+    "ingredients": "доматен сос, кашкавал, бурата, рукола, зехтин",
+    "name": "Пица с бурата",
+    "price": "15.90",
+    "weight": "450",
+    "subcategory": ""
+  },
+  "grill_1": {
+    "category": "-OQEbEZGKz6SiNC2jrC6",
+    "description": "Пилешка пържола от бут - сочно и ароматно ястие от скарата.",
+    "image": "",
+    "ingredients": "пилешки бут",
+    "name": "Пилешка пържола от бут",
+    "price": "11.90",
+    "weight": "180",
+    "subcategory": ""
+  },
+  "grill_2": {
+    "category": "-OQEbEZGKz6SiNC2jrC6",
+    "description": "Пилешки карета - сочно и ароматно ястие от скарата.",
+    "image": "",
+    "ingredients": "пилешко филе",
+    "name": "Пилешки карета",
+    "price": "11.90",
+    "weight": "180",
+    "subcategory": ""
+  },
+  "grill_3": {
+    "category": "-OQEbEZGKz6SiNC2jrC6",
+    "description": "Свинска вратна пържола - сочно и ароматно ястие от скарата.",
+    "image": "",
+    "ingredients": "свински врат",
+    "name": "Свинска вратна пържола",
+    "price": "12.90",
+    "weight": "200",
+    "subcategory": ""
+  },
+  "grill_4": {
+    "category": "-OQEbEZGKz6SiNC2jrC6",
+    "description": "Суджук на гребен - сочно и ароматно ястие от скарата.",
+    "image": "",
+    "ingredients": "суджук",
+    "name": "Суджук на гребен",
+    "price": "15.90",
+    "weight": "180",
+    "subcategory": ""
+  }
+}
+
