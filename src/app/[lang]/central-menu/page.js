@@ -4,6 +4,7 @@ import { useCategories } from '@/context/CategoriesContext';
 import { useProducts } from '@/context/ProductsContext';
 // import { useTranslations } from '@/context/TranslationsContext'; използвай този ако има нужда от преводи от базата данни
 //използвай този ако има нужда от преводи от json файл
+import { translateCentralMenu } from '@/lib/centralMenuTranslate';
 import translations from '@/locales/central-menu.json';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { Button, Image, Select } from "antd";
@@ -35,13 +36,7 @@ export default function CentralMenuPage({ params }) {
     getLang();
   }, [params, urlParams]);
 
-  // Translation function
-  const t = (key) => {
-    if (selectedLanguage === 'bg') {
-      return key; // Return original Bulgarian text
-    }
-    return translations?.[selectedLanguage]?.[key] || key;
-  };
+  const t = (key) => translateCentralMenu(key, selectedLanguage, translations);
 
   const normalizePrice = (rawPrice) => {
     if (rawPrice === undefined || rawPrice === null) {
