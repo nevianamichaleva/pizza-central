@@ -5,6 +5,13 @@ import { useProducts } from "@/context/ProductsContext";
 import { useUser } from "@/context/UserContext";
 import { useObednoMenuSchedule } from "@/hooks/useObednoMenuSchedule";
 import { getObednoMenuClosedMessage, orderContainsUnavailableObednoItems } from "@/lib/obednoMenuSchedule";
+import {
+  getOrderAvailabilityMessage,
+  isDeliveryBlocked,
+  isOrderSubmissionBlocked,
+  normalizeOrderAvailability,
+  ORDER_AVAILABILITY_MODES,
+} from "@/lib/orderAvailability";
 import { Input, message, Select, Tooltip } from "antd";
 import { get, onValue, ref, update } from "firebase/database";
 import Image from "next/image";
@@ -41,6 +48,7 @@ export default function Order() {
   const [orderType, setOrderType] = useState('delivery'); // 'pickup' or 'delivery'
   const [selectedHour, setSelectedHour] = useState(null);
   const [selectedMinute, setSelectedMinute] = useState(null);
+  const [orderAvailabilityMode, setOrderAvailabilityMode] = useState(ORDER_AVAILABILITY_MODES.NORMAL);
 
   const resolveCartId = async () => {
     if (typeof window === "undefined") {
@@ -379,6 +387,16 @@ export default function Order() {
       return;
     }
 
+    if (isOrderSubmissionBlocked(orderAvailabilityMode)) {
+      message.error(getOrderAvailabilityMessage(orderAvailabilityMode));
+      return;
+    }
+
+    if (orderType === 'delivery' && isDeliveryBlocked(orderAvailabilityMode)) {
+      message.error(getOrderAvailabilityMessage(orderAvailabilityMode));
+      return;
+    }
+
     // Get order number if not already assigned
     let orderNumber = order.order_number;
     if (!orderNumber) {
@@ -489,13 +507,25 @@ export default function Order() {
         })
       );
     }
-    showAToast("success", "Поръчката е изпратена успешно! Очаквайте доставка на посочения адрес.");
+    showAToast(
+      "success",
+      orderType === 'pickup'
+        ? "Поръчката е изпратена успешно! Очакваме ви в ресторанта, за да получите поръчката си."
+        : "Поръчката е изпратена успешно! Очаквайте доставка на посочения адрес."
+    );
   };
+
+  useEffect(() => {
+    if (orderAvailabilityMode === ORDER_AVAILABILITY_MODES.PICKUP_ONLY && orderType === 'delivery') {
+      setOrderType('pickup');
+    }
+  }, [orderAvailabilityMode, orderType]);
 
   useEffect(() => {
     let unsubscribe = () => {};
     let unsubscribeWorkingHours = () => {};
     let unsubDeliveryPrice = () => {};
+    let unsubOrderAvailability = () => {};
 
     const init = async () => {
       setLoading(true);
@@ -537,6 +567,15 @@ export default function Order() {
           }
         }
       });
+
+      const orderAvailabilityRef = ref(rtdb, 'settings/orderAvailability');
+      unsubOrderAvailability = onValue(orderAvailabilityRef, (snapshot) => {
+        if (snapshot.exists()) {
+          setOrderAvailabilityMode(normalizeOrderAvailability(snapshot.val()).mode);
+        } else {
+          setOrderAvailabilityMode(ORDER_AVAILABILITY_MODES.NORMAL);
+        }
+      });
     };
 
     init();
@@ -545,6 +584,7 @@ export default function Order() {
       unsubscribe();
       unsubscribeWorkingHours();
       unsubDeliveryPrice();
+      unsubOrderAvailability();
     };
   }, [user]);
 
@@ -663,6 +703,34 @@ export default function Order() {
       ? calculatedTotal - pickupDiscount
       : calculatedTotal + deliveryFee - registeredUserDiscountAmount;
 
+  const ordersDisabled = isOrderSubmissionBlocked(orderAvailabilityMode);
+  const deliveryDisabled = isDeliveryBlocked(orderAvailabilityMode);
+  const availabilityMessage = getOrderAvailabilityMessage(orderAvailabilityMode);
+  const isSubmitDisabled =
+    ordersDisabled ||
+    order?.status === 'in progress' ||
+    (orderType === 'delivery' && calculatedTotal < minOrderForDelivery) ||
+    !isWithinWorkingHours() ||
+    !phone ||
+    !String(phone).trim() ||
+    (orderType === 'delivery' && (!address || !String(address).trim()));
+
+  const getSubmitTooltip = () => {
+    if (ordersDisabled) {
+      return availabilityMessage;
+    }
+    if (!phone || !String(phone).trim()) {
+      return "Въведете телефон като натиснете бутона Добави";
+    }
+    if (orderType === 'delivery' && (!address || !String(address).trim())) {
+      return "Въведете адрес за доставка";
+    }
+    if (!isWithinWorkingHours()) {
+      return `Поръчките се приемат от ${workingHours.startHour}:00 до ${workingHours.endHour}:00 часа`;
+    }
+    return "";
+  };
+
   return (
     <>
       <section id="contact" className="contact section shopping-cart dark">
@@ -675,6 +743,21 @@ export default function Order() {
             <Link href="/for-home" className="btn btn-primary w-auto text-center py-1 px-3" style={{ marginBottom: "20px" }}>
               Към меню
             </Link>
+            {!orderCompleted && availabilityMessage && (
+              <div style={{
+                marginBottom: '20px',
+                padding: '16px 20px',
+                borderRadius: '8px',
+                backgroundColor: ordersDisabled ? '#fff2f0' : '#fff7e6',
+                border: `1px solid ${ordersDisabled ? '#ffccc7' : '#ffd591'}`,
+                color: ordersDisabled ? '#cf1322' : '#d46b08',
+                fontSize: '15px',
+                lineHeight: 1.6,
+                textAlign: 'left',
+              }}>
+                {availabilityMessage}
+              </div>
+            )}
             <div className="content box">
               <div className="row">
                 <div className="col-lg-8 items-section">
@@ -978,7 +1061,8 @@ export default function Order() {
                           borderRadius: "8px",
                           backgroundColor: orderType === 'delivery' ? "#ce1212" : "#fff",
                           color: orderType === 'delivery' ? "#fff" : "#000",
-                          cursor: "pointer",
+                          cursor: deliveryDisabled ? "not-allowed" : "pointer",
+                          opacity: deliveryDisabled ? 0.45 : 1,
                           transition: "all 0.3s",
                           position: "relative"
                         }}>
@@ -988,7 +1072,8 @@ export default function Order() {
                             value="delivery"
                             checked={orderType === 'delivery'}
                             onChange={(e) => setOrderType(e.target.value)}
-                            style={{ display: "none", cursor: "pointer" }}
+                            disabled={deliveryDisabled}
+                            style={{ display: "none", cursor: deliveryDisabled ? "not-allowed" : "pointer" }}
                           />
                           <div style={{ fontWeight: "600", fontSize: "13px", textAlign: "center", lineHeight: "1.2" }}>
                             Доставка
@@ -1133,7 +1218,8 @@ export default function Order() {
                           border: orderType === 'delivery' ? "2px solid #ce1212" : "2px solid #e0e0e0",
                           borderRadius: "8px",
                           backgroundColor: orderType === 'delivery' ? "#fff5f5" : "#fff",
-                          cursor: "pointer"
+                          cursor: deliveryDisabled ? "not-allowed" : "pointer",
+                          opacity: deliveryDisabled ? 0.45 : 1,
                         }}>
                           <input
                             type="radio"
@@ -1141,7 +1227,8 @@ export default function Order() {
                             value="delivery"
                             checked={orderType === 'delivery'}
                             onChange={(e) => setOrderType(e.target.value)}
-                            style={{ display: "none", marginRight: "10px", cursor: "pointer" }}
+                            disabled={deliveryDisabled}
+                            style={{ display: "none", marginRight: "10px", cursor: deliveryDisabled ? "not-allowed" : "pointer" }}
                           />
                           <div>
                             <div style={{ fontWeight: "600" }}>
@@ -1164,33 +1251,23 @@ export default function Order() {
                           Политика за личните данни
                         </Link>
                       </div>
-                      <Tooltip title={
-                        (!phone || !String(phone).trim()) 
-                          ? "Въведете телефон като натиснете бутона Добави" 
-                          : (orderType === 'delivery' && (!address || !String(address).trim()))
-                            ? "Въведете адрес за доставка"
-                            : !isWithinWorkingHours() 
-                              ? `Поръчките се приемат от ${workingHours.startHour}:00 до ${workingHours.endHour}:00 часа` 
-                              : ""
-                      }>
+                      <Tooltip title={getSubmitTooltip()}>
                         <span style={{ display: 'inline-block', width: '100%', marginTop: '10px' }}>
                           <button
                             className="btn btn-primary btn-lg btn-block"
                             onClick={changeOrderStatus}
-                            disabled={
-                              order?.status === 'in progress' || 
-                              (orderType === 'delivery' && calculatedTotal < minOrderForDelivery) || 
-                              !isWithinWorkingHours() ||
-                              !phone || 
-                              !String(phone).trim() ||
-                              (orderType === 'delivery' && (!address || !String(address).trim()))
-                            }
+                            disabled={isSubmitDisabled}
                           >
                             Поръчай
                           </button>
                         </span>
                       </Tooltip>
-                      {!isWithinWorkingHours() && (
+                      {ordersDisabled && (
+                        <p style={{ fontSize: '15px', textAlign: 'left', color: 'red', marginTop: '10px' }}>
+                          {availabilityMessage}
+                        </p>
+                      )}
+                      {!ordersDisabled && !isWithinWorkingHours() && (
                         <p style={{ fontSize: '15px', textAlign: 'left', color: 'red', marginTop: '10px' }}>
                           Поръчките се приемат от {workingHours.startHour}:00 до {workingHours.endHour}:00 часа
                         </p>
@@ -1446,27 +1523,12 @@ export default function Order() {
                   {/* Second Поръчай button - below contact data */}
                   {!orderCompleted && (
                     <>
-                      <Tooltip title={
-                        (!phone || !String(phone).trim()) 
-                          ? "Въведете телефон" 
-                          : (orderType === 'delivery' && (!address || !String(address).trim()))
-                            ? "Въведете адрес за доставка"
-                            : !isWithinWorkingHours() 
-                              ? `Поръчките се приемат от ${workingHours.startHour}:00 до ${workingHours.endHour}:00 часа` 
-                              : ""
-                      }>
+                      <Tooltip title={getSubmitTooltip()}>
                         <span style={{ display: 'inline-block', width: '100%', marginTop: '20px' }}>
                           <button
                             className="btn btn-primary btn-lg btn-block"
                             onClick={changeOrderStatus}
-                            disabled={
-                              order?.status === 'in progress' || 
-                              (orderType === 'delivery' && calculatedTotal < minOrderForDelivery) || 
-                              !isWithinWorkingHours() ||
-                              !phone || 
-                              !String(phone).trim() ||
-                              (orderType === 'delivery' && (!address || !String(address).trim()))
-                            }
+                            disabled={isSubmitDisabled}
                           >
                             Поръчай
                           </button>
@@ -1514,7 +1576,9 @@ export default function Order() {
                     margin: '0 0 16px 0',
                     lineHeight: '1.5'
                   }}>
-                    Очаквайте доставка на посочения адрес
+                    {orderType === 'pickup'
+                      ? 'Очакваме ви в ресторанта, за да получите поръчката си.'
+                      : 'Очаквайте доставка на посочения адрес.'}
                   </p>
                   
                   {/* Status Section */}
@@ -1538,7 +1602,13 @@ export default function Order() {
                       fontSize: '16px',
                       fontWeight: '600'
                     }}>
-                      {status == "in progress" ? "🚚 Доставя се" : status == "completed" ? "✅ Поръчката е доставена" : status == "cancelled" ? "❌ Поръчката е отказана" : status}
+                      {status == "in progress"
+                        ? (orderType === 'pickup' ? "🍽️ Приготвя се" : "🚚 Доставя се")
+                        : status == "completed"
+                          ? (orderType === 'pickup' ? "✅ Готова за вземане" : "✅ Поръчката е доставена")
+                          : status == "cancelled"
+                            ? "❌ Поръчката е отказана"
+                            : status}
                     </span>
                   </div>
                   

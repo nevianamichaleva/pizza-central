@@ -8,6 +8,10 @@ import Link from 'next/link';
 import { useEffect, useState } from "react";
 import { rtdb } from '../../../../lib/firebase';
 import {
+    ORDER_AVAILABILITY_MODES,
+    normalizeOrderAvailability,
+} from '../../../lib/orderAvailability';
+import {
     compareOrdersByDate,
     generateOrderNumber,
     getOrderNumberSortValue,
@@ -48,6 +52,8 @@ const AdminOrdersPage = () => {
     const [editingMinOrderAmount, setEditingMinOrderAmount] = useState(25);
     const [registeredUserDiscountPercent, setRegisteredUserDiscountPercent] = useState(0);
     const [editingRegisteredUserDiscountPercent, setEditingRegisteredUserDiscountPercent] = useState(0);
+    const [orderAvailabilityMode, setOrderAvailabilityMode] = useState(ORDER_AVAILABILITY_MODES.NORMAL);
+    const [savingOrderAvailability, setSavingOrderAvailability] = useState(false);
     const [adminEmail, setAdminEmail] = useState('');
     const [editingEmail, setEditingEmail] = useState('');
     const [isEditingEmail, setIsEditingEmail] = useState(false);
@@ -211,6 +217,7 @@ const AdminOrdersPage = () => {
         fetchOrders();
         fetchWorkingHours();
         fetchDeliveryPriceTiers();
+        fetchOrderAvailability();
         fetchAdminEmail();
         fetchSmtpConfig();
     }, []);
@@ -353,6 +360,50 @@ const AdminOrdersPage = () => {
         setEditingMinOrderAmount(minOrderAmount);
         setEditingRegisteredUserDiscountPercent(registeredUserDiscountPercent);
         setIsEditingDeliveryTiers(false);
+    };
+
+    const fetchOrderAvailability = async () => {
+        try {
+            const settingsRef = ref(rtdb, 'settings/orderAvailability');
+            const snapshot = await get(settingsRef);
+
+            if (snapshot.exists()) {
+                setOrderAvailabilityMode(normalizeOrderAvailability(snapshot.val()).mode);
+            } else {
+                setOrderAvailabilityMode(ORDER_AVAILABILITY_MODES.NORMAL);
+            }
+        } catch (error) {
+            console.error('Error fetching order availability:', error);
+        }
+    };
+
+    const saveOrderAvailability = async (mode) => {
+        try {
+            setSavingOrderAvailability(true);
+            const settingsRef = ref(rtdb, 'settings/orderAvailability');
+            await set(settingsRef, { mode });
+            setOrderAvailabilityMode(mode);
+
+            if (mode === ORDER_AVAILABILITY_MODES.NORMAL) {
+                message.success('Поръчките са активирани.');
+            } else if (mode === ORDER_AVAILABILITY_MODES.DISABLED) {
+                message.success('Онлайн поръчките са изключени.');
+            } else {
+                message.success('Активирано е само вземане от ресторанта.');
+            }
+        } catch (error) {
+            console.error('Error saving order availability:', error);
+            message.error('Грешка при запазване на настройката за поръчки');
+        } finally {
+            setSavingOrderAvailability(false);
+        }
+    };
+
+    const toggleOrderAvailability = (targetMode) => {
+        const nextMode = orderAvailabilityMode === targetMode
+            ? ORDER_AVAILABILITY_MODES.NORMAL
+            : targetMode;
+        saveOrderAvailability(nextMode);
     };
 
     const fetchAdminEmail = async () => {
@@ -656,6 +707,50 @@ const AdminOrdersPage = () => {
                                 </div>
                             </Space>
                         )}
+                    </Card>
+                    <Card
+                        title="Приемане на поръчки"
+                        style={{ marginBottom: "20px" }}
+                    >
+                        <p style={{ color: '#666', fontSize: '14px', marginBottom: '16px' }}>
+                            Бързо управление на онлайн поръчките. Активиран бутон означава, че съответният режим е включен.
+                        </p>
+                        <Space wrap size="middle">
+                            <Button
+                                type={orderAvailabilityMode === ORDER_AVAILABILITY_MODES.DISABLED ? 'primary' : 'default'}
+                                danger={orderAvailabilityMode === ORDER_AVAILABILITY_MODES.DISABLED}
+                                loading={savingOrderAvailability}
+                                onClick={() => toggleOrderAvailability(ORDER_AVAILABILITY_MODES.DISABLED)}
+                            >
+                                {orderAvailabilityMode === ORDER_AVAILABILITY_MODES.DISABLED ? '✓ ' : ''}
+                                Изключи поръчките
+                            </Button>
+                            <Button
+                                type={orderAvailabilityMode === ORDER_AVAILABILITY_MODES.PICKUP_ONLY ? 'primary' : 'default'}
+                                loading={savingOrderAvailability}
+                                onClick={() => toggleOrderAvailability(ORDER_AVAILABILITY_MODES.PICKUP_ONLY)}
+                            >
+                                {orderAvailabilityMode === ORDER_AVAILABILITY_MODES.PICKUP_ONLY ? '✓ ' : ''}
+                                Само вземане от ресторанта
+                            </Button>
+                        </Space>
+                        <div style={{ marginTop: '16px' }}>
+                            {orderAvailabilityMode === ORDER_AVAILABILITY_MODES.NORMAL && (
+                                <p style={{ color: '#52c41a', fontSize: '14px', margin: 0 }}>
+                                    Поръчките се приемат нормално – доставка и вземане от ресторанта.
+                                </p>
+                            )}
+                            {orderAvailabilityMode === ORDER_AVAILABILITY_MODES.DISABLED && (
+                                <p style={{ color: '#f5222d', fontSize: '14px', margin: 0 }}>
+                                    Клиентите няма да могат да изпратят поръчка. Ще виждат съобщение, че в момента не приемате онлайн поръчки.
+                                </p>
+                            )}
+                            {orderAvailabilityMode === ORDER_AVAILABILITY_MODES.PICKUP_ONLY && (
+                                <p style={{ color: '#fa8c16', fontSize: '14px', margin: 0 }}>
+                                    Клиентите могат да поръчат само за вземане от ресторанта. Доставката е изключена.
+                                </p>
+                            )}
+                        </div>
                     </Card>
                     <Card
                         title="Цени на доставка"
