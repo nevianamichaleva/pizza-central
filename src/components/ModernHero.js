@@ -76,7 +76,7 @@ const ModernHero = () => {
                         <div style={{ width: '100%', maxWidth: '500px', aspectRatio: '1', margin: '0 auto', borderRadius: '50%', overflow: 'hidden' }}>
                             <Image
                                 src="/images/dinner-3.jpg"
-                                alt="Авторско ястие от ресторант Централ Добрич"
+                                alt="Цвински кралски котлет от ресторант Централ Добрич"
                                 width={500}
                                 height={500}
                                 //className="img-fluid animated"
