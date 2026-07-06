@@ -2,10 +2,10 @@
 
 import { useUser } from '@/context/UserContext';
 import { DeleteOutlined } from '@ant-design/icons';
-import { Button, Card, Drawer, Input, message, Popconfirm, Select, Space, Switch, Table, Tabs } from "antd";
+import { Button, Card, DatePicker, Drawer, Input, InputNumber, message, Popconfirm, Select, Space, Switch, Table, Tabs } from "antd";
 import { get, ref, remove, set } from 'firebase/database';
 import Link from 'next/link';
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { rtdb } from '../../../../lib/firebase';
 import {
     ORDER_AVAILABILITY_MODES,
@@ -18,9 +18,48 @@ import {
     parseOrderDateTimestamp,
 } from '../../../utils/orderNumberUtils';
 
+const { RangePicker } = DatePicker;
+
+const ORDER_STATUS_OPTIONS = [
+    { value: 'all', label: 'Всички статуси' },
+    { value: 'pending', label: '🕐 Чакаща' },
+    { value: 'in progress', label: '🚚 В процес' },
+    { value: 'delivered', label: '✅ Доставена' },
+    { value: 'cancelled', label: '❌ Отказана' },
+];
+
+const normalizeOrderStatus = (status) => {
+    const s = (status || '').toString().trim().toLowerCase();
+    const map = {
+        'чакаща': 'pending',
+        'pending': 'pending',
+        'в процес': 'in progress',
+        'in progress': 'in progress',
+        'доставена': 'delivered',
+        'delivered': 'delivered',
+        'отказана': 'cancelled',
+        'cancelled': 'cancelled',
+    };
+    return map[s] || s;
+};
+
+const normalizeMoneyInput = (value) => {
+    if (value === '' || value == null) return null;
+    const parsed = parseFloat(String(value).replace(',', '.'));
+    return Number.isNaN(parsed) ? null : Math.round(parsed * 100) / 100;
+};
+
+const formatMoneyDisplay = (value) => {
+    const num = Number(value);
+    if (!Number.isFinite(num)) return '0';
+    return num.toLocaleString('bg-BG', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+};
+
 const AdminOrdersPage = () => {
     const { isAdmin } = useUser();
     const [orders, setOrders] = useState([]);
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [dateRange, setDateRange] = useState(null);
     
     // Currency conversion rate
     const EUR_RATE = 1.95583;
@@ -320,8 +359,8 @@ const AdminOrdersPage = () => {
             const t0 = editingDeliveryTiers[0];
             const t1 = editingDeliveryTiers[1];
             const max0 = t0?.maxAmount === '' || t0?.maxAmount == null ? 25 : parseInt(Number(t0.maxAmount), 10);
-            const fee0 = parseFloat(t0?.fee) || 0;
-            const fee1 = parseFloat(t1?.fee) || 0;
+            const fee0 = normalizeMoneyInput(t0?.fee) ?? 0;
+            const fee1 = normalizeMoneyInput(t1?.fee) ?? 0;
             const tiers = [
                 { maxAmount: max0, fee: fee0 },
                 { maxAmount: null, fee: fee1 }
@@ -610,6 +649,31 @@ const AdminOrdersPage = () => {
         }
     };
 
+    const filteredOrders = useMemo(() => {
+        return orders.filter((order) => {
+            if (statusFilter !== 'all' && normalizeOrderStatus(order.status) !== statusFilter) {
+                return false;
+            }
+
+            if (dateRange?.[0] && dateRange?.[1]) {
+                const ts = parseOrderDateTimestamp(order);
+                if (!ts) return false;
+                const start = dateRange[0].startOf('day').valueOf();
+                const end = dateRange[1].endOf('day').valueOf();
+                if (ts < start || ts > end) return false;
+            }
+
+            return true;
+        });
+    }, [orders, statusFilter, dateRange]);
+
+    const hasActiveFilters = statusFilter !== 'all' || Boolean(dateRange?.[0] && dateRange?.[1]);
+
+    const clearFilters = () => {
+        setStatusFilter('all');
+        setDateRange(null);
+    };
+
     if (!isAdmin) {
         return <section id="contact" className="contact section">
             <div className="container">
@@ -629,9 +693,34 @@ const AdminOrdersPage = () => {
             label: '📋 Поръчки',
             children: (
                 <div style={{ overflowX: 'auto', width: '100%' }}>
+                    <div style={{ marginBottom: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <Select
+                            value={statusFilter}
+                            onChange={setStatusFilter}
+                            style={{ width: 200 }}
+                            options={ORDER_STATUS_OPTIONS}
+                        />
+                        <RangePicker
+                            value={dateRange}
+                            onChange={setDateRange}
+                            format="DD.MM.YYYY"
+                            placeholder={['От дата', 'До дата']}
+                            allowClear
+                        />
+                        {hasActiveFilters && (
+                            <Button onClick={clearFilters}>
+                                Изчисти филтрите
+                            </Button>
+                        )}
+                        {hasActiveFilters && (
+                            <span style={{ color: '#666', fontSize: '14px' }}>
+                                Показани {filteredOrders.length} от {orders.length} поръчки
+                            </span>
+                        )}
+                    </div>
                     <Table
                         bordered
-                        dataSource={orders}
+                        dataSource={filteredOrders}
                         columns={columns}
                         rowKey="id"
                         scroll={{ x: 1200 }}
@@ -776,10 +865,10 @@ const AdminOrdersPage = () => {
                                     <strong>Минимална сума за доставка:</strong> {minOrderAmount} лв
                                 </p>
                                 <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
-                                    <strong>До {deliveryPriceTiers[0]?.maxAmount ?? 25} лв:</strong> {deliveryPriceTiers[0]?.fee ?? 5} лв
+                                    <strong>До {deliveryPriceTiers[0]?.maxAmount ?? 25} лв:</strong> {formatMoneyDisplay(deliveryPriceTiers[0]?.fee ?? 5)} лв
                                 </p>
                                 <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
-                                    <strong>Над {deliveryPriceTiers[0]?.maxAmount ?? 25} лв:</strong> {deliveryPriceTiers[1]?.fee ?? 3} лв
+                                    <strong>Над {deliveryPriceTiers[0]?.maxAmount ?? 25} лв:</strong> {formatMoneyDisplay(deliveryPriceTiers[1]?.fee ?? 3)} лв
                                 </p>
                                 <p style={{ color: '#52c41a', fontSize: '14px', marginTop: '14px', marginBottom: '10px' }}>
                                     <strong>Отстъпка за регистрирани потребители:</strong> {registeredUserDiscountPercent}%
@@ -816,20 +905,20 @@ const AdminOrdersPage = () => {
                                         style={{ width: 80 }}
                                     />
                                     <span><strong>лв →</strong></span>
-                                    <Input
-                                        type="number"
+                                    <InputNumber
                                         min={0}
-                                        step={0.5}
+                                        step={0.01}
+                                        precision={2}
+                                        decimalSeparator=","
                                         value={editingDeliveryTiers[0]?.fee ?? 5}
-                                        onChange={(e) => {
-                                            const v = parseFloat(e.target.value) || 0;
+                                        onChange={(v) => {
                                             setEditingDeliveryTiers(prev => {
                                                 const next = [...prev];
-                                                next[0] = { ...next[0], fee: v };
+                                                next[0] = { ...next[0], fee: v ?? 0 };
                                                 return next;
                                             });
                                         }}
-                                        style={{ width: 80 }}
+                                        style={{ width: 100 }}
                                     />
                                     <span><strong>лв</strong></span>
                                 </div>
@@ -843,21 +932,21 @@ const AdminOrdersPage = () => {
                                         disabled
                                     />
                                     <span><strong>лв →</strong></span>
-                                    <Input
-                                        type="number"
+                                    <InputNumber
                                         min={0}
-                                        step={0.5}
+                                        step={0.01}
+                                        precision={2}
+                                        decimalSeparator=","
                                         value={editingDeliveryTiers[1]?.fee ?? 3}
-                                        onChange={(e) => {
-                                            const v = parseFloat(e.target.value) || 0;
+                                        onChange={(v) => {
                                             setEditingDeliveryTiers(prev => {
                                                 const next = [...prev];
                                                 if (!next[1]) next[1] = { maxAmount: null, fee: 3 };
-                                                next[1] = { ...next[1], fee: v };
+                                                next[1] = { ...next[1], fee: v ?? 0 };
                                                 return next;
                                             });
                                         }}
-                                        style={{ width: 80 }}
+                                        style={{ width: 100 }}
                                     />
                                     <span><strong>лв</strong></span>
                                 </div>

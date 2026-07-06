@@ -15,6 +15,7 @@ import { get, push, ref, set, update } from "firebase/database";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from 'react';
 import { rtdb } from "../../lib/firebase";
+import { formatOrderDate } from '@/utils/orderNumberUtils';
 import showAToast from "./common/showAToast";
 import MobileProductsSlider from "./MobileProductsSlider";
 import SpicyBadge from "./SpicyBadge";
@@ -309,7 +310,7 @@ const MenuPreview = () => {
 
         const newOrder = {
           items: items,
-          order_date: new Date().toLocaleString(),
+          order_date: formatOrderDate(),
           status: "pending",
           total: totalProductPrice,
           user_id: user ? user.uid : null,
@@ -394,6 +395,7 @@ const MenuPreview = () => {
         await update(ref(rtdb, `orders/${orderKey}`), {
           items: updatedItems,
           total: updatedTotal,
+          order_date: formatOrderDate(),
           user_id: user ? user.uid : currentOrder.user_id ?? null,
           user_email: user ? user.email : currentOrder.user_email ?? null,
           user_phone: userDetails ? userDetails.phone : currentOrder.user_phone ?? null,

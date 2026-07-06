@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { formatOrderDate } from '@/utils/orderNumberUtils';
 
 export async function POST(request) {
   try {
@@ -105,7 +106,7 @@ export async function POST(request) {
 Детайли на поръчката:
 Номер на поръчка: ${orderNumber}
 ID: ${orderData.id || 'N/A'}
-Дата: ${orderData.order_date || new Date().toLocaleString()}
+Дата: ${orderData.order_date || formatOrderDate()}
 Статус: ${orderData.status || 'pending'}
 
 Клиент:

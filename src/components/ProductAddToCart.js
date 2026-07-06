@@ -6,6 +6,7 @@ import { useProducts } from '@/context/ProductsContext';
 import { useUser } from '@/context/UserContext';
 import { useObednoMenuSchedule } from '@/hooks/useObednoMenuSchedule';
 import { canOrderObednoProduct, getObednoMenuClosedMessage } from '@/lib/obednoMenuSchedule';
+import { formatOrderDate } from '@/utils/orderNumberUtils';
 import { Button, Modal, Radio } from 'antd';
 import { get, push, ref, set } from 'firebase/database';
 import { useState } from "react";
@@ -147,7 +148,7 @@ const ProductAddToCart = ({ product }) => {
 
         const newOrder = {
           items: items,
-          order_date: new Date().toLocaleString(),
+          order_date: formatOrderDate(),
           status: "pending",
           total: totalProductPrice, // Already includes packaging price
           user_id: user ? user.uid : null,
@@ -222,6 +223,7 @@ const ProductAddToCart = ({ product }) => {
           ...orderData,
           items: updatedItems,
           total: updatedTotal,
+          order_date: formatOrderDate(),
         });
 
         showAToast("success", "Продуктът е добавен в количката");

@@ -3,6 +3,7 @@
 import { default as showAToast } from '@/components/common/showAToast';
 import { useProducts } from '@/context/ProductsContext';
 import { useUser } from '@/context/UserContext';
+import { formatOrderDate } from '@/utils/orderNumberUtils';
 import { Button, Modal, Radio } from 'antd';
 import { get, push, ref, set } from 'firebase/database';
 import { useState } from "react";
@@ -154,7 +155,7 @@ const NewDishAddToCart = ({ dish }) => {
 
         const newOrder = {
           items: items,
-          order_date: new Date().toLocaleString(),
+          order_date: formatOrderDate(),
           status: "pending",
           total: totalProductPrice,
           user_id: user ? user.uid : null,
@@ -215,7 +216,7 @@ const NewDishAddToCart = ({ dish }) => {
 
           const newOrder = {
             items: items,
-            order_date: new Date().toLocaleString(),
+            order_date: formatOrderDate(),
             status: "pending",
             total: totalProductPrice,
             user_id: user ? user.uid : null,
@@ -286,6 +287,7 @@ const NewDishAddToCart = ({ dish }) => {
             ...orderData,
             items: existingItems,
             total: newTotal,
+            order_date: formatOrderDate(),
           });
 
           showAToast("success", "Продуктът е добавен в количката");

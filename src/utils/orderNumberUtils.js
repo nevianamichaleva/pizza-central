@@ -64,39 +64,63 @@ export function getOrderNumberSortValue(order) {
   return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
-/** Timestamp за сортиране по дата (поддържа toLocaleString и DD.MM.YYYY). */
+/** Формат DD.MM.YYYY HH:mm за запис на дата на поръчка в количката. */
+export function formatOrderDate(date = new Date()) {
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return '';
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${day}.${month}.${year} ${hours}:${minutes}`;
+}
+
+function parseDotDateParts(dayStr, monthStr, yearStr, timePart = '') {
+  let year = parseInt(yearStr, 10);
+  if (year < 100) year += 2000;
+  const month = parseInt(monthStr, 10) - 1;
+  const day = parseInt(dayStr, 10);
+  const timeMatch = timePart?.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+  const h = timeMatch ? parseInt(timeMatch[1], 10) : 0;
+  const min = timeMatch ? parseInt(timeMatch[2], 10) : 0;
+  const sec = timeMatch && timeMatch[3] ? parseInt(timeMatch[3], 10) : 0;
+  const ts = new Date(year, month, day, h, min, sec).getTime();
+  return Number.isNaN(ts) ? 0 : ts;
+}
+
+/** Timestamp за сортиране/филтриране по дата (DD.MM.YYYY, legacy toLocaleString и др.). */
 export function parseOrderDateTimestamp(order) {
   if (!order?.order_date) return 0;
   const raw = String(order.order_date).trim();
   if (!raw) return 0;
 
   const cleaned = raw.replace(/ г\./g, '').replace(/ ч\./g, '').trim();
-  const direct = Date.parse(cleaned);
-  if (!Number.isNaN(direct)) return direct;
 
-  const datePart = cleaned.includes(',')
-    ? cleaned.split(',')[0].trim()
-    : cleaned.split(/\s+/)[0].trim();
-
-  const dotMatch = datePart.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/);
-  if (dotMatch) {
-    let year = parseInt(dotMatch[3], 10);
-    if (year < 100) year += 2000;
-    const month = parseInt(dotMatch[2], 10) - 1;
-    const day = parseInt(dotMatch[1], 10);
-    const timePart = cleaned.includes(',') ? cleaned.split(',')[1]?.trim() : '';
-    const timeMatch = timePart?.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
-    const h = timeMatch ? parseInt(timeMatch[1], 10) : 0;
-    const min = timeMatch ? parseInt(timeMatch[2], 10) : 0;
-    const sec = timeMatch && timeMatch[3] ? parseInt(timeMatch[3], 10) : 0;
-    return new Date(year, month, day, h, min, sec).getTime();
+  // DD.MM.YYYY [HH:mm[:ss]] – български формат (преди Date.parse, за да не се обърка с MM.DD.YYYY)
+  const bgMatch = cleaned.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})(?:\s+(\d{1,2}:\d{2}(?::\d{2})?))?$/);
+  if (bgMatch) {
+    return parseDotDateParts(bgMatch[1], bgMatch[2], bgMatch[3], bgMatch[4] || '');
   }
 
-  const slashMatch = datePart.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  // Legacy: "DD.MM.YYYY, HH:mm:ss"
+  if (cleaned.includes(',')) {
+    const [datePart, timePart] = cleaned.split(',').map((s) => s.trim());
+    const dotMatch = datePart.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/);
+    if (dotMatch) {
+      return parseDotDateParts(dotMatch[1], dotMatch[2], dotMatch[3], timePart);
+    }
+  }
+
+  const slashMatch = cleaned.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
   if (slashMatch) {
-    let year = parseInt(slashMatch[3], 10);
-    if (year < 100) year += 2000;
-    return new Date(year, parseInt(slashMatch[2], 10) - 1, parseInt(slashMatch[1], 10)).getTime();
+    return parseDotDateParts(slashMatch[1], slashMatch[2], slashMatch[3]);
+  }
+
+  // ISO и други стандартни формати – не dot-separated (те се объркват като MM.DD.YYYY)
+  if (!/^\d{1,2}\.\d{1,2}\./.test(cleaned)) {
+    const direct = Date.parse(cleaned);
+    if (!Number.isNaN(direct)) return direct;
   }
 
   const fallback = new Date(order.order_date).getTime();
