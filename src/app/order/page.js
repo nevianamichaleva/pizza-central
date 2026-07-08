@@ -1341,8 +1341,13 @@ export default function Order() {
                       )}
                     </div>
                     <div style={{ marginBottom: "20px" }}>
+                      <h5>Начин на плащане:</h5>
                       {!orderCompleted ? (
-                        <Checkbox checked={payWithCard} onChange={(e) => setPayWithCard(e.target.checked)}>
+                        <Checkbox
+                          className="order-pay-card-checkbox"
+                          checked={payWithCard}
+                          onChange={(e) => setPayWithCard(e.target.checked)}
+                        >
                           Желая да платя с карта при доставката
                         </Checkbox>
                       ) : (
@@ -1493,7 +1498,11 @@ export default function Order() {
                     }}>
                       <h5 style={{ fontSize: "16px", fontWeight: "600", margin: "0 0 10px 0", textAlign: "left" }}>Начин на плащане:</h5>
                       {!orderCompleted ? (
-                        <Checkbox checked={payWithCard} onChange={(e) => setPayWithCard(e.target.checked)}>
+                        <Checkbox
+                          className="order-pay-card-checkbox"
+                          checked={payWithCard}
+                          onChange={(e) => setPayWithCard(e.target.checked)}
+                        >
                           Желая да платя с карта при доставката
                         </Checkbox>
                       ) : (
