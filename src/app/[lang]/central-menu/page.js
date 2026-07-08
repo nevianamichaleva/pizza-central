@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useObednoMenuSchedule } from '@/hooks/useObednoMenuSchedule';
 import { categoryUsesObednoSchedule } from '@/lib/obednoMenuSchedule';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 export default function CentralMenuPage({ params }) {
   const router = useRouter();
@@ -120,16 +120,6 @@ export default function CentralMenuPage({ params }) {
     return orderA - orderB;
   });
 
-  // Set first category as selected by default
-  useEffect(() => {
-    if (mainCategories.length > 0 && selectedCategoryId === null) {
-      setSelectedCategoryId(mainCategories[0].id);
-    }
-  }, [mainCategories, selectedCategoryId]);
-
-  // Get selected category
-  const selectedCategory = mainCategories.find(cat => cat.id === selectedCategoryId) || mainCategories[0];
-  
   // Helper function to check if product belongs to a category
   // Supports both old format (category) and new format (categories array)
   const productBelongsToCategory = (product, categoryId) => {
@@ -166,6 +156,76 @@ export default function CentralMenuPage({ params }) {
         // If only forDelivery exists, show if not explicitly marked as delivery-only
         return item.forDelivery !== true;
       }
+    );
+  };
+
+  const visibleCategories = useMemo(
+    () => mainCategories.filter((category) => getCategoryProducts(category.id).length > 0),
+    [mainCategories, products, categories]
+  );
+
+  useEffect(() => {
+    if (visibleCategories.length === 0) return;
+    const isCurrentVisible = visibleCategories.some((cat) => cat.id === selectedCategoryId);
+    if (selectedCategoryId === null || !isCurrentVisible) {
+      setSelectedCategoryId(visibleCategories[0].id);
+    }
+  }, [visibleCategories, selectedCategoryId]);
+
+  const selectedCategory = visibleCategories.find((cat) => cat.id === selectedCategoryId)
+    || visibleCategories[0]
+    || null;
+
+  const formatCategoryLabel = (category) => {
+    const translatedName = t(category.name);
+    return translatedName.charAt(0).toUpperCase() + translatedName.slice(1);
+  };
+
+  const currentCategoryIndex = selectedCategory
+    ? visibleCategories.findIndex((cat) => cat.id === selectedCategory.id)
+    : -1;
+  const previousCategory = currentCategoryIndex > 0 ? visibleCategories[currentCategoryIndex - 1] : null;
+  const nextCategory = currentCategoryIndex >= 0 && currentCategoryIndex < visibleCategories.length - 1
+    ? visibleCategories[currentCategoryIndex + 1]
+    : null;
+
+  const goToCategory = (categoryId) => {
+    setSelectedCategoryId(categoryId);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const renderCategoryNavigation = () => {
+    if (!previousCategory && !nextCategory) return null;
+
+    return (
+      <nav className="central-menu-category-nav" aria-label={t('Навигация между категории')}>
+        {previousCategory ? (
+          <button
+            type="button"
+            className="central-menu-category-nav-link central-menu-category-nav-link--prev"
+            onClick={() => goToCategory(previousCategory.id)}
+          >
+            <LeftOutlined />
+            <span>{formatCategoryLabel(previousCategory)}</span>
+          </button>
+        ) : (
+          <span className="central-menu-category-nav-spacer" aria-hidden="true" />
+        )}
+        {nextCategory ? (
+          <button
+            type="button"
+            className="central-menu-category-nav-link central-menu-category-nav-link--next"
+            onClick={() => goToCategory(nextCategory.id)}
+          >
+            <span>{formatCategoryLabel(nextCategory)}</span>
+            <RightOutlined />
+          </button>
+        ) : (
+          <span className="central-menu-category-nav-spacer" aria-hidden="true" />
+        )}
+      </nav>
     );
   };
 
@@ -298,6 +358,7 @@ export default function CentralMenuPage({ params }) {
                   <p style={{ textAlign: 'center', padding: '40px', color: '#6c757d' }}>
                     {t("Няма продукти в тази категория.")}
                   </p>
+                  {renderCategoryNavigation()}
                 </div>
               );
             }
@@ -506,6 +567,7 @@ export default function CentralMenuPage({ params }) {
                     ))}
                   </div>
                 )}
+                {renderCategoryNavigation()}
               </div>
             );
           })()}

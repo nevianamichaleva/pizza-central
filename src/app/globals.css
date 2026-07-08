@@ -815,6 +815,38 @@ a {
   line-height: 1.45;
 }
 
+.central-menu-category-nav {
+  display: none;
+}
+
+.central-menu-category-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #ce1212;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.central-menu-category-nav-link--next {
+  margin-left: auto;
+  text-align: right;
+}
+
+.central-menu-category-nav-link:hover {
+  color: #a00e0e;
+  text-decoration: underline;
+}
+
+.central-menu-category-nav-spacer {
+  flex: 1;
+}
+
 /* Mobile Styles */
 @media (max-width: 768px) {
   .central-menu-header {
@@ -931,6 +963,23 @@ a {
 
   .central-menu-item-allergens {
     font-size: 0.8125rem;
+  }
+
+  .central-menu-category-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #e9ecef;
+    clear: both;
+  }
+
+  .central-menu-category-nav-link {
+    max-width: calc(50% - 6px);
+    font-size: 0.9rem;
+    line-height: 1.3;
   }
 }
 

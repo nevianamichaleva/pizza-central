@@ -122,6 +122,7 @@ ${orderData.special_notes ? `Специални забележки:
 ${orderData.special_notes}
 
 ` : ''}Начин на получаване: ${orderType === 'pickup' ? 'Вземане от ресторанта' : 'Доставка'}
+Начин на плащане: ${orderData.pay_with_card ? 'Желая да платя с карта при доставката' : 'В брой'}
 ${orderData.delivery_time && orderType === 'delivery' ? `Желан час за доставка: ${orderData.delivery_time}
 
 ` : ''}Сума: ${formatPrice(subtotal).both}

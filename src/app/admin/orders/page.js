@@ -1204,6 +1204,7 @@ const AdminOrdersPage = () => {
                                     <p><strong>Email:</strong> {selectedOrder.user_email || selectedOrder.email || 'Не е посочен'}</p>
                                     <p><strong>Телефон:</strong> {selectedOrder.user_phone || selectedOrder.phone || 'Не е посочен'}</p>
                                     <p><strong>Адрес за доставка:</strong> {selectedOrder.user_address || selectedOrder.delivery_address || 'Не е посочен'}</p>
+                                    <p><strong>Начин на плащане:</strong> {selectedOrder.pay_with_card ? 'Желая да платя с карта при доставката' : 'В брой'}</p>
                                 </div>
 
                                 {(selectedOrder.special_notes || selectedOrder.delivery_time) && (

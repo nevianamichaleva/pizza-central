@@ -12,7 +12,7 @@ import {
   normalizeOrderAvailability,
   ORDER_AVAILABILITY_MODES,
 } from "@/lib/orderAvailability";
-import { Input, message, Select, Tooltip } from "antd";
+import { Checkbox, Input, message, Select, Tooltip } from "antd";
 import { get, onValue, ref, update } from "firebase/database";
 import Image from "next/image";
 import Link from "next/link";
@@ -44,6 +44,7 @@ export default function Order() {
   const [minOrderForDelivery, setMinOrderForDelivery] = useState(25);
   const [registeredUserDiscountPercent, setRegisteredUserDiscountPercent] = useState(0);
   const [specialNotes, setSpecialNotes] = useState("");
+  const [payWithCard, setPayWithCard] = useState(false);
   const [deliveryTime, setDeliveryTime] = useState("");
   const [orderType, setOrderType] = useState('delivery'); // 'pickup' or 'delivery'
   const [selectedHour, setSelectedHour] = useState(null);
@@ -101,6 +102,7 @@ export default function Order() {
       setPhone("");
       setEmail("");
       setSpecialNotes("");
+      setPayWithCard(false);
       setDeliveryTime("");
       setLoading(false);
       return () => {};
@@ -117,6 +119,7 @@ export default function Order() {
         setPhone("");
         setEmail("");
         setSpecialNotes("");
+        setPayWithCard(false);
         setDeliveryTime("");
         setLoading(false);
         return;
@@ -133,6 +136,7 @@ export default function Order() {
       setPhone(orderPhone);
       setEmail(orderEmail);
       setSpecialNotes(orderData.special_notes || "");
+      setPayWithCard(Boolean(orderData.pay_with_card));
       setDeliveryTime(orderData.delivery_time || "");
       setStatus(orderData.status || "");
       // Default to delivery for pending orders, or use saved order_type for completed orders
@@ -427,6 +431,7 @@ export default function Order() {
       phone: phoneStr,
       email: email,
       special_notes: specialNotes,
+      pay_with_card: payWithCard,
       delivery_time: orderType === 'delivery' ? deliveryTime : '',
       order_number: orderNumber,
       order_type: orderType,
@@ -1335,6 +1340,15 @@ export default function Order() {
                         <span>{specialNotes || "Няма специални забележки"}</span>
                       )}
                     </div>
+                    <div style={{ marginBottom: "20px" }}>
+                      {!orderCompleted ? (
+                        <Checkbox checked={payWithCard} onChange={(e) => setPayWithCard(e.target.checked)}>
+                          Желая да платя с карта при доставката
+                        </Checkbox>
+                      ) : (
+                        <span>{payWithCard ? "Желая да платя с карта при доставката" : "В брой при получаване"}</span>
+                      )}
+                    </div>
                     {(orderType === 'delivery' || orderCompleted) && (
                       <div style={{ marginBottom: "20px" }}>
                         <h5>Час за доставка (по избор):</h5>
@@ -1470,6 +1484,25 @@ export default function Order() {
                       )}
                     </div>
                     
+                    <div style={{ 
+                      marginBottom: "15px", 
+                      padding: "15px",
+                      backgroundColor: "#fff",
+                      borderRadius: "8px",
+                      border: "1px solid #e0e0e0"
+                    }}>
+                      <h5 style={{ fontSize: "16px", fontWeight: "600", margin: "0 0 10px 0", textAlign: "left" }}>Начин на плащане:</h5>
+                      {!orderCompleted ? (
+                        <Checkbox checked={payWithCard} onChange={(e) => setPayWithCard(e.target.checked)}>
+                          Желая да платя с карта при доставката
+                        </Checkbox>
+                      ) : (
+                        <div style={{ fontSize: "14px", color: "#333", textAlign: "left" }}>
+                          {payWithCard ? "Желая да платя с карта при доставката" : "В брой при получаване"}
+                        </div>
+                      )}
+                    </div>
+
                     {(orderType === 'delivery' || orderCompleted) && (
                       <div style={{ 
                         marginBottom: "15px", 
