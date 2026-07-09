@@ -3,20 +3,37 @@
 import { Button, DatePicker, Form, Input, InputNumber, Select } from "antd";
 import { get, push, ref, set } from 'firebase/database';
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { rtdb } from '../../lib/firebase';
+import FormAntiBotFields from './FormAntiBotFields';
 import showAToast from "./common/showAToast";
+import { useFormAntiBot } from '@/hooks/useFormAntiBot';
 
 const BookTableSection = () => {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-  }, []);
+  const {
+    setTurnstileToken,
+    honeypotRef,
+    turnstileRef,
+    validateBeforeSubmit,
+    resetAfterSubmit,
+    submitBlocked,
+    turnstileConfigured,
+  } = useFormAntiBot();
 
   const handleSubmit = async (values) => {
     // Prevent double submission
     if (submitting) {
+      return;
+    }
+
+    const gate = validateBeforeSubmit();
+    if (!gate.ok) {
+      if (gate.honeypot) {
+        showAToast('success', 'Вашата резервация е успешна. Очаквайте нашето обаждане за да обсъдим подробностите!');
+        form.resetFields();
+      }
       return;
     }
 
@@ -70,6 +87,8 @@ const BookTableSection = () => {
                 bookingData: bookingData,
                 adminEmail: adminEmail,
                 smtpConfig: smtpConfig,
+                antiBot: gate.antiBot,
+                turnstileToken: gate.turnstileToken,
               }),
             });
 
@@ -96,6 +115,8 @@ const BookTableSection = () => {
               body: JSON.stringify({
                 bookingData: bookingData,
                 smtpConfig: smtpConfig,
+                antiBot: gate.antiBot,
+                turnstileToken: gate.turnstileToken,
               }),
             });
 
@@ -116,6 +137,7 @@ const BookTableSection = () => {
       setTimeout(() => {
         showAToast('success', 'Вашата резервация е успешна. Очаквайте нашето обаждане за да обсъдим подробностите!');
         form.resetFields();
+        resetAfterSubmit();
         setSubmitting(false);
       }, 1000);
     } catch (error) {
@@ -178,6 +200,7 @@ const BookTableSection = () => {
               layout="vertical"
               onFinish={handleSubmit}
               className="reservation-form"
+              style={{ position: 'relative', width: '100%' }}
             >
               <div className="row gy-4">
                 <div className="col-lg-4 col-md-6">
@@ -282,8 +305,20 @@ const BookTableSection = () => {
                 </a>
               </div>
 
+              <FormAntiBotFields
+                honeypotRef={honeypotRef}
+                turnstileRef={turnstileRef}
+                setTurnstileToken={setTurnstileToken}
+                turnstileConfigured={turnstileConfigured}
+              />
+
               <div className="text-center mt-3">
-                <Button type="primary" htmlType="submit" loading={submitting} disabled={submitting}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={submitting}
+                  disabled={submitting || submitBlocked}
+                >
                   Запази
                 </Button>
               </div>

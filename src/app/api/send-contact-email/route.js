@@ -1,5 +1,4 @@
-import { validateContactAntiBot } from '@/lib/contactAntiBot';
-import { getClientIp, verifyTurnstileToken } from '@/lib/verifyTurnstile';
+import { verifyFormSubmission } from '@/lib/verifyFormSubmission';
 import nodemailer from 'nodemailer';
 
 export async function POST(request) {
@@ -20,23 +19,15 @@ export async function POST(request) {
       );
     }
 
-    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
-    if (!turnstileSecret) {
-      console.error('TURNSTILE_SECRET_KEY is not configured');
-      return Response.json({ error: 'Service unavailable' }, { status: 503 });
-    }
-
-    const turnstile = await verifyTurnstileToken(turnstileToken, getClientIp(request));
-    if (!turnstile.success) {
-      return Response.json({ error: 'Bot verification failed' }, { status: 403 });
-    }
-
-    const botCheck = validateContactAntiBot(antiBot);
-    if (!botCheck.ok) {
-      if (botCheck.code === 'honeypot') {
+    const submission = await verifyFormSubmission({ antiBot, turnstileToken }, request);
+    if (!submission.ok) {
+      if (submission.honeypot) {
         return Response.json({ success: true, message: 'OK' });
       }
-      return Response.json({ error: 'Invalid request' }, { status: 400 });
+      return Response.json(
+        { error: submission.error || 'Invalid request' },
+        { status: submission.status }
+      );
     }
 
     // Get recipient email from request or environment

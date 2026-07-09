@@ -1,14 +1,31 @@
+import { verifyFormSubmission } from '@/lib/verifyFormSubmission';
 import nodemailer from 'nodemailer';
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { bookingData, smtpConfig: smtpConfigFromRequest } = body;
+    const {
+      bookingData,
+      smtpConfig: smtpConfigFromRequest,
+      antiBot,
+      turnstileToken,
+    } = body;
 
     if (!bookingData || !bookingData.email) {
       return Response.json(
         { error: 'Missing booking data or customer email' },
         { status: 400 }
+      );
+    }
+
+    const submission = await verifyFormSubmission({ antiBot, turnstileToken }, request);
+    if (!submission.ok) {
+      if (submission.honeypot) {
+        return Response.json({ success: true, message: 'OK' });
+      }
+      return Response.json(
+        { error: submission.error || 'Invalid request' },
+        { status: submission.status }
       );
     }
 

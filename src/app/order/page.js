@@ -4,6 +4,7 @@ import { useCategories } from "@/context/CategoriesContext";
 import { useProducts } from "@/context/ProductsContext";
 import { useUser } from "@/context/UserContext";
 import { useObednoMenuSchedule } from "@/hooks/useObednoMenuSchedule";
+import { useFormAntiBot } from "@/hooks/useFormAntiBot";
 import { getObednoMenuClosedMessage, orderContainsUnavailableObednoItems } from "@/lib/obednoMenuSchedule";
 import {
   getOrderAvailabilityMessage,
@@ -19,6 +20,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { rtdb } from "../../../lib/firebase";
+import FormAntiBotFields from "../../components/FormAntiBotFields";
 import showAToast from "../../components/common/showAToast";
 const { TextArea } = Input;
 
@@ -50,6 +52,16 @@ export default function Order() {
   const [selectedHour, setSelectedHour] = useState(null);
   const [selectedMinute, setSelectedMinute] = useState(null);
   const [orderAvailabilityMode, setOrderAvailabilityMode] = useState(ORDER_AVAILABILITY_MODES.NORMAL);
+  const isGuest = !user;
+  const {
+    setTurnstileToken,
+    honeypotRef,
+    turnstileRef,
+    validateBeforeSubmit,
+    resetAfterSubmit,
+    submitBlocked: guestSubmitBlocked,
+    turnstileConfigured,
+  } = useFormAntiBot();
 
   const resolveCartId = async () => {
     if (typeof window === "undefined") {
@@ -401,6 +413,26 @@ export default function Order() {
       return;
     }
 
+    let guestAntiBot = null;
+    let guestTurnstileToken = null;
+    if (isGuest) {
+      const gate = validateBeforeSubmit();
+      if (!gate.ok) {
+        if (gate.honeypot) {
+          showAToast(
+            "success",
+            orderType === 'pickup'
+              ? "Поръчката е изпратена успешно! Очакваме ви в ресторанта, за да получите поръчката си."
+              : "Поръчката е изпратена успешно! Очаквайте доставка на посочения адрес."
+          );
+          setOrderCompleted(true);
+        }
+        return;
+      }
+      guestAntiBot = gate.antiBot;
+      guestTurnstileToken = gate.turnstileToken;
+    }
+
     // Get order number if not already assigned
     let orderNumber = order.order_number;
     if (!orderNumber) {
@@ -486,6 +518,9 @@ export default function Order() {
             orderData: updatedOrder,
             adminEmail: adminEmail,
             smtpConfig: smtpConfig,
+            ...(isGuest
+              ? { antiBot: guestAntiBot, turnstileToken: guestTurnstileToken }
+              : {}),
           }),
         });
 
@@ -511,6 +546,9 @@ export default function Order() {
           detail: { cartId: null },
         })
       );
+    }
+    if (isGuest) {
+      resetAfterSubmit();
     }
     showAToast(
       "success",
@@ -718,7 +756,8 @@ export default function Order() {
     !isWithinWorkingHours() ||
     !phone ||
     !String(phone).trim() ||
-    (orderType === 'delivery' && (!address || !String(address).trim()));
+    (orderType === 'delivery' && (!address || !String(address).trim())) ||
+    (isGuest && guestSubmitBlocked);
 
   const getSubmitTooltip = () => {
     if (ordersDisabled) {
@@ -732,6 +771,12 @@ export default function Order() {
     }
     if (!isWithinWorkingHours()) {
       return `Поръчките се приемат от ${workingHours.startHour}:00 до ${workingHours.endHour}:00 часа`;
+    }
+    if (isGuest && guestSubmitBlocked && turnstileConfigured) {
+      return "Моля потвърдете, че не сте робот";
+    }
+    if (isGuest && guestSubmitBlocked && !turnstileConfigured) {
+      return "Поръчките временно не се приемат онлайн";
     }
     return "";
   };
@@ -1565,6 +1610,14 @@ export default function Order() {
                   {/* Second Поръчай button - below contact data */}
                   {!orderCompleted && (
                     <>
+                      {isGuest && (
+                        <FormAntiBotFields
+                          honeypotRef={honeypotRef}
+                          turnstileRef={turnstileRef}
+                          setTurnstileToken={setTurnstileToken}
+                          turnstileConfigured={turnstileConfigured}
+                        />
+                      )}
                       <Tooltip title={getSubmitTooltip()}>
                         <span style={{ display: 'inline-block', width: '100%', marginTop: '20px' }}>
                           <button

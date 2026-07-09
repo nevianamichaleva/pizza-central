@@ -1,16 +1,37 @@
+import { verifyFormSubmission } from '@/lib/verifyFormSubmission';
 import nodemailer from 'nodemailer';
 import { formatOrderDate } from '@/utils/orderNumberUtils';
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { orderData, adminEmail: adminEmailFromRequest, smtpConfig: smtpConfigFromRequest } = body;
+    const {
+      orderData,
+      adminEmail: adminEmailFromRequest,
+      smtpConfig: smtpConfigFromRequest,
+      antiBot,
+      turnstileToken,
+    } = body;
 
     if (!orderData) {
       return Response.json(
         { error: 'Missing order data' },
         { status: 400 }
       );
+    }
+
+    const isGuestOrder = !orderData.user_id;
+    if (isGuestOrder) {
+      const submission = await verifyFormSubmission({ antiBot, turnstileToken }, request);
+      if (!submission.ok) {
+        if (submission.honeypot) {
+          return Response.json({ success: true, message: 'OK' });
+        }
+        return Response.json(
+          { error: submission.error || 'Invalid request' },
+          { status: submission.status }
+        );
+      }
     }
 
     // Get recipient email from request or environment

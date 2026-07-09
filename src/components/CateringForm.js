@@ -5,13 +5,24 @@ import { get, push, ref, set } from 'firebase/database';
 import moment from 'moment';
 import { useState } from 'react';
 import { rtdb } from '../../lib/firebase';
+import FormAntiBotFields from './FormAntiBotFields';
 import showAToast from "./common/showAToast";
+import { useFormAntiBot } from '@/hooks/useFormAntiBot';
 
 const { TextArea } = Input;
 
 const CateringForm = () => {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
+  const {
+    setTurnstileToken,
+    honeypotRef,
+    turnstileRef,
+    validateBeforeSubmit,
+    resetAfterSubmit,
+    submitBlocked,
+    turnstileConfigured,
+  } = useFormAntiBot();
 
   const eventTypes = [
     { value: 'firmeno', label: 'Фирмено събитие' },
@@ -27,6 +38,15 @@ const CateringForm = () => {
   const handleSubmit = async (values) => {
     // Prevent double submission
     if (submitting) {
+      return;
+    }
+
+    const gate = validateBeforeSubmit();
+    if (!gate.ok) {
+      if (gate.honeypot) {
+        showAToast('success', 'Вашата заявка е изпратена успешно! Ще се свържем с вас скоро, за да уговорим час за консултация и уточняване на детайли и цени.');
+        form.resetFields();
+      }
       return;
     }
 
@@ -81,6 +101,8 @@ const CateringForm = () => {
                 cateringData: cateringData,
                 adminEmail: adminEmail,
                 smtpConfig: smtpConfig,
+                antiBot: gate.antiBot,
+                turnstileToken: gate.turnstileToken,
               }),
             });
 
@@ -103,6 +125,7 @@ const CateringForm = () => {
       setTimeout(() => {
         showAToast('success', 'Вашата заявка е изпратена успешно! Ще се свържем с вас скоро, за да уговорим час за консултация и уточняване на детайли и цени.');
         form.resetFields();
+        resetAfterSubmit();
         setSubmitting(false);
       }, 1000);
     } catch (error) {
@@ -122,6 +145,7 @@ const CateringForm = () => {
         layout="vertical"
         onFinish={handleSubmit}
         className="catering-form"
+        style={{ position: 'relative' }}
       >
         <div className="row gy-4">
           <div className="col-lg-4 col-md-6">
@@ -232,8 +256,20 @@ const CateringForm = () => {
           </a>
         </div>
 
+        <FormAntiBotFields
+          honeypotRef={honeypotRef}
+          turnstileRef={turnstileRef}
+          setTurnstileToken={setTurnstileToken}
+          turnstileConfigured={turnstileConfigured}
+        />
+
         <div className="text-center mt-3">
-          <Button type="primary" htmlType="submit" loading={submitting} disabled={submitting} style={{
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={submitting}
+            disabled={submitting || submitBlocked}
+            style={{
             backgroundColor: '#ce1212',
             borderColor: '#ce1212',
             height: '45px',
