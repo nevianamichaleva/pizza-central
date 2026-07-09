@@ -1,17 +1,34 @@
 import { validateContactAntiBot } from '@/lib/contactAntiBot';
+import { getClientIp, verifyTurnstileToken } from '@/lib/verifyTurnstile';
 import nodemailer from 'nodemailer';
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { contactData, adminEmail: adminEmailFromRequest, smtpConfig: smtpConfigFromRequest, antiBot } =
-      body;
+    const {
+      contactData,
+      adminEmail: adminEmailFromRequest,
+      smtpConfig: smtpConfigFromRequest,
+      antiBot,
+      turnstileToken,
+    } = body;
 
     if (!contactData) {
       return Response.json(
         { error: 'Missing contact data' },
         { status: 400 }
       );
+    }
+
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+    if (!turnstileSecret) {
+      console.error('TURNSTILE_SECRET_KEY is not configured');
+      return Response.json({ error: 'Service unavailable' }, { status: 503 });
+    }
+
+    const turnstile = await verifyTurnstileToken(turnstileToken, getClientIp(request));
+    if (!turnstile.success) {
+      return Response.json({ error: 'Bot verification failed' }, { status: 403 });
     }
 
     const botCheck = validateContactAntiBot(antiBot);

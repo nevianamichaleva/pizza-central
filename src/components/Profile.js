@@ -6,6 +6,7 @@ import { get, push, ref, set } from 'firebase/database';
 import { useEffect, useRef, useState } from 'react';
 import { rtdb } from '../../lib/firebase';
 import showAToast from "./common/showAToast";
+import ContactTurnstile, { isTurnstileConfigured } from './ContactTurnstile';
 
 const Profile = () => {
   const { user } = useUser();
@@ -19,8 +20,10 @@ const Profile = () => {
   });
 
   const [status, setStatus] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState(null);
   const formOpenedAtRef = useRef(0);
   const honeypotRef = useRef(null);
+  const turnstileRef = useRef(null);
 
   useEffect(() => {
     formOpenedAtRef.current = Date.now();
@@ -57,6 +60,11 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isTurnstileConfigured() && !turnstileToken) {
+      showAToast('error', 'Моля потвърдете, че не сте робот.');
+      return;
+    }
 
     const openedAt = formOpenedAtRef.current;
     const antiBot = {
@@ -135,6 +143,7 @@ const Profile = () => {
               adminEmail: adminEmail,
               smtpConfig: smtpConfig,
               antiBot,
+              turnstileToken,
             }),
           });
 
@@ -154,6 +163,8 @@ const Profile = () => {
       setStatus('success');
       setFormData({ name: '', email: '', subject: '', message: '', phone: '' });
       if (honeypotRef.current) honeypotRef.current.value = '';
+      setTurnstileToken(null);
+      turnstileRef.current?.reset();
       formOpenedAtRef.current = Date.now();
     } catch (error) {
       console.error('Грешка при изпращане на съобщение: ', error);
@@ -297,10 +308,29 @@ const Profile = () => {
                 />
               </div>
               <div className="col-md-12 text-center">
+                {isTurnstileConfigured() ? (
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                    <ContactTurnstile
+                      ref={turnstileRef}
+                      onSuccess={setTurnstileToken}
+                      onExpire={() => setTurnstileToken(null)}
+                      onError={() => setTurnstileToken(null)}
+                    />
+                  </div>
+                ) : (
+                  <p style={{ color: '#c00', fontSize: '14px', marginBottom: '12px' }}>
+                    Формата временно не приема съобщения. Моля обадете се на посочените телефони.
+                  </p>
+                )}
                 {status === 'loading' && <div className="loading">Зареждане ...</div>}
                 {status === 'error' && <div className="error-message">Има грешка, опитайте отново</div>}
                 {status === 'success' && <div className="sent-message">Вашето съобщение беше изпратено. Благодарим Ви</div>}
-                <button type="submit">Изпрати</button>
+                <button
+                  type="submit"
+                  disabled={!isTurnstileConfigured() || (isTurnstileConfigured() && !turnstileToken)}
+                >
+                  Изпрати
+                </button>
               </div>
             </div>
           </form>
