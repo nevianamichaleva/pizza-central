@@ -83,23 +83,8 @@ export async function POST(request) {
       },
     });
 
-    try {
-      await transporter.verify();
-      console.log('SMTP connection verified successfully');
-    } catch (verifyError) {
-      console.error('SMTP verification failed:', verifyError);
-      return Response.json(
-        {
-          success: false,
-          error: 'SMTP връзката не може да бъде установена',
-          details: verifyError.message,
-          smtpSource: hasRequestAuth ? 'firebase' : 'env',
-          smtpUser,
-        },
-        { status: 400 }
-      );
-    }
-
+    // Skip transporter.verify() — with Gmail it often fails/times out even when send works.
+    // Send a real test message instead.
     const mailOptions = {
       from: fromEmail,
       to: recipients.join(', '),
@@ -112,6 +97,7 @@ export async function POST(request) {
 - SMTP User: ${smtpUser}
 - От: ${fromEmail}
 - До: ${recipients.join(', ')}
+- Източник: ${hasRequestAuth ? 'Firebase (админ панел)' : 'Environment variables'}
 
 Ако получавате този мейл, конфигурацията работи правилно! ✅
 
@@ -133,7 +119,21 @@ export async function POST(request) {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+    try {
+      await transporter.sendMail(mailOptions);
+    } catch (sendError) {
+      console.error('SMTP send failed:', sendError);
+      return Response.json(
+        {
+          success: false,
+          error: 'Изпращането на тестов мейл неуспешно',
+          details: sendError.message,
+          smtpSource: hasRequestAuth ? 'firebase' : 'env',
+          smtpUser,
+        },
+        { status: 400 }
+      );
+    }
 
     return Response.json({
       success: true,

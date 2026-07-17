@@ -550,38 +550,73 @@ const AdminOrdersPage = () => {
     };
 
     const testEmailConfiguration = async () => {
+        const hide = message.loading('Тестване на SMTP...', 0);
         try {
+            // Refresh SMTP from Firebase so we use the latest password
+            const smtpRef = ref(rtdb, 'settings/email');
+            const snapshot = await get(smtpRef);
+            let latestSmtp = smtpConfig;
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                latestSmtp = {
+                    smtpHost: data.smtpHost || '',
+                    smtpPort: data.smtpPort || '587',
+                    smtpUser: data.smtpUser || '',
+                    smtpPassword: data.smtpPassword || '',
+                    smtpSecure: data.smtpSecure || false,
+                    fromEmail: data.fromEmail || data.smtpUser || '',
+                };
+                setSmtpConfig(latestSmtp);
+                setEditingSmtpConfig(latestSmtp);
+            }
+
+            if (!latestSmtp.smtpHost || !latestSmtp.smtpUser || !latestSmtp.smtpPassword) {
+                hide();
+                message.error('SMTP настройките са непълни. Попълнете Host, User и Password, после Запази.');
+                return;
+            }
+
+            // Use first notification email for the test
+            const firstRecipient = String(adminEmail || '')
+                .split(/[,;]+/)
+                .map((e) => e.trim())
+                .filter(Boolean)[0];
+
             const response = await fetch('/api/test-email', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    testEmail: adminEmail || 'test@example.com',
-                    smtpConfig: {
-                        smtpHost: smtpConfig.smtpHost,
-                        smtpPort: smtpConfig.smtpPort,
-                        smtpUser: smtpConfig.smtpUser,
-                        smtpPassword: smtpConfig.smtpPassword,
-                        smtpSecure: smtpConfig.smtpSecure,
-                        fromEmail: smtpConfig.fromEmail,
-                    },
+                    testEmail: firstRecipient || 'test@example.com',
+                    smtpConfig: latestSmtp,
                 }),
             });
 
-            const result = await response.json();
+            let result = {};
+            try {
+                result = await response.json();
+            } catch {
+                hide();
+                message.error(`Сървърът върна неочакван отговор (HTTP ${response.status})`);
+                return;
+            }
 
+            hide();
             if (result.success) {
                 message.success(`✅ ${result.message}`);
             } else {
-                message.error(`❌ ${result.error}`);
-                if (result.details) {
-                    console.error('Email test details:', result.details);
-                }
+                const details = result.details ? ` — ${result.details}` : '';
+                message.error(`❌ ${result.error || 'Неуспешен тест'}${details}`, 8);
+                console.error('Email test failed:', result);
             }
         } catch (error) {
+            hide();
             console.error('Error testing email:', error);
-            message.error('Грешка при тестване на мейл конфигурацията');
+            message.error(
+                `Грешка при тестване: ${error?.message || 'мрежова или сървърна грешка'}`,
+                8
+            );
         }
     };
 
