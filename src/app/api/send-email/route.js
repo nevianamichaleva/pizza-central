@@ -24,6 +24,13 @@ export async function POST(request) {
     // checkout pages stay open longer than contact forms.
     const isGuestOrder = !orderData.user_id;
     if (isGuestOrder) {
+      if (!turnstileToken) {
+        console.error('Order email blocked: guest order without Turnstile token');
+        return Response.json(
+          { error: 'Bot verification required', code: 'missing_turnstile' },
+          { status: 403 }
+        );
+      }
       const submission = await verifyFormSubmission(
         { antiBot, turnstileToken },
         request,
@@ -35,14 +42,14 @@ export async function POST(request) {
         }
         console.error('Order email blocked by bot check:', submission.error);
         return Response.json(
-          { error: submission.error || 'Invalid request' },
+          { error: submission.error || 'Invalid request', code: submission.error },
           { status: submission.status }
         );
       }
     }
 
-    // Get recipient email from request or environment
-    const recipientEmail = adminEmailFromRequest || process.env.ADMIN_EMAIL;
+    // Prefer ADMIN_EMAIL from env when set; else Firebase/client value
+    const recipientEmail = process.env.ADMIN_EMAIL || adminEmailFromRequest;
 
     if (!recipientEmail) {
       return Response.json(
@@ -164,13 +171,34 @@ ${orderType === 'delivery' ? `Доставка: ${formatPrice(deliveryFee).both}
     try {
       let transporter;
       
-      // Get SMTP config from request, environment variables, or Firebase
-      let smtpHost = smtpConfigFromRequest?.smtpHost || process.env.SMTP_HOST;
-      let smtpPort = smtpConfigFromRequest?.smtpPort || process.env.SMTP_PORT || '587';
-      let smtpUser = smtpConfigFromRequest?.smtpUser || process.env.SMTP_USER;
-      let smtpPassword = smtpConfigFromRequest?.smtpPassword || process.env.SMTP_PASSWORD;
-      let smtpSecure = smtpConfigFromRequest?.smtpSecure || process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465';
-      let fromEmail = smtpConfigFromRequest?.fromEmail || process.env.SMTP_FROM || process.env.SMTP_USER;
+    // Prefer complete server env; otherwise fall back to client/Firebase SMTP (same as contact form)
+    const envSmtpReady =
+      Boolean(process.env.SMTP_HOST) &&
+      Boolean(process.env.SMTP_USER) &&
+      Boolean(process.env.SMTP_PASSWORD);
+
+    let smtpHost = envSmtpReady
+      ? process.env.SMTP_HOST
+      : smtpConfigFromRequest?.smtpHost || process.env.SMTP_HOST;
+    let smtpPort = envSmtpReady
+      ? process.env.SMTP_PORT || '587'
+      : smtpConfigFromRequest?.smtpPort || process.env.SMTP_PORT || '587';
+    let smtpUser = envSmtpReady
+      ? process.env.SMTP_USER
+      : smtpConfigFromRequest?.smtpUser || process.env.SMTP_USER;
+    let smtpPassword = envSmtpReady
+      ? process.env.SMTP_PASSWORD
+      : smtpConfigFromRequest?.smtpPassword || process.env.SMTP_PASSWORD;
+    let smtpSecure = envSmtpReady
+      ? process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465'
+      : smtpConfigFromRequest?.smtpSecure === true ||
+        process.env.SMTP_SECURE === 'true' ||
+        process.env.SMTP_PORT === '465';
+    let fromEmail = envSmtpReady
+      ? process.env.SMTP_FROM || process.env.SMTP_USER
+      : smtpConfigFromRequest?.fromEmail ||
+        process.env.SMTP_FROM ||
+        process.env.SMTP_USER;
       
       // Check if SMTP configuration is available
       if (smtpHost && smtpUser && smtpPassword) {
@@ -213,12 +241,14 @@ ${orderType === 'delivery' ? `Доставка: ${formatPrice(deliveryFee).both}
       }
     } catch (emailError) {
       console.error('Error sending email:', emailError);
-      // Still return success to not block the order process
-      return Response.json({ 
-        success: true, 
-        message: 'Order saved, but email failed to send',
-        error: emailError.message 
-      });
+      return Response.json(
+        {
+          success: false,
+          message: 'Order saved, but email failed to send',
+          error: emailError.message,
+        },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error('Error in send-email API:', error);

@@ -487,58 +487,47 @@ export default function Order() {
 
     let emailNotifyFailed = false;
 
-    // Send email notification
+    // Send email notification — always call API; SMTP may come from Firebase or server env
     try {
-      // Get admin email from Firebase settings
-      const emailRef = ref(rtdb, 'settings/email');
-      const emailSnapshot = await get(emailRef);
       let adminEmail = null;
-
-      if (emailSnapshot.exists()) {
-        const emailData = emailSnapshot.val();
-        adminEmail = emailData.adminEmail || emailData.email;
-      }
-
-      if (adminEmail) {
-        // Also get SMTP config to send to API
-        const smtpRef = ref(rtdb, 'settings/email');
-        const smtpSnapshot = await get(smtpRef);
-        let smtpConfig = null;
-
-        if (smtpSnapshot.exists()) {
-          const smtpData = smtpSnapshot.val();
+      let smtpConfig = null;
+      try {
+        const emailSnapshot = await get(ref(rtdb, 'settings/email'));
+        if (emailSnapshot.exists()) {
+          const emailData = emailSnapshot.val();
+          adminEmail = emailData.adminEmail || emailData.email || null;
           smtpConfig = {
-            smtpHost: smtpData.smtpHost,
-            smtpPort: smtpData.smtpPort,
-            smtpUser: smtpData.smtpUser,
-            smtpPassword: smtpData.smtpPassword,
-            smtpSecure: smtpData.smtpSecure,
-            fromEmail: smtpData.fromEmail
+            smtpHost: emailData.smtpHost,
+            smtpPort: emailData.smtpPort,
+            smtpUser: emailData.smtpUser,
+            smtpPassword: emailData.smtpPassword,
+            smtpSecure: emailData.smtpSecure,
+            fromEmail: emailData.fromEmail,
           };
         }
+      } catch (settingsError) {
+        console.warn('Could not read settings/email from Firebase, using server env:', settingsError);
+      }
 
-        const response = await fetch('/api/send-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            orderData: updatedOrder,
-            adminEmail: adminEmail,
-            smtpConfig: smtpConfig,
-            ...(isGuest
-              ? { antiBot: guestAntiBot, turnstileToken: guestTurnstileToken }
-              : {}),
-          }),
-        });
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderData: updatedOrder,
+          adminEmail,
+          smtpConfig,
+          ...(isGuest
+            ? { antiBot: guestAntiBot, turnstileToken: guestTurnstileToken }
+            : {}),
+        }),
+      });
 
-        const result = await response.json();
-        if (!response.ok || (!result.success && !result.logged)) {
-          console.error('Failed to send email notification:', response.status, result);
-          emailNotifyFailed = true;
-        }
-      } else {
-        console.log('No admin email configured, skipping email notification');
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || (!result.success && !result.logged)) {
+        console.error('Failed to send email notification:', response.status, result);
+        emailNotifyFailed = true;
       }
     } catch (error) {
       console.error('Error sending email notification:', error);
