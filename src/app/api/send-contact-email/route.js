@@ -58,13 +58,28 @@ ${contactData.message || 'Няма съобщение'}
     try {
       let transporter;
       
-      // Get SMTP config from request, environment variables, or Firebase
-      let smtpHost = smtpConfigFromRequest?.smtpHost || process.env.SMTP_HOST;
-      let smtpPort = smtpConfigFromRequest?.smtpPort || process.env.SMTP_PORT || '587';
-      let smtpUser = smtpConfigFromRequest?.smtpUser || process.env.SMTP_USER;
-      let smtpPassword = smtpConfigFromRequest?.smtpPassword || process.env.SMTP_PASSWORD;
-      let smtpSecure = smtpConfigFromRequest?.smtpSecure || process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465';
-      let fromEmail = smtpConfigFromRequest?.fromEmail || process.env.SMTP_FROM || process.env.SMTP_USER;
+      // Never mix Firebase user with env password
+      const req = smtpConfigFromRequest || {};
+      const hasRequestAuth = Boolean(
+        String(req.smtpUser || '').trim() && String(req.smtpPassword || '').trim()
+      );
+
+      let smtpHost, smtpPort, smtpUser, smtpPassword, smtpSecure, fromEmail;
+      if (hasRequestAuth) {
+        smtpHost = req.smtpHost || process.env.SMTP_HOST;
+        smtpPort = req.smtpPort || process.env.SMTP_PORT || '587';
+        smtpUser = String(req.smtpUser).trim();
+        smtpPassword = String(req.smtpPassword).replace(/\s+/g, '');
+        smtpSecure = req.smtpSecure === true || req.smtpSecure === 'true' || String(smtpPort) === '465';
+        fromEmail = req.fromEmail || req.smtpUser || process.env.SMTP_FROM;
+      } else {
+        smtpHost = process.env.SMTP_HOST;
+        smtpPort = process.env.SMTP_PORT || '587';
+        smtpUser = process.env.SMTP_USER;
+        smtpPassword = String(process.env.SMTP_PASSWORD || '').replace(/\s+/g, '');
+        smtpSecure = process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465';
+        fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER;
+      }
       
       // Check if SMTP configuration is available
       if (smtpHost && smtpUser && smtpPassword) {

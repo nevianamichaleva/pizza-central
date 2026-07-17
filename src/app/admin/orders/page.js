@@ -3,7 +3,7 @@
 import { useUser } from '@/context/UserContext';
 import { DeleteOutlined } from '@ant-design/icons';
 import { Button, Card, DatePicker, Drawer, Input, InputNumber, message, Popconfirm, Select, Space, Switch, Table, Tabs } from "antd";
-import { get, ref, remove, set } from 'firebase/database';
+import { get, ref, remove, set, update } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from "react";
 import { rtdb } from '../../../../lib/firebase';
@@ -469,12 +469,13 @@ const AdminOrdersPage = () => {
             }
 
             const emailRef = ref(rtdb, 'settings/email');
-            await set(emailRef, {
-                adminEmail: editingEmail,
-                email: editingEmail
+            // update() only changes these fields — never wipe SMTP settings
+            await update(emailRef, {
+                adminEmail: editingEmail.trim(),
+                email: editingEmail.trim(),
             });
-            
-            setAdminEmail(editingEmail);
+
+            setAdminEmail(editingEmail.trim());
             setIsEditingEmail(false);
             message.success('Email адресът е запазен успешно!');
         } catch (error) {
@@ -516,18 +517,25 @@ const AdminOrdersPage = () => {
             const emailRef = ref(rtdb, 'settings/email');
             const currentData = await get(emailRef);
             const existingData = currentData.exists() ? currentData.val() : {};
-            
-            await set(emailRef, {
-                ...existingData,
+
+            const passwordToSave =
+                String(editingSmtpConfig.smtpPassword || '').trim() ||
+                existingData.smtpPassword ||
+                '';
+
+            // update preserves adminEmail / other fields
+            await update(emailRef, {
                 smtpHost: editingSmtpConfig.smtpHost,
                 smtpPort: editingSmtpConfig.smtpPort,
                 smtpUser: editingSmtpConfig.smtpUser,
-                smtpPassword: editingSmtpConfig.smtpPassword,
+                smtpPassword: passwordToSave,
                 smtpSecure: editingSmtpConfig.smtpSecure,
-                fromEmail: editingSmtpConfig.fromEmail
+                fromEmail: editingSmtpConfig.fromEmail,
             });
-            
-            setSmtpConfig(editingSmtpConfig);
+
+            const savedConfig = { ...editingSmtpConfig, smtpPassword: passwordToSave };
+            setSmtpConfig(savedConfig);
+            setEditingSmtpConfig(savedConfig);
             setIsEditingSmtp(false);
             message.success('SMTP настройките са запазени успешно!');
         } catch (error) {
@@ -549,8 +557,16 @@ const AdminOrdersPage = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    testEmail: adminEmail || 'test@example.com'
-                })
+                    testEmail: adminEmail || 'test@example.com',
+                    smtpConfig: {
+                        smtpHost: smtpConfig.smtpHost,
+                        smtpPort: smtpConfig.smtpPort,
+                        smtpUser: smtpConfig.smtpUser,
+                        smtpPassword: smtpConfig.smtpPassword,
+                        smtpSecure: smtpConfig.smtpSecure,
+                        fromEmail: smtpConfig.fromEmail,
+                    },
+                }),
             });
 
             const result = await response.json();
@@ -1047,6 +1063,10 @@ const AdminOrdersPage = () => {
                                 </p>
                                 <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
                                     <strong>From Email:</strong> {smtpConfig.fromEmail || 'Не е настроен'}
+                                </p>
+                                <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
+                                    <strong>SMTP Password:</strong>{' '}
+                                    {smtpConfig.smtpPassword ? '•••••••• (зададена)' : '❌ Липсва — мейлите няма да се изпращат'}
                                 </p>
                                 <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
                                     За да се изпращат email известия, моля конфигурирайте SMTP настройките или използвайте environment variables.

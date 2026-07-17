@@ -171,19 +171,36 @@ ${orderType === 'delivery' ? `Доставка: ${formatPrice(deliveryFee).both}
     try {
       let transporter;
 
-      // Same priority as contact form: Firebase/client config first, then env
-      let smtpHost = smtpConfigFromRequest?.smtpHost || process.env.SMTP_HOST;
-      let smtpPort = smtpConfigFromRequest?.smtpPort || process.env.SMTP_PORT || '587';
-      let smtpUser = smtpConfigFromRequest?.smtpUser || process.env.SMTP_USER;
-      let smtpPassword = smtpConfigFromRequest?.smtpPassword || process.env.SMTP_PASSWORD;
-      let smtpSecure =
-        smtpConfigFromRequest?.smtpSecure ||
-        process.env.SMTP_SECURE === 'true' ||
-        process.env.SMTP_PORT === '465';
-      let fromEmail =
-        smtpConfigFromRequest?.fromEmail ||
-        process.env.SMTP_FROM ||
-        process.env.SMTP_USER;
+      // IMPORTANT: never mix Firebase user with env password (causes Gmail 535).
+      // Use a complete Firebase/client config, otherwise fall back entirely to env.
+      const req = smtpConfigFromRequest || {};
+      const hasRequestAuth = Boolean(
+        String(req.smtpUser || '').trim() && String(req.smtpPassword || '').trim()
+      );
+      const smtpSource = hasRequestAuth ? 'firebase' : 'env';
+
+      let smtpHost;
+      let smtpPort;
+      let smtpUser;
+      let smtpPassword;
+      let smtpSecure;
+      let fromEmail;
+
+      if (hasRequestAuth) {
+        smtpHost = req.smtpHost || process.env.SMTP_HOST;
+        smtpPort = req.smtpPort || process.env.SMTP_PORT || '587';
+        smtpUser = String(req.smtpUser).trim();
+        smtpPassword = String(req.smtpPassword).replace(/\s+/g, '');
+        smtpSecure = req.smtpSecure === true || req.smtpSecure === 'true' || String(smtpPort) === '465';
+        fromEmail = req.fromEmail || req.smtpUser || process.env.SMTP_FROM;
+      } else {
+        smtpHost = process.env.SMTP_HOST;
+        smtpPort = process.env.SMTP_PORT || '587';
+        smtpUser = process.env.SMTP_USER;
+        smtpPassword = String(process.env.SMTP_PASSWORD || '').replace(/\s+/g, '');
+        smtpSecure = process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465';
+        fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER;
+      }
 
       // Check if SMTP configuration is available
       if (smtpHost && smtpUser && smtpPassword) {
@@ -193,8 +210,7 @@ ${orderType === 'delivery' ? `Доставка: ${formatPrice(deliveryFee).both}
           secure: Boolean(smtpSecure),
           auth: {
             user: smtpUser,
-            // Gmail app passwords are often stored with spaces — strip them
-            pass: String(smtpPassword).replace(/\s+/g, ''),
+            pass: smtpPassword,
           },
         });
 
@@ -208,27 +224,37 @@ ${orderType === 'delivery' ? `Доставка: ${formatPrice(deliveryFee).both}
 
         await transporter.sendMail(mailOptions);
 
-        return Response.json({ success: true, message: 'Email sent successfully' });
+        return Response.json({ success: true, message: 'Email sent successfully', smtpSource });
       } else {
         console.log('Email notification (SMTP not configured):', {
           to: recipientEmail,
           subject: emailSubject,
-          body: emailBody,
+          smtpSource,
+          hasRequestAuth,
         });
 
         return Response.json({
           success: true,
           message: 'Email logged (configure SMTP environment variables for actual sending)',
           logged: true,
+          smtpSource,
         });
       }
     } catch (emailError) {
       console.error('Error sending email:', emailError);
+      const req = smtpConfigFromRequest || {};
+      const hasRequestAuth = Boolean(
+        String(req.smtpUser || '').trim() && String(req.smtpPassword || '').trim()
+      );
       return Response.json(
         {
           success: false,
           message: 'Order saved, but email failed to send',
           error: emailError.message,
+          smtpSource: hasRequestAuth ? 'firebase' : 'env',
+          smtpUser: hasRequestAuth
+            ? String(req.smtpUser || '').trim()
+            : process.env.SMTP_USER || null,
         },
         { status: 500 }
       );
