@@ -20,13 +20,20 @@ export async function POST(request) {
       );
     }
 
+    // Guest orders (no user_id) must pass Turnstile. Timing checks are skipped —
+    // checkout pages stay open longer than contact forms.
     const isGuestOrder = !orderData.user_id;
     if (isGuestOrder) {
-      const submission = await verifyFormSubmission({ antiBot, turnstileToken }, request);
+      const submission = await verifyFormSubmission(
+        { antiBot, turnstileToken },
+        request,
+        { turnstileOnly: true }
+      );
       if (!submission.ok) {
         if (submission.honeypot) {
           return Response.json({ success: true, message: 'OK' });
         }
+        console.error('Order email blocked by bot check:', submission.error);
         return Response.json(
           { error: submission.error || 'Invalid request' },
           { status: submission.status }

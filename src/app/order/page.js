@@ -416,7 +416,7 @@ export default function Order() {
     let guestAntiBot = null;
     let guestTurnstileToken = null;
     if (isGuest) {
-      const gate = validateBeforeSubmit();
+      const gate = validateBeforeSubmit({ turnstileOnly: true });
       if (!gate.ok) {
         if (gate.honeypot) {
           showAToast(
@@ -458,6 +458,12 @@ export default function Order() {
 
     const updatedOrder = {
       ...order,
+      // Attach logged-in user so the email API does not treat this as a guest
+      // (guest carts keep user_id: null until submit — that was blocking emails).
+      user_id: user?.uid || order.user_id || null,
+      user_email: email || user?.email || order.user_email || null,
+      user_phone: phoneStr || order.user_phone || null,
+      user_address: orderType === 'delivery' ? addressStr : (order.user_address || null),
       status: 'in progress',
       delivery_address: orderType === 'delivery' ? addressStr : '',
       phone: phoneStr,
@@ -478,14 +484,16 @@ export default function Order() {
 
     setStatus('in progress');
     setOrderCompleted(true);
-    
+
+    let emailNotifyFailed = false;
+
     // Send email notification
     try {
       // Get admin email from Firebase settings
       const emailRef = ref(rtdb, 'settings/email');
       const emailSnapshot = await get(emailRef);
       let adminEmail = null;
-      
+
       if (emailSnapshot.exists()) {
         const emailData = emailSnapshot.val();
         adminEmail = emailData.adminEmail || emailData.email;
@@ -496,7 +504,7 @@ export default function Order() {
         const smtpRef = ref(rtdb, 'settings/email');
         const smtpSnapshot = await get(smtpRef);
         let smtpConfig = null;
-        
+
         if (smtpSnapshot.exists()) {
           const smtpData = smtpSnapshot.val();
           smtpConfig = {
@@ -525,15 +533,16 @@ export default function Order() {
         });
 
         const result = await response.json();
-        if (!result.success && !result.logged) {
-          console.error('Failed to send email notification:', result);
+        if (!response.ok || (!result.success && !result.logged)) {
+          console.error('Failed to send email notification:', response.status, result);
+          emailNotifyFailed = true;
         }
       } else {
         console.log('No admin email configured, skipping email notification');
       }
     } catch (error) {
       console.error('Error sending email notification:', error);
-      // Don't block the order process if email fails
+      emailNotifyFailed = true;
     }
 
     // Keep orderId in localStorage so we can continue to show the order data
@@ -550,12 +559,19 @@ export default function Order() {
     if (isGuest) {
       resetAfterSubmit();
     }
-    showAToast(
-      "success",
-      orderType === 'pickup'
-        ? "Поръчката е изпратена успешно! Очакваме ви в ресторанта, за да получите поръчката си."
-        : "Поръчката е изпратена успешно! Очаквайте доставка на посочения адрес."
-    );
+    if (emailNotifyFailed) {
+      showAToast(
+        'error',
+        'Поръчката е записана, но имейл известието не беше изпратено. Моля обадете се на +359 895 516 401.'
+      );
+    } else {
+      showAToast(
+        "success",
+        orderType === 'pickup'
+          ? "Поръчката е изпратена успешно! Очакваме ви в ресторанта, за да получите поръчката си."
+          : "Поръчката е изпратена успешно! Очаквайте доставка на посочения адрес."
+      );
+    }
   };
 
   useEffect(() => {

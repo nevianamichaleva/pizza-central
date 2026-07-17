@@ -24,13 +24,21 @@ export function useFormAntiBot() {
   });
 
   /** @returns {{ ok: true, antiBot: object, turnstileToken: string | null } | { ok: false, honeypot?: boolean }} */
-  const validateBeforeSubmit = () => {
+  const validateBeforeSubmit = (options = {}) => {
     if (isTurnstileConfigured() && !turnstileToken) {
       showAToast('error', 'Моля потвърдете, че не сте робот.');
       return { ok: false };
     }
 
     const antiBot = getAntiBotPayload();
+
+    if (options.turnstileOnly) {
+      if (String(antiBot.hpWebsite ?? '').trim() !== '') {
+        return { ok: false, honeypot: true };
+      }
+      return { ok: true, antiBot, turnstileToken };
+    }
+
     const gate = validateContactAntiBot(antiBot);
     if (!gate.ok) {
       if (gate.code === 'honeypot') {
