@@ -48,8 +48,8 @@ export async function POST(request) {
       }
     }
 
-    // Prefer ADMIN_EMAIL from env when set; else Firebase/client value
-    const recipientEmail = process.env.ADMIN_EMAIL || adminEmailFromRequest;
+    // Same as contact form: Firebase/client SMTP first, then server env
+    const recipientEmail = adminEmailFromRequest || process.env.ADMIN_EMAIL;
 
     if (!recipientEmail) {
       return Response.json(
@@ -170,50 +170,34 @@ ${orderType === 'delivery' ? `Доставка: ${formatPrice(deliveryFee).both}
     // Try to send email using nodemailer
     try {
       let transporter;
-      
-    // Prefer complete server env; otherwise fall back to client/Firebase SMTP (same as contact form)
-    const envSmtpReady =
-      Boolean(process.env.SMTP_HOST) &&
-      Boolean(process.env.SMTP_USER) &&
-      Boolean(process.env.SMTP_PASSWORD);
 
-    let smtpHost = envSmtpReady
-      ? process.env.SMTP_HOST
-      : smtpConfigFromRequest?.smtpHost || process.env.SMTP_HOST;
-    let smtpPort = envSmtpReady
-      ? process.env.SMTP_PORT || '587'
-      : smtpConfigFromRequest?.smtpPort || process.env.SMTP_PORT || '587';
-    let smtpUser = envSmtpReady
-      ? process.env.SMTP_USER
-      : smtpConfigFromRequest?.smtpUser || process.env.SMTP_USER;
-    let smtpPassword = envSmtpReady
-      ? process.env.SMTP_PASSWORD
-      : smtpConfigFromRequest?.smtpPassword || process.env.SMTP_PASSWORD;
-    let smtpSecure = envSmtpReady
-      ? process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465'
-      : smtpConfigFromRequest?.smtpSecure === true ||
+      // Same priority as contact form: Firebase/client config first, then env
+      let smtpHost = smtpConfigFromRequest?.smtpHost || process.env.SMTP_HOST;
+      let smtpPort = smtpConfigFromRequest?.smtpPort || process.env.SMTP_PORT || '587';
+      let smtpUser = smtpConfigFromRequest?.smtpUser || process.env.SMTP_USER;
+      let smtpPassword = smtpConfigFromRequest?.smtpPassword || process.env.SMTP_PASSWORD;
+      let smtpSecure =
+        smtpConfigFromRequest?.smtpSecure ||
         process.env.SMTP_SECURE === 'true' ||
         process.env.SMTP_PORT === '465';
-    let fromEmail = envSmtpReady
-      ? process.env.SMTP_FROM || process.env.SMTP_USER
-      : smtpConfigFromRequest?.fromEmail ||
+      let fromEmail =
+        smtpConfigFromRequest?.fromEmail ||
         process.env.SMTP_FROM ||
         process.env.SMTP_USER;
-      
+
       // Check if SMTP configuration is available
       if (smtpHost && smtpUser && smtpPassword) {
-        // Use environment variables for SMTP
         transporter = nodemailer.createTransport({
           host: smtpHost,
-          port: parseInt(smtpPort),
-          secure: smtpSecure,
+          port: parseInt(smtpPort, 10),
+          secure: Boolean(smtpSecure),
           auth: {
             user: smtpUser,
-            pass: smtpPassword,
+            // Gmail app passwords are often stored with spaces — strip them
+            pass: String(smtpPassword).replace(/\s+/g, ''),
           },
         });
 
-        // Send email
         const mailOptions = {
           from: fromEmail,
           to: recipientEmail,
@@ -226,17 +210,16 @@ ${orderType === 'delivery' ? `Доставка: ${formatPrice(deliveryFee).both}
 
         return Response.json({ success: true, message: 'Email sent successfully' });
       } else {
-        // Fallback: Log the email
         console.log('Email notification (SMTP not configured):', {
           to: recipientEmail,
           subject: emailSubject,
           body: emailBody,
         });
 
-        return Response.json({ 
-          success: true, 
+        return Response.json({
+          success: true,
           message: 'Email logged (configure SMTP environment variables for actual sending)',
-          logged: true 
+          logged: true,
         });
       }
     } catch (emailError) {
