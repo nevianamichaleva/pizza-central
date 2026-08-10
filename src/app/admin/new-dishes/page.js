@@ -16,7 +16,7 @@ const EUR_RATE = 1.95583;
 
 const formatDualPriceBgn = (bgn) => {
   const v = parseFloat(bgn || 0);
-  return `${(v / EUR_RATE).toFixed(2)} € / ${v.toFixed(2)} лв`;
+  return `${(v / EUR_RATE).toFixed(2)} €`;
 };
 
 const AdminNewDishesPage = () => {

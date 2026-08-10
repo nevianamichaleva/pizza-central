@@ -61,16 +61,15 @@ export async function POST(request) {
     // Currency conversion rate
     const EUR_RATE = 1.95583;
     
-    // Format price in BGN and EUR
+    // Format price in EUR (стойностите в базата са в BGN)
     const formatPrice = (priceInBGN) => {
       const bgn = parseFloat(priceInBGN || 0);
       const eur = (bgn / EUR_RATE).toFixed(2);
-      const bgnStr = bgn.toFixed(2);
       return {
-        bgn: bgnStr,
+        bgn: bgn.toFixed(2),
         eur,
-        both: `${eur}€ (${bgnStr} лв)`,
-        bothNeg: `-${eur}€ (-${bgnStr} лв)`,
+        both: `${eur}€`,
+        bothNeg: `-${eur}€`,
       };
     };
 

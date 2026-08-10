@@ -40,11 +40,11 @@ const PackagingManagement = () => {
       dataIndex: "price",
       key: "price",
       render: (price) => {
-        const priceFloat = parseFloat(price);
+        const priceFloat = parseFloat(price) / 1.95583;
         if (priceFloat % 1 === 0) {
-          return `${priceFloat.toFixed(0)} лв.`;
+          return `${priceFloat.toFixed(0)} €`;
         }
-        return `${priceFloat.toFixed(2)} лв.`;
+        return `${priceFloat.toFixed(2)} €`;
       },
     },
   ];
@@ -78,7 +78,7 @@ const PackagingManagement = () => {
     
     set(newPackagingRef, {
       name: name.trim(),
-      price: parseFloat(price),
+      price: Number((parseFloat(price) * 1.95583).toFixed(2)),
     })
       .then(() => {
         closeDrawer();
@@ -149,7 +149,7 @@ const PackagingManagement = () => {
 
     const updatedData = {
       name: name.trim(),
-      price: parseFloat(price),
+      price: Number((parseFloat(price) * 1.95583).toFixed(2)),
     };
 
     try {
@@ -172,7 +172,7 @@ const PackagingManagement = () => {
     } = values || {};
 
     setName(name);
-    setPrice(price.toString());
+    setPrice(price === '' || price == null ? '' : (parseFloat(price) / 1.95583).toFixed(2));
 
     setPackaging(id);
   };
@@ -274,7 +274,7 @@ const PackagingManagement = () => {
               <div className="row gy-4">
                 <div className="col-md-12">
                   <label htmlFor="price" style={{ marginBottom: "8px", display: "block", fontWeight: 500 }}>
-                    Цена (лв.)
+                    Цена (€)
                   </label>
                   <Input
                     type="number"

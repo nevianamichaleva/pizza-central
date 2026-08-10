@@ -198,8 +198,8 @@ export default async function ProductDetailsPage({ params }) {
       : `${baseUrl}/images/no-image.png`,
     "offers": product.price ? {
       "@type": "Offer",
-      "price": parseFloat(product.price).toFixed(2),
-      "priceCurrency": "BGN",
+      "price": (parseFloat(product.price) / 1.95583).toFixed(2),
+      "priceCurrency": "EUR",
       "availability": "https://schema.org/InStock",
       "url": `${baseUrl}/products/${slug}`
     } : undefined,
@@ -242,7 +242,7 @@ export default async function ProductDetailsPage({ params }) {
             
             {displayPrice !== null && (
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#c41d7f', marginBottom: '15px' }}>
-                {(displayPrice / 1.95583).toFixed(2)} € / {displayPrice.toFixed(2)} лв
+                {(displayPrice / 1.95583).toFixed(2)} €
               </div>
             )}
             

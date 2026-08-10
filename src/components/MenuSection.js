@@ -218,9 +218,8 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
       return null;
     }
 
-    const priceInLv = normalized.toFixed(2);
     const priceInEuro = (normalized / 1.95583).toFixed(2);
-    return `${priceInEuro} € / ${priceInLv} лв.`;
+    return `${priceInEuro} €`;
   };
 
   // Get display price (product price + packaging price for delivery items)
@@ -944,13 +943,11 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                           )}
                           {getDisplayPrice(item) && (() => {
                             const price = getDisplayPrice(item);
-                            const priceInLv = price.toFixed(2);
                             const priceInEuro = (price / 1.95583).toFixed(2);
                             return (
                               <div className="price" style={{ fontSize: '14px', fontWeight: 600, color: '#333', marginBottom: '8px', lineHeight: '1.4' }}>
-                                <div style={{ fontSize: '13px', color: '#333' }}>{priceInEuro} €</div>
                                 <div style={{ fontSize: '13px', color: '#333' }}>
-                                  {priceInLv}лв{item.weight ? ` | ${item.weight} ${item.weightUnit || 'г'}` : ''}
+                                  {priceInEuro} €{item.weight ? ` | ${item.weight} ${item.weightUnit || 'г'}` : ''}
                                 </div>
                               </div>
                             );
@@ -1182,13 +1179,11 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                         )}
                         {getDisplayPrice(item) && (() => {
                           const price = getDisplayPrice(item);
-                          const priceInLv = price.toFixed(2);
                           const priceInEuro = (price / 1.95583).toFixed(2);
                           return (
                             <div className="price" style={{ fontSize: '14px', fontWeight: 600, color: '#333', marginBottom: '8px', lineHeight: '1.4' }}>
-                              <div style={{ fontSize: '13px', color: '#333' }}>{priceInEuro} €</div>
                               <div style={{ fontSize: '13px', color: '#333' }}>
-                                {priceInLv}лв{item.weight ? ` | ${item.weight} ${item.weightUnit || 'г'}` : ''}
+                                {priceInEuro} €{item.weight ? ` | ${item.weight} ${item.weightUnit || 'г'}` : ''}
                               </div>
                             </div>
                           );
@@ -1325,13 +1320,11 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                       )}
                       {getDisplayPrice(item) && (() => {
                         const price = getDisplayPrice(item);
-                        const priceInLv = price.toFixed(2);
                         const priceInEuro = (price / 1.95583).toFixed(2);
                         return (
                           <div className="price" style={{ fontSize: '14px', fontWeight: 600, color: '#333', marginBottom: '8px', lineHeight: '1.4' }}>
-                            <div style={{ fontSize: '13px', color: '#333' }}>{priceInEuro} €</div>
                             <div style={{ fontSize: '13px', color: '#333' }}>
-                              {priceInLv}лв{item.weight ? ` | ${item.weight} ${item.weightUnit || 'г'}` : ''}
+                              {priceInEuro} €{item.weight ? ` | ${item.weight} ${item.weightUnit || 'г'}` : ''}
                             </div>
                           </div>
                         );

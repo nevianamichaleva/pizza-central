@@ -66,9 +66,8 @@ export default function CentralMenuPage({ params }) {
       return null;
     }
 
-    const priceInLv = normalized.toFixed(2);
     const priceInEuro = (normalized / 1.95583).toFixed(2);
-    return `${priceInEuro} € / ${priceInLv} лв.`;
+    return `${priceInEuro} €`;
   };
 
   // Мапване на стойностите на алергените към техните български имена (за търсене в JSON)

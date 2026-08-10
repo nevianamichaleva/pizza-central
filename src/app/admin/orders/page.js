@@ -64,16 +64,15 @@ const AdminOrdersPage = () => {
     // Currency conversion rate
     const EUR_RATE = 1.95583;
     
-    // Format price in BGN and EUR
+    // Format price in EUR (стойностите в базата са в BGN)
     const formatPrice = (priceInBGN) => {
         const bgn = parseFloat(priceInBGN || 0);
         const eur = (bgn / EUR_RATE).toFixed(2);
-        const bgnStr = bgn.toFixed(2);
         return {
-            bgn: bgnStr,
+            bgn: bgn.toFixed(2),
             eur,
-            both: `${eur}€ (${bgnStr} лв)`,
-            bothNeg: `-${eur}€ (-${bgnStr} лв)`,
+            both: `${eur}€`,
+            bothNeg: `-${eur}€`,
         };
     };
     const [workingHours, setWorkingHours] = useState({ startHour: 10, endHour: 22 });
@@ -183,7 +182,7 @@ const AdminOrdersPage = () => {
             key: 'total',
             render: (total) => {
                 const price = formatPrice(total);
-                return total ? price.both : '0.00€ (0.00 лв)';
+                return total ? price.both : '0.00€';
             },
         },
         {
@@ -358,9 +357,13 @@ const AdminOrdersPage = () => {
         try {
             const t0 = editingDeliveryTiers[0];
             const t1 = editingDeliveryTiers[1];
-            const max0 = t0?.maxAmount === '' || t0?.maxAmount == null ? 25 : parseInt(Number(t0.maxAmount), 10);
-            const fee0 = normalizeMoneyInput(t0?.fee) ?? 0;
-            const fee1 = normalizeMoneyInput(t1?.fee) ?? 0;
+            // Админът редактира в €; в базата се пазят стойности в BGN
+            const max0Eur = t0?.maxAmount === '' || t0?.maxAmount == null ? (25 / EUR_RATE) : Number(t0.maxAmount);
+            const fee0Eur = normalizeMoneyInput(t0?.fee) ?? 0;
+            const fee1Eur = normalizeMoneyInput(t1?.fee) ?? 0;
+            const max0 = Math.round(max0Eur * EUR_RATE);
+            const fee0 = Number((fee0Eur * EUR_RATE).toFixed(2));
+            const fee1 = Number((fee1Eur * EUR_RATE).toFixed(2));
             const tiers = [
                 { maxAmount: max0, fee: fee0 },
                 { maxAmount: null, fee: fee1 }
@@ -369,7 +372,10 @@ const AdminOrdersPage = () => {
                 message.error('Попълнете коректно границите и таксите за доставка.');
                 return;
             }
-            const minOrder = (editingMinOrderAmount === '' || editingMinOrderAmount == null) ? minOrderAmount : Number(editingMinOrderAmount);
+            const minOrderEur = (editingMinOrderAmount === '' || editingMinOrderAmount == null)
+                ? (minOrderAmount / EUR_RATE)
+                : Number(editingMinOrderAmount);
+            const minOrder = Number((minOrderEur * EUR_RATE).toFixed(2));
             if (isNaN(minOrder) || minOrder < 0) {
                 message.error('Минималната сума за доставка трябва да е положително число.');
                 return;
@@ -897,7 +903,21 @@ const AdminOrdersPage = () => {
                         style={{ marginBottom: "20px" }}
                         extra={
                             !isEditingDeliveryTiers ? (
-                                <Button type="primary" onClick={() => setIsEditingDeliveryTiers(true)}>
+                                <Button type="primary" onClick={() => {
+                                    setEditingMinOrderAmount(Number(((minOrderAmount ?? 0) / EUR_RATE).toFixed(2)));
+                                    setEditingDeliveryTiers([
+                                        {
+                                            maxAmount: Number((((deliveryPriceTiers[0]?.maxAmount ?? 25)) / EUR_RATE).toFixed(2)),
+                                            fee: Number((((deliveryPriceTiers[0]?.fee ?? 5)) / EUR_RATE).toFixed(2)),
+                                        },
+                                        {
+                                            maxAmount: null,
+                                            fee: Number((((deliveryPriceTiers[1]?.fee ?? 3)) / EUR_RATE).toFixed(2)),
+                                        },
+                                    ]);
+                                    setEditingRegisteredUserDiscountPercent(registeredUserDiscountPercent);
+                                    setIsEditingDeliveryTiers(true);
+                                }}>
                                     Редактирай
                                 </Button>
                             ) : (
@@ -913,13 +933,13 @@ const AdminOrdersPage = () => {
                         {!isEditingDeliveryTiers ? (
                             <div>
                                 <p style={{ color: '#1890ff', fontSize: '14px', marginTop: '10px', marginBottom: '14px' }}>
-                                    <strong>Минимална сума за доставка:</strong> {minOrderAmount} лв
+                                    <strong>Минимална сума за доставка:</strong> {(minOrderAmount / EUR_RATE).toFixed(2)} €
                                 </p>
                                 <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
-                                    <strong>До {deliveryPriceTiers[0]?.maxAmount ?? 25} лв:</strong> {formatMoneyDisplay(deliveryPriceTiers[0]?.fee ?? 5)} лв
+                                    <strong>До {((deliveryPriceTiers[0]?.maxAmount ?? 25) / EUR_RATE).toFixed(2)} €:</strong> {formatMoneyDisplay((deliveryPriceTiers[0]?.fee ?? 5) / EUR_RATE)} €
                                 </p>
                                 <p style={{ color: '#666', fontSize: '14px', marginTop: '10px' }}>
-                                    <strong>Над {deliveryPriceTiers[0]?.maxAmount ?? 25} лв:</strong> {formatMoneyDisplay(deliveryPriceTiers[1]?.fee ?? 3)} лв
+                                    <strong>Над {((deliveryPriceTiers[0]?.maxAmount ?? 25) / EUR_RATE).toFixed(2)} €:</strong> {formatMoneyDisplay((deliveryPriceTiers[1]?.fee ?? 3) / EUR_RATE)} €
                                 </p>
                                 <p style={{ color: '#52c41a', fontSize: '14px', marginTop: '14px', marginBottom: '10px' }}>
                                     <strong>Отстъпка за регистрирани потребители:</strong> {registeredUserDiscountPercent}%
@@ -937,7 +957,7 @@ const AdminOrdersPage = () => {
                                         onChange={(e) => setEditingMinOrderAmount(e.target.value === '' ? '' : Number(e.target.value))}
                                         style={{ width: 80 }}
                                     />
-                                    <span><strong>лв</strong></span>
+                                    <span><strong>€</strong></span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                                     <span><strong>До</strong></span>
@@ -955,7 +975,7 @@ const AdminOrdersPage = () => {
                                         }}
                                         style={{ width: 80 }}
                                     />
-                                    <span><strong>лв →</strong></span>
+                                    <span><strong>€ →</strong></span>
                                     <InputNumber
                                         min={0}
                                         step={0.01}
@@ -971,7 +991,7 @@ const AdminOrdersPage = () => {
                                         }}
                                         style={{ width: 100 }}
                                     />
-                                    <span><strong>лв</strong></span>
+                                    <span><strong>€</strong></span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                                     <span><strong>Над</strong></span>
@@ -982,7 +1002,7 @@ const AdminOrdersPage = () => {
                                         style={{ width: 80 }}
                                         disabled
                                     />
-                                    <span><strong>лв →</strong></span>
+                                    <span><strong>€ →</strong></span>
                                     <InputNumber
                                         min={0}
                                         step={0.01}
@@ -999,7 +1019,7 @@ const AdminOrdersPage = () => {
                                         }}
                                         style={{ width: 100 }}
                                     />
-                                    <span><strong>лв</strong></span>
+                                    <span><strong>€</strong></span>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #f0f0f0' }}>
                                     <span><strong>Отстъпка за регистрирани потребители (%):</strong></span>

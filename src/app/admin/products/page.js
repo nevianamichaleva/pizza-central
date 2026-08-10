@@ -812,7 +812,7 @@ const AddProduct = () => {
                   >
                     {packagingList.map((packaging) => (
                       <Option key={packaging.id} value={packaging.id}>
-                        {packaging.name} ({parseFloat(packaging.price).toFixed(2)} лв.)
+                        {packaging.name} ({(parseFloat(packaging.price) / 1.95583).toFixed(2)} €)
                       </Option>
                     ))}
                   </Select>

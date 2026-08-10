@@ -720,16 +720,15 @@ export default function Order() {
   // Currency conversion rate
   const EUR_RATE = 1.95583;
   
-  // Format price in BGN and EUR (евро първо навсякъде)
+  // Format price in EUR (стойностите в базата са в BGN)
   const formatPrice = (priceInBGN) => {
     const bgn = parseFloat(priceInBGN || 0);
     const eur = (bgn / EUR_RATE).toFixed(2);
-    const bgnStr = bgn.toFixed(2);
     return {
-      bgn: bgnStr,
+      bgn: bgn.toFixed(2),
       eur,
-      both: `${eur}€ (${bgnStr} лв)`,
-      bothNeg: `-${eur}€ (-${bgnStr} лв)`,
+      both: `${eur}€`,
+      bothNeg: `-${eur}€`,
     };
   };
   
@@ -842,11 +841,11 @@ export default function Order() {
                             <span>{item.quantity}</span>
                           </div>
                           <div className="col-md-2 price d-flex align-items-center justify-content-center">
-                            <span>{item.value ? formatPrice(parseFloat(item.value)).both : "0.00€ (0.00 лв)"}</span>
+                            <span>{item.value ? formatPrice(parseFloat(item.value)).both : "0.00€"}</span>
                           </div>
                           <div className="col-md-2 total-price d-flex align-items-center justify-content-center">
                             <span>
-                              {Number.isFinite(item.value * item.quantity) ? formatPrice(item.value * item.quantity).both : "0.00€ (0.00 лв)"}
+                              {Number.isFinite(item.value * item.quantity) ? formatPrice(item.value * item.quantity).both : "0.00€"}
                             </span>
                           </div>
                         </div>

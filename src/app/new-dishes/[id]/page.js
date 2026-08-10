@@ -181,8 +181,8 @@ export default async function NewDishDetailsPage({ params }) {
       : `${baseUrl}/images/no-image.png`,
     "offers": displayPrice != null ? {
       "@type": "Offer",
-      "price": parseFloat(displayPrice).toFixed(2),
-      "priceCurrency": "BGN",
+      "price": (parseFloat(displayPrice) / 1.95583).toFixed(2),
+      "priceCurrency": "EUR",
       "availability": "https://schema.org/InStock",
       "url": `${baseUrl}/new-dishes/${slug}`
     } : undefined,
@@ -229,7 +229,7 @@ export default async function NewDishDetailsPage({ params }) {
               <>
                 {(displayPrice != null) && (
                   <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#c41d7f', marginBottom: '15px' }}>
-                    {(parseFloat(displayPrice) / 1.95583).toFixed(2)} € / {parseFloat(displayPrice).toFixed(2)} лв
+                    {(parseFloat(displayPrice) / 1.95583).toFixed(2)} €
                   </div>
                 )}
                 
