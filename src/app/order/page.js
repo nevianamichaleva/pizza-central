@@ -1134,7 +1134,7 @@ export default function Order() {
                             Доставка
                           </div>
                           <div style={{ fontSize: "11px", marginTop: "2px", opacity: 0.9 }}>
-                            {formatPrice(3.00).both}
+                            {formatPrice(getDeliveryFee(calculatedTotal)).both}
                           </div>
                           {orderType === 'delivery' && (
                             <div style={{
@@ -1287,7 +1287,7 @@ export default function Order() {
                           />
                           <div>
                             <div style={{ fontWeight: "600" }}>
-                              С доставка ({formatPrice(deliveryFee).both})
+                              С доставка ({formatPrice(getDeliveryFee(calculatedTotal)).both})
                             </div>
                           </div>
                         </label>

@@ -26,7 +26,7 @@ export default function ForHomeClient() {
               fontWeight: '600',
             }}
           >
-            Поръчайте директно от нас – без посредник. <strong>Такса за доставка 1,53 €.</strong>{' '}
+            Поръчайте директно от нас – без посредник. <strong>Такса за доставка 3 €.</strong>{' '}
             <strong>5% отстъпка</strong> за регистрирани при доставка · <strong>10%</strong> при вземане от място
           </p>
           {!user && (
@@ -93,7 +93,7 @@ export default function ForHomeClient() {
               }}
             >
               {/* <li style={{ marginBottom: '10px' }}>
-                <strong>Такса за доставка:</strong> 1,53 €
+                <strong>Такса за доставка:</strong> 3 €
                 <Link href="/order" style={{ color: '#ce1212', fontWeight: 600 }}>
                   количката
                 </Link>
