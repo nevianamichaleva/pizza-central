@@ -2,7 +2,7 @@
 // import AboutSection from '@/components/AboutSection';
 import BlogSection from '@/components/BlogSection';
 // import BookTableSection from '@/components/BookTableSection';
-import CateringSection from '@/components/CateringSection';
+// import CateringSection from '@/components/CateringSection';
 import Contact from '@/components/Contact';
 // import EventsSection from '@/components/EventsSection';
 import Gallery from '@/components/Gallery';
@@ -23,7 +23,7 @@ export default function Home() {
       {/* <Hero /> */}
       <ModernHero />
       <MenuPreview />
-      <CateringSection />
+      {/* <CateringSection /> */}
       <ServicesSection />
       {/* <MenuSection /> */}
       

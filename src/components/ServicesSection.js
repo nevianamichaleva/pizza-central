@@ -82,7 +82,7 @@ const ServicesSection = () => {
                 </Link>
               </div>
 
-              <div style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '100%', display: 'flex' }}>
+              {/* <div style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '100%', display: 'flex' }}>
                 <Link href="/catering" style={{ textDecoration: 'none', display: 'flex', flex: 1, width: '100%' }}>
                   <div className="text-center" style={{
                     padding: '40px 30px',
@@ -112,7 +112,7 @@ const ServicesSection = () => {
                     </p>
                   </div>
                 </Link>
-              </div>
+              </div> */}
 
               <div style={{ flex: '1 1 0', minWidth: '200px', maxWidth: '100%', display: 'flex' }}>
                 <Link href="/detski-kut" style={{ textDecoration: 'none', display: 'flex', flex: 1, width: '100%' }}>

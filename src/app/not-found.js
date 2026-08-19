@@ -59,9 +59,9 @@ export default function NotFound() {
             <Link href="/for-home">
               <Button size="large">Поръчай за доставка до дома</Button>
             </Link>
-            <Link href="/catering/zaiavka">
+            {/* <Link href="/catering/zaiavka">
               <Button size="large">Заяви кетъринг услуги</Button>
-            </Link>
+            </Link> */}
             <Link href="/reservation">
               <Button size="large">Резервирай маса в ресторанта</Button>
             </Link>

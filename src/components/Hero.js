@@ -20,9 +20,9 @@ const Hero = () => {
               <a href="#book-a-table" className="btn-get-started" aria-label="Резервирай маса в ресторанта">
                 Резервирай маса
               </a>
-              <a href="/catering/zaiavka" className="btn-get-started" aria-label="Заяви кетъринг услуги">
+              {/* <a href="/catering/zaiavka" className="btn-get-started" aria-label="Заяви кетъринг услуги">
                 Заяви кетъринг
-              </a>
+              </a> */}
               {/* <a
                 href="https://www.youtube.com/watch?v=Y7f98aduVJ8"
                 className="glightbox btn-watch-video d-flex align-items-center"
