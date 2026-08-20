@@ -8,6 +8,7 @@ import { translateCentralMenu } from '@/lib/centralMenuTranslate';
 import translations from '@/locales/central-menu.json';
 import { LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { Button, Image, Select } from "antd";
+import CentralMenuDrinks, { getMergedMenuCategories, isDrinkCategoryId } from '@/components/CentralMenuDrinks';
 import SpicyBadge from '@/components/SpicyBadge';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -158,10 +159,10 @@ export default function CentralMenuPage({ params }) {
     );
   };
 
-  const visibleCategories = useMemo(
-    () => mainCategories.filter((category) => getCategoryProducts(category.id).length > 0),
-    [mainCategories, products, categories]
-  );
+  const visibleCategories = useMemo(() => {
+    const foodCategories = mainCategories.filter((category) => getCategoryProducts(category.id).length > 0);
+    return getMergedMenuCategories(foodCategories, selectedLanguage);
+  }, [mainCategories, products, categories, selectedLanguage]);
 
   useEffect(() => {
     if (visibleCategories.length === 0) return;
@@ -176,6 +177,10 @@ export default function CentralMenuPage({ params }) {
     || null;
 
   const formatCategoryLabel = (category) => {
+    if (category.isDrink) {
+      const label = category.name;
+      return label.charAt(0).toUpperCase() + label.slice(1);
+    }
     const translatedName = t(category.name);
     return translatedName.charAt(0).toUpperCase() + translatedName.slice(1);
   };
@@ -253,7 +258,7 @@ export default function CentralMenuPage({ params }) {
             <h1 className="central-menu-title desktop-title" style={{fontSize: '36px'}}>{t("Меню на Ресторант-пицария Централ град Добрич")}</h1>
             {selectedCategory && (
               <div className="central-menu-title mobile-title">
-                {t(selectedCategory.name.charAt(0).toUpperCase() + selectedCategory.name.slice(1))}
+                {formatCategoryLabel(selectedCategory)}
               </div>
             )}
             <div className="language-selector-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -315,24 +320,15 @@ export default function CentralMenuPage({ params }) {
               className="central-menu-categories-slider"
               ref={categoriesSliderRef}
             >
-              {mainCategories.map((category) => {
-                const categoryProducts = getCategoryProducts(category.id);
-                // Hide empty categories
-                if (categoryProducts.length === 0) return null;
-                
-                return (
-                  <button
-                    key={category.id}
-                    className={`central-menu-category-btn ${selectedCategoryId === category.id ? 'active' : ''}`}
-                    onClick={() => setSelectedCategoryId(category.id)}
-                  >
-                    {(() => {
-                      const translatedName = t(category.name);
-                      return translatedName.charAt(0).toUpperCase() + translatedName.slice(1);
-                    })()}
-                  </button>
-                );
-              })}
+              {visibleCategories.map((category) => (
+                <button
+                  key={category.id}
+                  className={`central-menu-category-btn ${selectedCategoryId === category.id ? 'active' : ''}`}
+                  onClick={() => setSelectedCategoryId(category.id)}
+                >
+                  {formatCategoryLabel(category)}
+                </button>
+              ))}
             </div>
             <button 
               className="central-menu-category-arrow central-menu-category-arrow-right"
@@ -348,7 +344,17 @@ export default function CentralMenuPage({ params }) {
       {/* Menu Content */}
       <div className="central-menu-content">
         <div className="container">
-          {selectedCategory && (() => {
+          {selectedCategory && isDrinkCategoryId(selectedCategory.id) ? (
+            <>
+              <CentralMenuDrinks
+                categoryId={selectedCategory.id}
+                lang={selectedLanguage}
+                t={t}
+                getAllergenLabel={getAllergenLabel}
+              />
+              {renderCategoryNavigation()}
+            </>
+          ) : selectedCategory && (() => {
             const categoryProducts = getCategoryProducts(selectedCategory.id);
             
             if (categoryProducts.length === 0) {

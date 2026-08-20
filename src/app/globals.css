@@ -834,6 +834,68 @@ a {
   line-height: 1.45;
 }
 
+.central-menu-category--drinks {
+  padding-bottom: 8px;
+}
+
+.central-menu-drink-note {
+  margin: -8px 0 20px;
+  font-size: 0.95rem;
+  color: #6c757d;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.central-menu-drink-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.central-menu-drink-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #eef0f2;
+}
+
+.central-menu-drink-item:last-child {
+  border-bottom: none;
+}
+
+.central-menu-drink-item-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px 20px;
+  align-items: baseline;
+}
+
+.central-menu-drink-item-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--heading-color, #212529);
+  line-height: 1.35;
+}
+
+.central-menu-drink-item-quantity {
+  font-size: 0.9rem;
+  color: #6c757d;
+  white-space: nowrap;
+}
+
+.central-menu-drink-item-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ce1212;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.central-menu-drink-item-description {
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+  color: #6c757d;
+  line-height: 1.4;
+}
+
 .central-menu-category-nav {
   display: none;
 }
@@ -945,6 +1007,16 @@ a {
   .central-menu-subcategory-title {
     font-size: 1.1rem;
     margin-bottom: 10px;
+  }
+
+  .central-menu-drink-item-main {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .central-menu-drink-item-quantity,
+  .central-menu-drink-item-price {
+    text-align: left;
   }
 
   .central-menu-item {
