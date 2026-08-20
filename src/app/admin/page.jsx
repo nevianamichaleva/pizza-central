@@ -571,7 +571,7 @@ const AdministrationPage = () => {
                             >
                                 Управление на резервации
                             </Link>
-                            {/* <Link 
+                            <Link 
                                 href='/admin/catering' 
                                 style={{ 
                                     textDecoration: 'none',
@@ -602,7 +602,7 @@ const AdministrationPage = () => {
                                 }}
                             >
                                 Управление на кетъринг
-                            </Link> */}
+                            </Link>
                             <Link 
                                 href='/admin/orders' 
                                 style={{ 
@@ -893,7 +893,7 @@ const AdministrationPage = () => {
                                             Общ брой прегледи на всички публикувани статии
                                         </p>
                                     </div>
-                                    {/* <div style={{ 
+                                    <div style={{ 
                                         background: '#fff', 
                                         padding: '24px', 
                                         borderRadius: '8px',
@@ -916,7 +916,7 @@ const AdministrationPage = () => {
                                         <p style={{ textAlign: 'center', color: '#666', fontSize: '16px' }}>
                                             Брой кетъринг заявки за последната седмица
                                         </p>
-                                    </div> */}
+                                    </div>
                                 </div>
 
                                 {/* Orders Chart */}

@@ -67,7 +67,7 @@ const AboutSection = () => {
                   Резервирай маса
                 </button>
               </Link>
-              {/* <Link href="/catering/zaiavka" style={{ display: 'inline-block' }}>
+              <Link href="/catering/zaiavka" style={{ display: 'inline-block' }}>
                 <button 
                   className="btn btn-primary"
                   style={{
@@ -85,7 +85,7 @@ const AboutSection = () => {
                 >
                   Заявете кетъринг
                 </button>
-              </Link> */}
+              </Link>
               <p>Или се свържете с нас на телефон 0895 516401 и 0893 315201</p>
             </div>
           </div>
