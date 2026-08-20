@@ -6,7 +6,7 @@ import { useProducts } from '@/context/ProductsContext';
 //използвай този ако има нужда от преводи от json файл
 import { translateCentralMenu } from '@/lib/centralMenuTranslate';
 import translations from '@/locales/central-menu.json';
-import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { CloseOutlined, DownOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { Button, Image, Select } from "antd";
 import CentralMenuDrinks, { getMergedMenuCategories, isDrinkCategoryId } from '@/components/CentralMenuDrinks';
 import SpicyBadge from '@/components/SpicyBadge';
@@ -24,6 +24,7 @@ export default function CentralMenuPage({ params }) {
   const { isObednoOpen } = useObednoMenuSchedule();
   // const { translations } = useTranslations();
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
   const categoriesSliderRef = useRef(null);
   const [selectedLanguage, setSelectedLanguage] = useState('bg');
 
@@ -195,10 +196,37 @@ export default function CentralMenuPage({ params }) {
 
   const goToCategory = (categoryId) => {
     setSelectedCategoryId(categoryId);
+    setIsCategoryPickerOpen(false);
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
+
+  useEffect(() => {
+    if (!isCategoryPickerOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isCategoryPickerOpen]);
+
+  useEffect(() => {
+    if (!selectedCategoryId || !categoriesSliderRef.current) return;
+    const activeBtn = categoriesSliderRef.current.querySelector('.central-menu-category-btn.active');
+    if (activeBtn) {
+      activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, [selectedCategoryId]);
+
+  const foodCategoriesList = useMemo(
+    () => visibleCategories.filter((category) => !category.isDrink),
+    [visibleCategories]
+  );
+  const drinkCategoriesList = useMemo(
+    () => visibleCategories.filter((category) => category.isDrink),
+    [visibleCategories]
+  );
 
   const renderCategoryNavigation = () => {
     if (!previousCategory && !nextCategory) return null;
@@ -211,8 +239,11 @@ export default function CentralMenuPage({ params }) {
             className="central-menu-category-nav-link central-menu-category-nav-link--prev"
             onClick={() => goToCategory(previousCategory.id)}
           >
-            <LeftOutlined />
-            <span>{formatCategoryLabel(previousCategory)}</span>
+            <span className="central-menu-category-nav-hint">{t('Предишна')}</span>
+            <span className="central-menu-category-nav-name">
+              <LeftOutlined />
+              {formatCategoryLabel(previousCategory)}
+            </span>
           </button>
         ) : (
           <span className="central-menu-category-nav-spacer" aria-hidden="true" />
@@ -223,8 +254,11 @@ export default function CentralMenuPage({ params }) {
             className="central-menu-category-nav-link central-menu-category-nav-link--next"
             onClick={() => goToCategory(nextCategory.id)}
           >
-            <span>{formatCategoryLabel(nextCategory)}</span>
-            <RightOutlined />
+            <span className="central-menu-category-nav-hint">{t('Следваща')}</span>
+            <span className="central-menu-category-nav-name">
+              {formatCategoryLabel(nextCategory)}
+              <RightOutlined />
+            </span>
           </button>
         ) : (
           <span className="central-menu-category-nav-spacer" aria-hidden="true" />
@@ -305,10 +339,31 @@ export default function CentralMenuPage({ params }) {
         </div>
       </div>
 
-      {/* Categories Slider */}
+      {/* Categories navigation */}
       <div className="central-menu-categories-container">
         <div className="container">
-          <div className="central-menu-categories-wrapper">
+          {/* Mobile: clear category picker */}
+          <div className="central-menu-mobile-picker">
+            <button
+              type="button"
+              className="central-menu-mobile-picker-btn"
+              onClick={() => setIsCategoryPickerOpen(true)}
+              aria-expanded={isCategoryPickerOpen}
+              aria-haspopup="dialog"
+            >
+              <span className="central-menu-mobile-picker-label">{t('Избери категория')}</span>
+              <span className="central-menu-mobile-picker-current">
+                {selectedCategory ? formatCategoryLabel(selectedCategory) : t('Избери категория')}
+              </span>
+              <DownOutlined className="central-menu-mobile-picker-icon" aria-hidden="true" />
+            </button>
+            <p className="central-menu-mobile-picker-hint">
+              {t('Докоснете, за да видите всички категории')}
+            </p>
+          </div>
+
+          {/* Desktop: horizontal category chips */}
+          <div className="central-menu-categories-wrapper central-menu-categories-wrapper--desktop">
             <button 
               className="central-menu-category-arrow central-menu-category-arrow-left"
               onClick={() => scrollCategories('left')}
@@ -340,6 +395,71 @@ export default function CentralMenuPage({ params }) {
           </div>
         </div>
       </div>
+
+      {isCategoryPickerOpen && (
+        <div
+          className="central-menu-picker-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('Избери категория')}
+        >
+          <button
+            type="button"
+            className="central-menu-picker-backdrop"
+            aria-label={t('Затвори')}
+            onClick={() => setIsCategoryPickerOpen(false)}
+          />
+          <div className="central-menu-picker-sheet">
+            <div className="central-menu-picker-sheet-header">
+              <h2 className="central-menu-picker-sheet-title">{t('Избери категория')}</h2>
+              <button
+                type="button"
+                className="central-menu-picker-close"
+                onClick={() => setIsCategoryPickerOpen(false)}
+                aria-label={t('Затвори')}
+              >
+                <CloseOutlined />
+              </button>
+            </div>
+            <div className="central-menu-picker-sheet-body">
+              {foodCategoriesList.length > 0 && (
+                <div className="central-menu-picker-group">
+                  <h3 className="central-menu-picker-group-title">{t('Храна')}</h3>
+                  <div className="central-menu-picker-list">
+                    {foodCategoriesList.map((category) => (
+                      <button
+                        key={category.id}
+                        type="button"
+                        className={`central-menu-picker-item ${selectedCategoryId === category.id ? 'active' : ''}`}
+                        onClick={() => goToCategory(category.id)}
+                      >
+                        {formatCategoryLabel(category)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {drinkCategoriesList.length > 0 && (
+                <div className="central-menu-picker-group">
+                  <h3 className="central-menu-picker-group-title">{t('Напитки')}</h3>
+                  <div className="central-menu-picker-list">
+                    {drinkCategoriesList.map((category) => (
+                      <button
+                        key={category.id}
+                        type="button"
+                        className={`central-menu-picker-item ${selectedCategoryId === category.id ? 'active' : ''}`}
+                        onClick={() => goToCategory(category.id)}
+                      >
+                        {formatCategoryLabel(category)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Menu Content */}
       <div className="central-menu-content">
