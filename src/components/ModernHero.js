@@ -32,7 +32,7 @@ const HERO_SLIDES = [
     image: '/images/pizza-central-3x1.png',
     imageAlt: 'Пица Централ 3х1 – три вкуса в една XXL пица',
     primaryCta: {
-      href: '/for-home',
+      href: '/products/pizza-central',
       label: 'Поръчай 3х1',
       ariaLabel: 'Поръчай Пица Централ 3х1 за вкъщи',
     },
@@ -44,7 +44,7 @@ const HERO_SLIDES = [
   },
 ];
 
-const AUTO_MS = 6500;
+const AUTO_MS = 3000;
 
 const ModernHero = () => {
   const [activeIndex, setActiveIndex] = useState(0);
