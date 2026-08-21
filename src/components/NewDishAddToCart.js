@@ -1,12 +1,20 @@
 'use client';
 
 import { default as showAToast } from '@/components/common/showAToast';
+import Pizza3x1Modal from '@/components/Pizza3x1Modal';
 import { useProducts } from '@/context/ProductsContext';
 import { useUser } from '@/context/UserContext';
+import {
+  buildPizza3x1FlavorNames,
+  buildPizza3x1ItemKey,
+  buildPizza3x1ItemName,
+  isPizza3x1Product,
+  isValidPizza3x1FlavorSelection,
+} from '@/lib/pizza3x1';
 import { formatOrderDate } from '@/utils/orderNumberUtils';
 import { Button, Modal, Radio } from 'antd';
 import { get, push, ref, set } from 'firebase/database';
-import { useState } from "react";
+import { useState } from 'react';
 import { rtdb } from '../../lib/firebase';
 
 const NewDishAddToCart = ({ dish }) => {
@@ -14,52 +22,82 @@ const NewDishAddToCart = ({ dish }) => {
   const { products } = useProducts();
   const [addingToCart, setAddingToCart] = useState(false);
   const [sideDishModalVisible, setSideDishModalVisible] = useState(false);
+  const [flavorModalVisible, setFlavorModalVisible] = useState(false);
   const [selectedSideDish, setSelectedSideDish] = useState(null);
 
+  const product = dish?.product;
+  const is3x1 = isPizza3x1Product(product);
+
   const getSideDishes = () => {
-    return products.filter(p => p.isSideDish === true);
+    return products.filter((p) => p.isSideDish === true);
+  };
+
+  const emitCartUpdate = (cartId) => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('cart:update', {
+          detail: { cartId },
+        })
+      );
+    }
   };
 
   const handleAddToCartClick = () => {
     if (!dish || !dish.productId) {
-      showAToast("error", "Продуктът не е свързан с това ястие");
+      showAToast('error', 'Продуктът не е свързан с това ястие');
       return;
     }
 
-    const product = dish.product;
     if (!product || !product.price) {
-      showAToast("error", "Цената не е зададена за продукта");
+      showAToast('error', 'Цената не е зададена за продукта');
+      return;
+    }
+
+    if (is3x1) {
+      setFlavorModalVisible(true);
       return;
     }
 
     if (product.requiresSideDish) {
       setSideDishModalVisible(true);
-    } else {
-      handleAddToCart(null);
+      return;
     }
+
+    handleAddToCart(null);
   };
 
-  const handleAddToCart = async (sideDish) => {
+  const handleAddToCart = async (sideDish, flavors = null) => {
     if (!dish || !dish.productId) {
-      showAToast("error", "Продуктът не е свързан с това ястие");
+      showAToast('error', 'Продуктът не е свързан с това ястие');
       return;
     }
 
-    const product = dish.product;
     if (!product || !product.price) {
-      showAToast("error", "Цената не е зададена за продукта");
+      showAToast('error', 'Цената не е зададена за продукта');
       return;
     }
 
+    const withFlavors = isPizza3x1Product(product) && isValidPizza3x1FlavorSelection(flavors);
     const productPrice = parseFloat(product.price);
-    const productName = sideDish 
-      ? `${product.name} (с ${sideDish.name})`
-      : product.name;
-    const productImage = product.image || dish.img || "/images/no-image.png";
-    
-    const itemKey = sideDish ? `${product.id}_${sideDish.id}` : product.id;
+    if (!Number.isFinite(productPrice)) {
+      showAToast('error', 'Цената не е валидна');
+      return;
+    }
 
-    // Fetch packaging items for this product
+    const flavorIds = withFlavors ? flavors.map((f) => f.id) : null;
+    const flavorNames = withFlavors ? buildPizza3x1FlavorNames(flavors) : null;
+    const productName = withFlavors
+      ? buildPizza3x1ItemName(product.name, flavors)
+      : sideDish
+        ? `${product.name} (с ${sideDish.name})`
+        : product.name;
+    const productImage = product.image || dish.img || '/images/no-image.png';
+    const itemKey = withFlavors
+      ? buildPizza3x1ItemKey(product.id, flavorIds)
+      : sideDish
+        ? `${product.id}_${sideDish.id}`
+        : product.id;
+
     let packagingItems = [];
     const packagingIds = product.packagingIds;
     if (packagingIds) {
@@ -71,12 +109,12 @@ const NewDishAddToCart = ({ dish }) => {
           if (packagingSnapshot.exists()) {
             const packagingData = packagingSnapshot.val();
             packagingItems = idsArray
-              .map(packagingId => {
+              .map((packagingId) => {
                 const packaging = packagingData[packagingId];
                 if (packaging) {
                   return {
                     id: packagingId,
-                    ...packaging
+                    ...packaging,
                   };
                 }
                 return null;
@@ -84,203 +122,105 @@ const NewDishAddToCart = ({ dish }) => {
               .filter(Boolean);
           }
         } catch (error) {
-          console.error("Error fetching packaging:", error);
+          console.error('Error fetching packaging:', error);
         }
       }
     }
 
-    setAddingToCart(true);
-    try {
-      const ordersRef = ref(rtdb, 'orders');
-      const snapshot = await get(ordersRef);
+    const buildItemPayload = (quantity) => ({
+      name: productName,
+      quantity,
+      value: productPrice + packagingItems.reduce((sum, p) => sum + (parseFloat(p.price) || 0), 0),
+      image: productImage,
+      productId: product.id,
+      sideDishId: sideDish ? sideDish.id : null,
+      sideDishName: sideDish ? sideDish.name : null,
+      flavorIds: withFlavors ? flavorIds : null,
+      flavorNames: withFlavors ? flavorNames : null,
+      isPizza3x1: withFlavors || null,
+    });
 
-      let orderKey = null;
-      if (typeof window !== "undefined") {
-        orderKey = window.localStorage.getItem("cartId");
-      }
-
-      const emitCartUpdate = (cartId) => {
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("cart:update", {
-              detail: { cartId },
-            })
-          );
-        }
-      };
-
-      if (!orderKey) {
-        const newOrderRef = push(ordersRef);
-        orderKey = newOrderRef.key;
-        if (typeof window !== "undefined") {
-          window.localStorage.setItem("cartId", orderKey);
-        }
-        emitCartUpdate(orderKey);
-
-        let packagingTotal = 0;
-        packagingItems.forEach((packaging) => {
-          packagingTotal += parseFloat(packaging.price);
-        });
-        const totalProductPrice = productPrice + packagingTotal;
-
-        const items = {
-          [itemKey]: {
-            name: productName,
-            quantity: 1,
-            value: totalProductPrice, // Include packaging price in product price
-            image: productImage,
-            productId: product.id,
-            sideDishId: sideDish ? sideDish.id : null,
-            sideDishName: sideDish ? sideDish.name : null,
-          },
-        };
-
-        // Add packaging items linked to this product (hidden in cart but kept for email and admin)
-        packagingItems.forEach((packaging) => {
-          const packagingKey = `${itemKey}_packaging_${packaging.id}`;
+    const addPackagingItems = (items, quantity = 1) => {
+      packagingItems.forEach((packaging) => {
+        const packagingKey = `${itemKey}_packaging_${packaging.id}`;
+        const existingPackaging = items[packagingKey];
+        if (existingPackaging) {
+          items[packagingKey] = {
+            ...existingPackaging,
+            quantity: (Number(existingPackaging.quantity) || 0) + quantity,
+            hiddenInCart: true,
+          };
+        } else {
           items[packagingKey] = {
             name: packaging.name,
-            quantity: 1,
+            quantity,
             value: parseFloat(packaging.price),
-            image: "/images/no-image.png",
+            image: '/images/no-image.png',
             productId: null,
             sideDishId: null,
             sideDishName: null,
             isPackaging: true,
             linkedToItemId: itemKey,
             packagingId: packaging.id,
-            hiddenInCart: true, // Hide in cart but keep for email and admin
+            hiddenInCart: true,
           };
-        });
+        }
+      });
+    };
 
-        const newOrder = {
-          items: items,
+    setAddingToCart(true);
+    try {
+      const ordersRef = ref(rtdb, 'orders');
+      let orderKey = typeof window !== 'undefined' ? window.localStorage.getItem('cartId') : null;
+
+      const createNewOrder = async () => {
+        const newOrderRef = push(ordersRef);
+        orderKey = newOrderRef.key;
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem('cartId', orderKey);
+        }
+        emitCartUpdate(orderKey);
+
+        const items = {
+          [itemKey]: buildItemPayload(1),
+        };
+        addPackagingItems(items, 1);
+
+        const totalProductPrice = items[itemKey].value;
+        await set(newOrderRef, {
+          items,
           order_date: formatOrderDate(),
-          status: "pending",
+          status: 'pending',
           total: totalProductPrice,
           user_id: user ? user.uid : null,
           user_email: user ? user.email : null,
           user_phone: userDetails ? userDetails.phone : null,
           user_address: userDetails ? userDetails.address : null,
           id: orderKey,
-        };
+        });
+      };
 
-        await set(newOrderRef, newOrder);
-        showAToast("success", "Продуктът е добавен в количката");
+      if (!orderKey) {
+        await createNewOrder();
+        showAToast('success', 'Продуктът е добавен в количката');
       } else {
         const orderSnapshot = await get(ref(rtdb, `orders/${orderKey}`));
-        
+
         if (!orderSnapshot.exists()) {
-          const newOrderRef = push(ordersRef);
-          orderKey = newOrderRef.key;
-          if (typeof window !== "undefined") {
-            window.localStorage.setItem("cartId", orderKey);
-          }
-          emitCartUpdate(orderKey);
-
-          let packagingTotal = 0;
-          packagingItems.forEach((packaging) => {
-            packagingTotal += parseFloat(packaging.price);
-          });
-          const totalProductPrice = productPrice + packagingTotal;
-
-          const items = {
-            [itemKey]: {
-              name: productName,
-              quantity: 1,
-              value: totalProductPrice, // Include packaging price in product price
-              image: productImage,
-              productId: product.id,
-              sideDishId: sideDish ? sideDish.id : null,
-              sideDishName: sideDish ? sideDish.name : null,
-            },
-          };
-
-          // Add packaging items linked to this product (hidden in cart but kept for email and admin)
-          packagingItems.forEach((packaging) => {
-            const packagingKey = `${itemKey}_packaging_${packaging.id}`;
-            items[packagingKey] = {
-              name: packaging.name,
-              quantity: 1,
-              value: parseFloat(packaging.price),
-              image: "/images/no-image.png",
-              productId: null,
-              sideDishId: null,
-              sideDishName: null,
-              isPackaging: true,
-              linkedToItemId: itemKey,
-              packagingId: packaging.id,
-              hiddenInCart: true, // Hide in cart but keep for email and admin
-            };
-          });
-
-          const newOrder = {
-            items: items,
-            order_date: formatOrderDate(),
-            status: "pending",
-            total: totalProductPrice,
-            user_id: user ? user.uid : null,
-            user_email: user ? user.email : null,
-            user_phone: userDetails ? userDetails.phone : null,
-            user_address: userDetails ? userDetails.address : null,
-            id: orderKey,
-          };
-
-          await set(newOrderRef, newOrder);
-          showAToast("success", "Продуктът е добавен в количката");
+          await createNewOrder();
+          showAToast('success', 'Продуктът е добавен в количката');
         } else {
           const orderData = orderSnapshot.val();
-          const existingItems = orderData.items || {};
-          
-          let packagingTotal = 0;
-          packagingItems.forEach((packaging) => {
-            packagingTotal += parseFloat(packaging.price);
-          });
-          const totalProductPrice = productPrice + packagingTotal;
+          const existingItems = { ...(orderData.items || {}) };
+          const existingItem = existingItems[itemKey];
+          const currentQuantity = Number(existingItem?.quantity) || 0;
 
-          if (existingItems[itemKey]) {
-            existingItems[itemKey].quantity += 1;
-          } else {
-            existingItems[itemKey] = {
-              name: productName,
-              quantity: 1,
-              value: totalProductPrice, // Include packaging price in product price
-              image: productImage,
-              productId: product.id,
-              sideDishId: sideDish ? sideDish.id : null,
-              sideDishName: sideDish ? sideDish.name : null,
-            };
-          }
-
-          // Add packaging items linked to this product (hidden in cart but kept for email and admin)
-          packagingItems.forEach((packaging) => {
-            const packagingKey = `${itemKey}_packaging_${packaging.id}`;
-            const existingPackaging = existingItems[packagingKey];
-            
-            if (existingPackaging) {
-              existingItems[packagingKey] = {
-                ...existingPackaging,
-                quantity: (Number(existingPackaging.quantity) || 0) + 1,
-              };
-            } else {
-              existingItems[packagingKey] = {
-                name: packaging.name,
-                quantity: 1,
-                value: parseFloat(packaging.price),
-                image: "/images/no-image.png",
-                productId: null,
-                sideDishId: null,
-                sideDishName: null,
-                isPackaging: true,
-                linkedToItemId: itemKey,
-                packagingId: packaging.id,
-                hiddenInCart: true, // Hide in cart but keep for email and admin
-              };
-            }
-          });
+          existingItems[itemKey] = buildItemPayload(currentQuantity + 1);
+          addPackagingItems(existingItems, 1);
 
           const newTotal = Object.values(existingItems).reduce((sum, item) => {
-            return sum + (item.quantity * parseFloat(item.value));
+            if (item.isPackaging && item.hiddenInCart) return sum;
+            return sum + item.quantity * parseFloat(item.value);
           }, 0);
 
           await set(ref(rtdb, `orders/${orderKey}`), {
@@ -289,21 +229,22 @@ const NewDishAddToCart = ({ dish }) => {
             total: newTotal,
             order_date: formatOrderDate(),
           });
-
-          showAToast("success", "Продуктът е добавен в количката");
+          emitCartUpdate(orderKey);
+          showAToast('success', 'Продуктът е добавен в количката');
         }
       }
     } catch (error) {
-      console.error("Error adding to cart:", error);
-      showAToast("error", "Грешка при добавяне в количката");
+      console.error('Error adding to cart:', error);
+      showAToast('error', 'Грешка при добавяне в количката');
     } finally {
       setAddingToCart(false);
       setSideDishModalVisible(false);
+      setFlavorModalVisible(false);
       setSelectedSideDish(null);
     }
   };
 
-  if (!dish || !dish.productId || !dish.product || !dish.product.price) {
+  if (!dish || !dish.productId || !product || !product.price) {
     return null;
   }
 
@@ -333,13 +274,15 @@ const NewDishAddToCart = ({ dish }) => {
         cancelText="Отказ"
       >
         <div style={{ marginBottom: '16px' }}>
-          <p><strong>{dish?.product?.name}</strong></p>
+          <p>
+            <strong>{product?.name}</strong>
+          </p>
           <p style={{ color: '#666', fontSize: '14px' }}>Моля, изберете гарнитура:</p>
         </div>
         <Radio.Group
           value={selectedSideDish?.id}
           onChange={(e) => {
-            const sideDish = getSideDishes().find(sd => sd.id === e.target.value);
+            const sideDish = getSideDishes().find((sd) => sd.id === e.target.value);
             setSelectedSideDish(sideDish);
           }}
           style={{ width: '100%' }}
@@ -356,9 +299,17 @@ const NewDishAddToCart = ({ dish }) => {
           * Гарнитурата е включена в цената на ястието
         </p>
       </Modal>
+
+      <Pizza3x1Modal
+        open={flavorModalVisible}
+        product={product}
+        products={products}
+        confirmLoading={addingToCart}
+        onCancel={() => setFlavorModalVisible(false)}
+        onConfirm={(flavors) => handleAddToCart(null, flavors)}
+      />
     </>
   );
 };
 
 export default NewDishAddToCart;
-
