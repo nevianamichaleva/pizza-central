@@ -1340,6 +1340,16 @@ const AdminOrdersPage = () => {
                                                                 <span><strong>{product.name}</strong> x{product.quantity}</span>
                                                                 <span>{formatPrice(productTotal).both}</span>
                                                             </div>
+                                                            {Array.isArray(product.flavorNames) && product.flavorNames.length > 0 && (
+                                                                <div style={{ 
+                                                                    padding: '4px 0 8px 12px',
+                                                                    fontSize: '13px',
+                                                                    color: '#666',
+                                                                    borderBottom: '1px solid #f0f0f0'
+                                                                }}>
+                                                                    Вкусове: {product.flavorNames.join(' / ')}
+                                                                </div>
+                                                            )}
                                                             {/* Show packaging items on separate lines */}
                                                             {linkedPackaging.map(pack => (
                                                                     <div key={pack.key} style={{ 

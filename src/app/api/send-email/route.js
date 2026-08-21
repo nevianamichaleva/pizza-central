@@ -108,6 +108,13 @@ export async function POST(request) {
           if (product.sideDishName && !product.name.includes(product.sideDishName)) {
             itemLine += `\n  Гарнитура: ${product.sideDishName}`;
           }
+
+          if (Array.isArray(product.flavorNames) && product.flavorNames.length > 0) {
+            const flavorsLabel = product.flavorNames.join(' / ');
+            if (!product.name.includes(flavorsLabel)) {
+              itemLine += `\n  Вкусове 3х1: ${flavorsLabel}`;
+            }
+          }
           
           // Add packaging items on separate lines
           if (linkedPackaging.length > 0) {

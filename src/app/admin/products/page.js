@@ -27,6 +27,8 @@ const AddProduct = () => {
   const [image, setImage] = useState('');
   const [requiresSideDish, setRequiresSideDish] = useState(false);
   const [isSideDish, setIsSideDish] = useState(false);
+  const [requiresFlavorSelection, setRequiresFlavorSelection] = useState(false);
+  const [participatesIn3x1, setParticipatesIn3x1] = useState(false);
   const [forDelivery, setForDelivery] = useState(true);
   const [forRestaurant, setForRestaurant] = useState(true);
   const [spicy, setSpicy] = useState(false);
@@ -217,6 +219,8 @@ const AddProduct = () => {
     handleViewProduct(null, null);
     setRequiresSideDish(false);
     setIsSideDish(false);
+    setRequiresFlavorSelection(false);
+    setParticipatesIn3x1(false);
     setForDelivery(true);
     setForRestaurant(true);
     setSpicy(false);
@@ -247,6 +251,8 @@ const AddProduct = () => {
       image: image,
       requiresSideDish: requiresSideDish || false,
       isSideDish: isSideDish || false,
+      requiresFlavorSelection: requiresFlavorSelection || false,
+      participatesIn3x1: participatesIn3x1 || false,
       forDelivery: forDelivery !== false,
       forRestaurant: forRestaurant !== false,
       spicy: spicy === true,
@@ -415,6 +421,8 @@ const AddProduct = () => {
       image: image,
       requiresSideDish: requiresSideDish || false,
       isSideDish: isSideDish || false,
+      requiresFlavorSelection: requiresFlavorSelection || false,
+      participatesIn3x1: participatesIn3x1 || false,
       forDelivery: forDelivery !== false,
       forRestaurant: forRestaurant !== false,
       spicy: spicy === true,
@@ -456,6 +464,8 @@ const AddProduct = () => {
       image = null,
       requiresSideDish = false,
       isSideDish = false,
+      requiresFlavorSelection = false,
+      participatesIn3x1 = false,
       forDelivery = true,
       forRestaurant = true,
       spicy = false,
@@ -482,6 +492,8 @@ const AddProduct = () => {
     setImage(image);
     setRequiresSideDish(requiresSideDish);
     setIsSideDish(isSideDish);
+    setRequiresFlavorSelection(requiresFlavorSelection === true);
+    setParticipatesIn3x1(participatesIn3x1 === true);
     setForDelivery(forDelivery !== false);
     setForRestaurant(forRestaurant !== false);
     setSpicy(spicy === true);
@@ -763,6 +775,33 @@ const AddProduct = () => {
                       onChange={setIsSideDish}
                     />
                     <span>Това е гарнитура (няма да се показва в менюто)</span>
+                  </div>
+                </div>
+              </div>
+              <div className="row gy-4">
+                <div className="col-md-6">
+                  <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <Switch
+                      checked={requiresFlavorSelection}
+                      onChange={(checked) => {
+                        setRequiresFlavorSelection(checked);
+                        if (checked) setParticipatesIn3x1(false);
+                      }}
+                    />
+                    <span>Пица Централ 3х1 (избор на 3 вкуса)</span>
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+                    <Switch
+                      checked={participatesIn3x1}
+                      onChange={(checked) => {
+                        setParticipatesIn3x1(checked);
+                        if (checked) setRequiresFlavorSelection(false);
+                      }}
+                      disabled={requiresFlavorSelection}
+                    />
+                    <span>Участва в избор за Пица Централ 3х1</span>
                   </div>
                 </div>
               </div>

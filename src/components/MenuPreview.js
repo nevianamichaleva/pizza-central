@@ -15,9 +15,16 @@ import { get, push, ref, set, update } from "firebase/database";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from 'react';
 import { rtdb } from "../../lib/firebase";
+import {
+  buildPizza3x1ItemKey,
+  buildPizza3x1ItemName,
+  calculatePizza3x1BasePrice,
+  isPizza3x1Product,
+} from '@/lib/pizza3x1';
 import { formatOrderDate } from '@/utils/orderNumberUtils';
 import showAToast from "./common/showAToast";
 import MobileProductsSlider from "./MobileProductsSlider";
+import Pizza3x1Modal from "./Pizza3x1Modal";
 import SpicyBadge from "./SpicyBadge";
 
 const allergens = [
@@ -49,6 +56,7 @@ const MenuPreview = () => {
   const { isObednoOpen } = useObednoMenuSchedule();
   const [packagingData, setPackagingData] = useState({});
   const [sideDishModalVisible, setSideDishModalVisible] = useState(false);
+  const [flavorModalVisible, setFlavorModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedSideDish, setSelectedSideDish] = useState(null);
 
@@ -168,6 +176,11 @@ const MenuPreview = () => {
       showAToast('warning', getObednoMenuClosedMessage());
       return;
     }
+    if (isPizza3x1Product(product)) {
+      setSelectedProduct(product);
+      setFlavorModalVisible(true);
+      return;
+    }
     if (product.requiresSideDish) {
       setSelectedProduct(product);
       setSideDishModalVisible(true);
@@ -190,23 +203,41 @@ const MenuPreview = () => {
     }
   };
 
-  async function handleAddProduct(product, sideDish) {
+  const handleFlavorConfirm = (flavors) => {
+    if (selectedProduct && flavors?.length === 3) {
+      handleAddProduct(selectedProduct, null, flavors);
+      setFlavorModalVisible(false);
+      setSelectedProduct(null);
+    }
+  };
+
+  async function handleAddProduct(product, sideDish, flavors = null) {
     if (!canOrderObednoProduct(product, categories, isObednoOpen)) {
       showAToast('warning', getObednoMenuClosedMessage());
       return;
     }
     const ordersRef = ref(rtdb, 'orders');
-    const productPrice = normalizePrice(product.price ?? product.value ?? product.basePrice);
+    const is3x1 = isPizza3x1Product(product) && Array.isArray(flavors) && flavors.length === 3;
+    const productPrice = is3x1
+      ? calculatePizza3x1BasePrice(flavors)
+      : normalizePrice(product.price ?? product.value ?? product.basePrice);
 
-    if (productPrice === null) {
+    if (productPrice === null || !Number.isFinite(productPrice)) {
       showAToast("error", "Този продукт няма валидна цена и не може да бъде добавен.");
       console.error("Invalid product price", product);
       return;
     }
 
     const productImage = product.image ?? product.img ?? product.url ?? "/images/no-image.png";
-    
-    const itemKey = sideDish ? `${product.id}_${sideDish.id}` : product.id;
+
+    const flavorIds = is3x1 ? flavors.map((f) => f.id) : null;
+    const flavorNames = is3x1 ? flavors.map((f) => f.name) : null;
+    const itemKey = is3x1
+      ? buildPizza3x1ItemKey(product.id, flavorIds)
+      : (sideDish ? `${product.id}_${sideDish.id}` : product.id);
+    const itemName = is3x1
+      ? buildPizza3x1ItemName(product.name, flavors)
+      : (sideDish ? `${product.name} (с ${sideDish.name})` : product.name);
 
     let packagingItems = [];
     const packagingIds = product.packagingIds;
@@ -268,10 +299,6 @@ const MenuPreview = () => {
         localStorage.setItem("cartId", orderKey);
         emitCartUpdate(orderKey);
 
-        const itemName = sideDish 
-          ? `${product.name} (с ${sideDish.name})`
-          : product.name;
-
         let packagingTotal = 0;
         packagingItems.forEach((packaging) => {
           packagingTotal += parseFloat(packaging.price) || 0;
@@ -287,6 +314,9 @@ const MenuPreview = () => {
             productId: product.id,
             sideDishId: sideDish ? sideDish.id : null,
             sideDishName: sideDish ? sideDish.name : null,
+            flavorIds: is3x1 ? flavorIds : null,
+            flavorNames: is3x1 ? flavorNames : null,
+            isPizza3x1: is3x1 || null,
           },
         };
 
@@ -326,10 +356,6 @@ const MenuPreview = () => {
         const currentOrder = orderSnapshot.exists() ? orderSnapshot.val() : {};
         const currentItems = currentOrder.items || {};
 
-        const itemName = sideDish 
-          ? `${product.name} (с ${sideDish.name})`
-          : product.name;
-
         let packagingTotal = 0;
         packagingItems.forEach((packaging) => {
           packagingTotal += parseFloat(packaging.price) || 0;
@@ -349,6 +375,9 @@ const MenuPreview = () => {
             productId: product.id,
             sideDishId: sideDish ? sideDish.id : null,
             sideDishName: sideDish ? sideDish.name : null,
+            flavorIds: is3x1 ? flavorIds : null,
+            flavorNames: is3x1 ? flavorNames : null,
+            isPizza3x1: is3x1 || null,
           },
         };
 
@@ -583,7 +612,11 @@ const MenuPreview = () => {
                     )}
                   </div>
                 )}
-                {getDisplayPrice(item) && (() => {
+                {isPizza3x1Product(item) ? (
+                  <div className="price" style={{ fontSize: '14px', fontWeight: 600, color: '#333', marginBottom: '8px', lineHeight: '1.4' }}>
+                    по вкусове
+                  </div>
+                ) : getDisplayPrice(item) ? (() => {
                   const price = getDisplayPrice(item);
                   const priceInEuro = (price / 1.95583).toFixed(2);
                   return (
@@ -593,7 +626,7 @@ const MenuPreview = () => {
                       </div>
                     </div>
                   );
-                })()}
+                })() : null}
                 <div className="menu-mobile-product-buttons" style={{ display: 'flex', gap: '6px', width: '100%' }}>
                   <Button
                     type="primary"
@@ -660,6 +693,17 @@ const MenuPreview = () => {
           * Гарнитурата е включена в цената на ястието
         </p>
       </Modal>
+
+      <Pizza3x1Modal
+        open={flavorModalVisible}
+        product={selectedProduct}
+        products={products}
+        onCancel={() => {
+          setFlavorModalVisible(false);
+          setSelectedProduct(null);
+        }}
+        onConfirm={handleFlavorConfirm}
+      />
     </section>
   );
 };

@@ -683,6 +683,8 @@ export default function Order() {
         image: item.image,
         value: item.value,
         sideDishName: item.sideDishName || null,
+        flavorNames: item.flavorNames || null,
+        isPizza3x1: item.isPizza3x1 || false,
         isPackaging: false,
         linkedPackaging: linkedPackaging,
       };
@@ -891,6 +893,11 @@ export default function Order() {
                                   Гарнитура: {item.sideDishName}
                                 </div>
                               )}
+                              {item.flavorNames && Array.isArray(item.flavorNames) && item.flavorNames.length > 0 && (
+                                <div style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
+                                  Вкусове: {item.flavorNames.join(' / ')}
+                                </div>
+                              )}
                             </div>
                           </div>
                           <div className="col-md-3 quantity d-flex align-items-center">
@@ -936,6 +943,11 @@ export default function Order() {
                               {item.sideDishName && (
                                 <div style={{ fontSize: "13px", color: "#666", marginTop: "4px" }}>
                                   Гарнитура: {item.sideDishName}
+                                </div>
+                              )}
+                              {item.flavorNames && Array.isArray(item.flavorNames) && item.flavorNames.length > 0 && (
+                                <div style={{ fontSize: "13px", color: "#666", marginTop: "4px" }}>
+                                  Вкусове: {item.flavorNames.join(' / ')}
                                 </div>
                               )}
                             </div>
