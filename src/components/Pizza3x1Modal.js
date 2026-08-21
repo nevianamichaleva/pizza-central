@@ -1,9 +1,10 @@
 'use client';
 
 import {
-  PIZZA_3X1_FLAVOR_COUNT,
-  calculatePizza3x1BasePrice,
+  PIZZA_3X1_MAX_FLAVORS,
+  PIZZA_3X1_MIN_FLAVORS,
   getPizza3x1FlavorOptions,
+  isValidPizza3x1FlavorSelection,
 } from '@/lib/pizza3x1';
 import { Checkbox, Modal } from 'antd';
 import { get, ref } from 'firebase/database';
@@ -15,6 +16,14 @@ const EUR_RATE = 1.95583;
 function formatEur(bgn) {
   const value = Number.isFinite(bgn) ? bgn : 0;
   return `${(value / EUR_RATE).toFixed(2)}€`;
+}
+
+function displayProductName(name) {
+  if (!name) return '';
+  return String(name)
+    .replace(/\s*XXL\s*/gi, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 }
 
 function getProductPackagingTotal(product, packagingData) {
@@ -29,8 +38,8 @@ function getProductPackagingTotal(product, packagingData) {
 }
 
 /**
- * Modal: pick exactly 3 different pizzas that participate in Централ 3х1.
- * Displayed price = sum of (each large pizza price / 3) + packaging.
+ * Modal: pick 2–3 different pizzas that participate in Централ 3х1.
+ * Price is fixed on the 3x1 product (+ packaging), same as other products.
  */
 export default function Pizza3x1Modal({
   open,
@@ -76,13 +85,15 @@ export default function Pizza3x1Modal({
     [selectedIds, options]
   );
 
-  const basePrice = calculatePizza3x1BasePrice(selectedFlavors);
+  const basePrice = parseFloat(product?.price);
   const packagingTotal = getProductPackagingTotal(product, packagingData);
-  const displayPrice = Math.round((basePrice + packagingTotal) * 100) / 100;
-  const canConfirm = selectedFlavors.length === PIZZA_3X1_FLAVOR_COUNT;
+  const displayPrice = Number.isFinite(basePrice)
+    ? Math.round((basePrice + packagingTotal) * 100) / 100
+    : null;
+  const canConfirm = isValidPizza3x1FlavorSelection(selectedFlavors);
 
   const handleChange = (checkedValues) => {
-    if (checkedValues.length <= PIZZA_3X1_FLAVOR_COUNT) {
+    if (checkedValues.length <= PIZZA_3X1_MAX_FLAVORS) {
       setSelectedIds(checkedValues);
     }
   };
@@ -100,7 +111,7 @@ export default function Pizza3x1Modal({
 
   return (
     <Modal
-      title="Изберете 3 вкуса"
+      title="Изберете вкусове"
       open={open}
       onOk={handleOk}
       onCancel={handleCancel}
@@ -112,10 +123,11 @@ export default function Pizza3x1Modal({
     >
       <div style={{ marginBottom: 16 }}>
         <p style={{ marginBottom: 4 }}>
-          <strong>{product?.name}</strong>
+          <strong>{displayProductName(product?.name)}</strong>
         </p>
         <p style={{ color: '#4a4a4a', fontSize: 14, marginBottom: 0 }}>
-          Изберете точно {PIZZA_3X1_FLAVOR_COUNT} различни вкуса. Цената ще се изчисли въз основа на цената на всяка избрана пица.        </p>
+          Изберете {PIZZA_3X1_MIN_FLAVORS} или {PIZZA_3X1_MAX_FLAVORS} различни вкуса.
+        </p>
       </div>
 
       {options.length === 0 ? (
@@ -133,7 +145,7 @@ export default function Pizza3x1Modal({
             {options.map((flavor) => {
               const checked = selectedIds.includes(flavor.id);
               const disabled =
-                !checked && selectedIds.length >= PIZZA_3X1_FLAVOR_COUNT;
+                !checked && selectedIds.length >= PIZZA_3X1_MAX_FLAVORS;
               return (
                 <Checkbox
                   key={flavor.id}
@@ -161,10 +173,12 @@ export default function Pizza3x1Modal({
         }}
       >
         <span style={{ fontSize: 13, color: '#666' }}>
-          Избрани: {selectedIds.length}/{PIZZA_3X1_FLAVOR_COUNT}
+          Избрани: {selectedIds.length}/{PIZZA_3X1_MAX_FLAVORS}
         </span>
         <strong style={{ fontSize: 16 }}>
-          {canConfirm ? `Цена: ${formatEur(displayPrice)}` : 'Изберете 3 вкуса'}
+          {canConfirm && displayPrice != null
+            ? `Цена: ${formatEur(displayPrice)}`
+            : `Изберете поне ${PIZZA_3X1_MIN_FLAVORS} вкуса`}
         </strong>
       </div>
     </Modal>

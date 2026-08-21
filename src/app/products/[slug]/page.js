@@ -1,6 +1,5 @@
 import ProductAddToCart from '@/components/ProductAddToCart';
 import SpicyBadge from '@/components/SpicyBadge';
-import { isPizza3x1Product } from '@/lib/pizza3x1';
 import { get, ref } from 'firebase/database';
 import Image from "next/image";
 import Link from "next/link";
@@ -241,15 +240,11 @@ export default async function ProductDetailsPage({ params }) {
           <div className={styles.heroContent}>
             <h1>{product.name}</h1>
             
-            {isPizza3x1Product(product) ? (
-              <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#c41d7f', marginBottom: '15px' }}>
-                Цена по избрани вкусове (1/3 от всяка голяма пица)
-              </div>
-            ) : displayPrice !== null ? (
+            {displayPrice !== null && (
               <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#c41d7f', marginBottom: '15px' }}>
                 {(displayPrice / 1.95583).toFixed(2)} €
               </div>
-            ) : null}
+            )}
             
             {product.weight && (
               <div style={{ marginBottom: '15px', fontSize: '16px' }}>

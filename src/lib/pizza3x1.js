@@ -1,7 +1,25 @@
-export const PIZZA_3X1_FLAVOR_COUNT = 3;
+export const PIZZA_3X1_MIN_FLAVORS = 2;
+export const PIZZA_3X1_MAX_FLAVORS = 3;
+
+/** @deprecated use PIZZA_3X1_MAX_FLAVORS */
+export const PIZZA_3X1_FLAVOR_COUNT = PIZZA_3X1_MAX_FLAVORS;
 
 export function isPizza3x1Product(product) {
   return product?.requiresFlavorSelection === true;
+}
+
+export function isValidPizza3x1FlavorSelection(flavors) {
+  const count = Array.isArray(flavors) ? flavors.length : 0;
+  return count >= PIZZA_3X1_MIN_FLAVORS && count <= PIZZA_3X1_MAX_FLAVORS;
+}
+
+/** Keep Пица Централ 3х1 products first; preserve relative order otherwise. */
+export function sortPizza3x1First(productList) {
+  return [...(productList || [])].sort((a, b) => {
+    const aFirst = isPizza3x1Product(a) ? 0 : 1;
+    const bFirst = isPizza3x1Product(b) ? 0 : 1;
+    return aFirst - bFirst;
+  });
 }
 
 export function getPizza3x1FlavorOptions(products) {
@@ -13,16 +31,6 @@ export function getPizza3x1FlavorOptions(products) {
         !p.isSideDish
     )
     .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'bg'));
-}
-
-/** Sum of 1/3 of each selected large pizza price. */
-export function calculatePizza3x1BasePrice(flavors) {
-  const sum = (flavors || []).reduce((total, flavor) => {
-    const price = parseFloat(flavor?.price);
-    if (!Number.isFinite(price)) return total;
-    return total + price / 3;
-  }, 0);
-  return Math.round(sum * 100) / 100;
 }
 
 export function buildPizza3x1ItemName(baseName, flavors) {

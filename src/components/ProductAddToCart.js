@@ -10,8 +10,8 @@ import { canOrderObednoProduct, getObednoMenuClosedMessage } from '@/lib/obednoM
 import {
   buildPizza3x1ItemKey,
   buildPizza3x1ItemName,
-  calculatePizza3x1BasePrice,
   isPizza3x1Product,
+  isValidPizza3x1FlavorSelection,
 } from '@/lib/pizza3x1';
 import { formatOrderDate } from '@/utils/orderNumberUtils';
 import { Button, Modal, Radio } from 'antd';
@@ -38,7 +38,7 @@ const ProductAddToCart = ({ product }) => {
   const handleAddToCartClick = () => {
     if (!product) return;
 
-    if (!is3x1 && !product.price) {
+    if (!product.price) {
       showAToast("error", "Цената не е зададена за продукта");
       return;
     }
@@ -69,7 +69,7 @@ const ProductAddToCart = ({ product }) => {
       return;
     }
 
-    const withFlavors = isPizza3x1Product(product) && Array.isArray(flavors) && flavors.length === 3;
+    const withFlavors = isPizza3x1Product(product) && isValidPizza3x1FlavorSelection(flavors);
 
     setAddingToCart(true);
     try {
@@ -89,9 +89,7 @@ const ProductAddToCart = ({ product }) => {
       const productName = withFlavors
         ? buildPizza3x1ItemName(product.name, flavors)
         : (sideDish ? `${product.name} (с ${sideDish.name})` : product.name);
-      const baseProductPrice = withFlavors
-        ? calculatePizza3x1BasePrice(flavors)
-        : parseFloat(product.price);
+      const baseProductPrice = parseFloat(product.price);
       const productImage = product.image || "/images/no-image.png";
       const itemKey = withFlavors
         ? buildPizza3x1ItemKey(product.id, flavorIds)
@@ -271,7 +269,7 @@ const ProductAddToCart = ({ product }) => {
     }
   };
 
-  if (!product || (!is3x1 && !product.price)) {
+  if (!product || !product.price) {
     return null;
   }
 

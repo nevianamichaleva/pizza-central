@@ -18,8 +18,8 @@ import { rtdb } from "../../lib/firebase";
 import {
   buildPizza3x1ItemKey,
   buildPizza3x1ItemName,
-  calculatePizza3x1BasePrice,
   isPizza3x1Product,
+  isValidPizza3x1FlavorSelection,
 } from '@/lib/pizza3x1';
 import { formatOrderDate } from '@/utils/orderNumberUtils';
 import showAToast from "./common/showAToast";
@@ -204,7 +204,7 @@ const MenuPreview = () => {
   };
 
   const handleFlavorConfirm = (flavors) => {
-    if (selectedProduct && flavors?.length === 3) {
+    if (selectedProduct && isValidPizza3x1FlavorSelection(flavors)) {
       handleAddProduct(selectedProduct, null, flavors);
       setFlavorModalVisible(false);
       setSelectedProduct(null);
@@ -217,10 +217,8 @@ const MenuPreview = () => {
       return;
     }
     const ordersRef = ref(rtdb, 'orders');
-    const is3x1 = isPizza3x1Product(product) && Array.isArray(flavors) && flavors.length === 3;
-    const productPrice = is3x1
-      ? calculatePizza3x1BasePrice(flavors)
-      : normalizePrice(product.price ?? product.value ?? product.basePrice);
+    const is3x1 = isPizza3x1Product(product) && isValidPizza3x1FlavorSelection(flavors);
+    const productPrice = normalizePrice(product.price ?? product.value ?? product.basePrice);
 
     if (productPrice === null || !Number.isFinite(productPrice)) {
       showAToast("error", "Този продукт няма валидна цена и не може да бъде добавен.");
@@ -612,11 +610,7 @@ const MenuPreview = () => {
                     )}
                   </div>
                 )}
-                {isPizza3x1Product(item) ? (
-                  <div className="price" style={{ fontSize: '14px', fontWeight: 600, color: '#333', marginBottom: '8px', lineHeight: '1.4' }}>
-                    по вкусове
-                  </div>
-                ) : getDisplayPrice(item) ? (() => {
+                {getDisplayPrice(item) && (() => {
                   const price = getDisplayPrice(item);
                   const priceInEuro = (price / 1.95583).toFixed(2);
                   return (
@@ -626,7 +620,7 @@ const MenuPreview = () => {
                       </div>
                     </div>
                   );
-                })() : null}
+                })()}
                 <div className="menu-mobile-product-buttons" style={{ display: 'flex', gap: '6px', width: '100%' }}>
                   <Button
                     type="primary"

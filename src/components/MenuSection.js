@@ -21,8 +21,9 @@ import { rtdb } from "../../lib/firebase";
 import {
   buildPizza3x1ItemKey,
   buildPizza3x1ItemName,
-  calculatePizza3x1BasePrice,
   isPizza3x1Product,
+  isValidPizza3x1FlavorSelection,
+  sortPizza3x1First,
 } from '@/lib/pizza3x1';
 import { formatOrderDate } from '@/utils/orderNumberUtils';
 import showAToast from "../components/common/showAToast";
@@ -128,34 +129,36 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
 
   // Filter products by search query (name, category, ingredients)
   const filterProductsBySearch = (productList, query) => {
-    if (!query || query.trim() === '') {
-      return productList;
+    let filtered = productList;
+
+    if (query && query.trim() !== '') {
+      const searchTerm = query.toLowerCase().trim();
+      
+      filtered = productList.filter((item) => {
+        // Search by name
+        const nameMatch = item.name && item.name.toLowerCase().includes(searchTerm);
+        
+        // Search by ingredients
+        const ingredientsMatch = item.ingredients && item.ingredients.toLowerCase().includes(searchTerm);
+        
+        // Search by category name
+        let categoryMatch = false;
+        const categoryIds = item.categories && Array.isArray(item.categories) && item.categories.length > 0
+          ? item.categories
+          : (item.category ? [item.category] : []);
+        
+        categoryIds.forEach(categoryId => {
+          const category = categories.find(cat => cat.id === categoryId);
+          if (category && category.name && category.name.toLowerCase().includes(searchTerm)) {
+            categoryMatch = true;
+          }
+        });
+        
+        return nameMatch || ingredientsMatch || categoryMatch;
+      });
     }
 
-    const searchTerm = query.toLowerCase().trim();
-    
-    return productList.filter((item) => {
-      // Search by name
-      const nameMatch = item.name && item.name.toLowerCase().includes(searchTerm);
-      
-      // Search by ingredients
-      const ingredientsMatch = item.ingredients && item.ingredients.toLowerCase().includes(searchTerm);
-      
-      // Search by category name
-      let categoryMatch = false;
-      const categoryIds = item.categories && Array.isArray(item.categories) && item.categories.length > 0
-        ? item.categories
-        : (item.category ? [item.category] : []);
-      
-      categoryIds.forEach(categoryId => {
-        const category = categories.find(cat => cat.id === categoryId);
-        if (category && category.name && category.name.toLowerCase().includes(searchTerm)) {
-          categoryMatch = true;
-        }
-      });
-      
-      return nameMatch || ingredientsMatch || categoryMatch;
-    });
+    return sortPizza3x1First(filtered);
   };
 
   // Validate and set active tab when categories are loaded
@@ -310,7 +313,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
   };
 
   const handleFlavorConfirm = (flavors) => {
-    if (selectedProduct && flavors?.length === 3) {
+    if (selectedProduct && isValidPizza3x1FlavorSelection(flavors)) {
       handleAddProduct(selectedProduct, null, flavors);
       setFlavorModalVisible(false);
       setSelectedProduct(null);
@@ -324,10 +327,8 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
     }
     const ordersRef = ref(rtdb, 'orders');
 
-    const is3x1 = isPizza3x1Product(product) && Array.isArray(flavors) && flavors.length === 3;
-    const productPrice = is3x1
-      ? calculatePizza3x1BasePrice(flavors)
-      : normalizePrice(product.price ?? product.value ?? product.basePrice);
+    const is3x1 = isPizza3x1Product(product) && isValidPizza3x1FlavorSelection(flavors);
+    const productPrice = normalizePrice(product.price ?? product.value ?? product.basePrice);
 
     if (productPrice === null || !Number.isFinite(productPrice)) {
       showAToast("error", "Този продукт няма валидна цена и не може да бъде добавен.");
@@ -625,11 +626,9 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
             </div>
           )}
           <div className="menu-card-footer">
-            {isPizza3x1Product(item) ? (
-              <p className="menu-card-price">по вкусове</p>
-            ) : formatPrice(getDisplayPrice(item)) ? (
+            {formatPrice(getDisplayPrice(item)) && (
               <p className="menu-card-price">{formatPrice(getDisplayPrice(item))}</p>
-            ) : null}
+            )}
             <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
               {item.slug && (
                 <Link href={`/products/${item.slug}`}>
@@ -1090,11 +1089,9 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                               )}
                             </div>
                           )}
-                          {isPizza3x1Product(item) ? (
-                            <p className="price">по вкусове</p>
-                          ) : formatPrice(getDisplayPrice(item)) ? (
+                          {formatPrice(getDisplayPrice(item)) && (
                             <p className="price">{formatPrice(getDisplayPrice(item))}</p>
-                          ) : null}
+                          )}
                           <div className="menu-mobile-product-buttons">
                             {item.slug && (
                               <Link href={`/products/${item.slug}`} style={{ marginBottom: '8px', display: 'block' }}>
@@ -1311,8 +1308,8 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                   </Link>
                 </div>
                 <MobileProductsSlider>
-                {products
-                  .filter((item) => {
+                {sortPizza3x1First(
+                  products.filter((item) => {
                     if (!productBelongsToCategory(item, selectedCategory.id) || item.isSideDish) return false;
                     const hasDeliveryField = item.forDelivery !== undefined && item.forDelivery !== null;
                     const hasRestaurantField = item.forRestaurant !== undefined && item.forRestaurant !== null;
@@ -1321,6 +1318,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
                     }
                     return item.forDelivery === true;
                   })
+                )
                   .map((item, index) => (
                     <Link 
                       key={index} 
