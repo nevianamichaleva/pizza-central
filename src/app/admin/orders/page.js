@@ -1347,7 +1347,10 @@ const AdminOrdersPage = () => {
                                                                     color: '#666',
                                                                     borderBottom: '1px solid #f0f0f0'
                                                                 }}>
-                                                                    Вкусове: {product.flavorNames.join(' / ')}
+                                                                    Вкусове: {product.flavorNames
+                                                                      .map((n) => String(n || '').replace(/\s*XXL\s*/gi, ' ').replace(/\s{2,}/g, ' ').trim())
+                                                                      .filter(Boolean)
+                                                                      .join(' / ')}
                                                                 </div>
                                                             )}
                                                             {/* Show packaging items on separate lines */}

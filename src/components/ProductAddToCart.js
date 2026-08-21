@@ -8,6 +8,7 @@ import { useUser } from '@/context/UserContext';
 import { useObednoMenuSchedule } from '@/hooks/useObednoMenuSchedule';
 import { canOrderObednoProduct, getObednoMenuClosedMessage } from '@/lib/obednoMenuSchedule';
 import {
+  buildPizza3x1FlavorNames,
   buildPizza3x1ItemKey,
   buildPizza3x1ItemName,
   isPizza3x1Product,
@@ -85,7 +86,7 @@ const ProductAddToCart = ({ product }) => {
       }
 
       const flavorIds = withFlavors ? flavors.map((f) => f.id) : null;
-      const flavorNames = withFlavors ? flavors.map((f) => f.name) : null;
+      const flavorNames = withFlavors ? buildPizza3x1FlavorNames(flavors) : null;
       const productName = withFlavors
         ? buildPizza3x1ItemName(product.name, flavors)
         : (sideDish ? `${product.name} (с ${sideDish.name})` : product.name);

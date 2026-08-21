@@ -6,6 +6,7 @@ import { useUser } from "@/context/UserContext";
 import { useObednoMenuSchedule } from "@/hooks/useObednoMenuSchedule";
 import { useFormAntiBot } from "@/hooks/useFormAntiBot";
 import { getObednoMenuClosedMessage, orderContainsUnavailableObednoItems } from "@/lib/obednoMenuSchedule";
+import { cleanPizza3x1DisplayName, formatFlavorNames } from "@/lib/pizza3x1";
 import {
   getOrderAvailabilityMessage,
   isDeliveryBlocked,
@@ -886,7 +887,9 @@ export default function Order() {
                             </div>
                             <div>
                               <a href="#" style={{ fontSize: "16px", fontWeight: "500" }}>
-                                {item.name}
+                                {item.isPizza3x1 || item.flavorNames
+                                  ? cleanPizza3x1DisplayName(item.name)
+                                  : item.name}
                               </a>
                               {item.sideDishName && (
                                 <div style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
@@ -895,7 +898,7 @@ export default function Order() {
                               )}
                               {item.flavorNames && Array.isArray(item.flavorNames) && item.flavorNames.length > 0 && (
                                 <div style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
-                                  Вкусове: {item.flavorNames.join(' / ')}
+                                  Вкусове: {formatFlavorNames(item.flavorNames)}
                                 </div>
                               )}
                             </div>
@@ -938,7 +941,9 @@ export default function Order() {
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
                             <div style={{ flex: 1, textAlign: "left" }}>
                               <div style={{ fontSize: "16px", fontWeight: "600", marginBottom: "4px", textAlign: "left" }}>
-                                {item.name}
+                                {item.isPizza3x1 || item.flavorNames
+                                  ? cleanPizza3x1DisplayName(item.name)
+                                  : item.name}
                               </div>
                               {item.sideDishName && (
                                 <div style={{ fontSize: "13px", color: "#666", marginTop: "4px" }}>
@@ -947,7 +952,7 @@ export default function Order() {
                               )}
                               {item.flavorNames && Array.isArray(item.flavorNames) && item.flavorNames.length > 0 && (
                                 <div style={{ fontSize: "13px", color: "#666", marginTop: "4px" }}>
-                                  Вкусове: {item.flavorNames.join(' / ')}
+                                  Вкусове: {formatFlavorNames(item.flavorNames)}
                                 </div>
                               )}
                             </div>

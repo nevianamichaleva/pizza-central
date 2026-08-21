@@ -3,6 +3,7 @@
 import {
   PIZZA_3X1_MAX_FLAVORS,
   PIZZA_3X1_MIN_FLAVORS,
+  cleanPizza3x1DisplayName,
   getPizza3x1FlavorOptions,
   isValidPizza3x1FlavorSelection,
 } from '@/lib/pizza3x1';
@@ -16,14 +17,6 @@ const EUR_RATE = 1.95583;
 function formatEur(bgn) {
   const value = Number.isFinite(bgn) ? bgn : 0;
   return `${(value / EUR_RATE).toFixed(2)}€`;
-}
-
-function displayProductName(name) {
-  if (!name) return '';
-  return String(name)
-    .replace(/\s*XXL\s*/gi, ' ')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
 }
 
 function getProductPackagingTotal(product, packagingData) {
@@ -123,7 +116,7 @@ export default function Pizza3x1Modal({
     >
       <div style={{ marginBottom: 16 }}>
         <p style={{ marginBottom: 4 }}>
-          <strong>{displayProductName(product?.name)}</strong>
+          <strong>{cleanPizza3x1DisplayName(product?.name)}</strong>
         </p>
         <p style={{ color: '#4a4a4a', fontSize: 14, marginBottom: 0 }}>
           Изберете {PIZZA_3X1_MIN_FLAVORS} или {PIZZA_3X1_MAX_FLAVORS} различни вкуса.
@@ -153,7 +146,7 @@ export default function Pizza3x1Modal({
                   disabled={disabled}
                   style={{ fontSize: 15, alignItems: 'flex-start' }}
                 >
-                  {flavor.name}
+                  {cleanPizza3x1DisplayName(flavor.name)}
                 </Checkbox>
               );
             })}

@@ -102,16 +102,22 @@ export async function POST(request) {
           const priceFormatted = formatPrice(unitPrice);
           const totalFormatted = formatPrice(productTotal);
           
-          let itemLine = `- ${product.name} x${product.quantity} - ${priceFormatted.both} | Общо: ${totalFormatted.both}`;
+          const displayName = (product.isPizza3x1 || product.flavorNames)
+            ? String(product.name || '').replace(/\s*XXL\s*/gi, ' ').replace(/\s{2,}/g, ' ').trim()
+            : product.name;
+          let itemLine = `- ${displayName} x${product.quantity} - ${priceFormatted.both} | Общо: ${totalFormatted.both}`;
           
           // If side dish is stored separately, show it explicitly
-          if (product.sideDishName && !product.name.includes(product.sideDishName)) {
+          if (product.sideDishName && !displayName.includes(product.sideDishName)) {
             itemLine += `\n  Гарнитура: ${product.sideDishName}`;
           }
 
           if (Array.isArray(product.flavorNames) && product.flavorNames.length > 0) {
-            const flavorsLabel = product.flavorNames.join(' / ');
-            if (!product.name.includes(flavorsLabel)) {
+            const flavorsLabel = product.flavorNames
+              .map((n) => String(n || '').replace(/\s*XXL\s*/gi, ' ').replace(/\s{2,}/g, ' ').trim())
+              .filter(Boolean)
+              .join(' / ');
+            if (flavorsLabel && !displayName.includes(flavorsLabel)) {
               itemLine += `\n  Вкусове 3х1: ${flavorsLabel}`;
             }
           }

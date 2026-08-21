@@ -22,6 +22,15 @@ export function sortPizza3x1First(productList) {
   });
 }
 
+/** Remove XXL/XL size labels from pizza names for 3x1 display. */
+export function cleanPizza3x1DisplayName(name) {
+  if (!name) return '';
+  return String(name)
+    .replace(/\s*XXL\s*/gi, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 export function getPizza3x1FlavorOptions(products) {
   return (products || [])
     .filter(
@@ -34,9 +43,18 @@ export function getPizza3x1FlavorOptions(products) {
 }
 
 export function buildPizza3x1ItemName(baseName, flavors) {
-  const names = (flavors || []).map((f) => f.name).filter(Boolean);
-  if (names.length === 0) return baseName;
-  return `${baseName} (${names.join(' / ')})`;
+  const names = (flavors || [])
+    .map((f) => cleanPizza3x1DisplayName(f.name))
+    .filter(Boolean);
+  const cleanedBase = cleanPizza3x1DisplayName(baseName) || baseName;
+  if (names.length === 0) return cleanedBase;
+  return `${cleanedBase} (${names.join(' / ')})`;
+}
+
+export function buildPizza3x1FlavorNames(flavors) {
+  return (flavors || [])
+    .map((f) => cleanPizza3x1DisplayName(f.name))
+    .filter(Boolean);
 }
 
 export function buildPizza3x1ItemKey(productId, flavorIds) {
@@ -46,5 +64,8 @@ export function buildPizza3x1ItemKey(productId, flavorIds) {
 
 export function formatFlavorNames(flavorNames) {
   if (!Array.isArray(flavorNames) || flavorNames.length === 0) return '';
-  return flavorNames.join(' / ');
+  return flavorNames
+    .map((name) => cleanPizza3x1DisplayName(name))
+    .filter(Boolean)
+    .join(' / ');
 }

@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from 'react';
 import { rtdb } from "../../lib/firebase";
 import {
+  buildPizza3x1FlavorNames,
   buildPizza3x1ItemKey,
   buildPizza3x1ItemName,
   isPizza3x1Product,
@@ -339,7 +340,7 @@ const MenuSection = ({ categorySlug = null, hideTitle = false }) => {
     const productImage = product.image ?? product.img ?? product.url ?? "/images/no-image.png";
     
     const flavorIds = is3x1 ? flavors.map((f) => f.id) : null;
-    const flavorNames = is3x1 ? flavors.map((f) => f.name) : null;
+    const flavorNames = is3x1 ? buildPizza3x1FlavorNames(flavors) : null;
     const itemKey = is3x1
       ? buildPizza3x1ItemKey(product.id, flavorIds)
       : (sideDish ? `${product.id}_${sideDish.id}` : product.id);
