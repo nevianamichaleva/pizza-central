@@ -102,13 +102,10 @@ export async function POST(request) {
           const priceFormatted = formatPrice(unitPrice);
           const totalFormatted = formatPrice(productTotal);
           
-          const displayName = (product.isPizza3x1 || product.flavorNames)
-            ? String(product.name || '').replace(/\s*XXL\s*/gi, ' ').replace(/\s{2,}/g, ' ').trim()
-            : product.name;
-          let itemLine = `- ${displayName} x${product.quantity} - ${priceFormatted.both} | Общо: ${totalFormatted.both}`;
+          let itemLine = `- ${product.name} x${product.quantity} - ${priceFormatted.both} | Общо: ${totalFormatted.both}`;
           
           // If side dish is stored separately, show it explicitly
-          if (product.sideDishName && !displayName.includes(product.sideDishName)) {
+          if (product.sideDishName && !product.name.includes(product.sideDishName)) {
             itemLine += `\n  Гарнитура: ${product.sideDishName}`;
           }
 
@@ -117,7 +114,7 @@ export async function POST(request) {
               .map((n) => String(n || '').replace(/\s*XXL\s*/gi, ' ').replace(/\s{2,}/g, ' ').trim())
               .filter(Boolean)
               .join(' / ');
-            if (flavorsLabel && !displayName.includes(flavorsLabel)) {
+            if (flavorsLabel && !product.name.includes(flavorsLabel)) {
               itemLine += `\n  Вкусове 3х1: ${flavorsLabel}`;
             }
           }

@@ -22,7 +22,7 @@ export function sortPizza3x1First(productList) {
   });
 }
 
-/** Remove XXL/XL size labels from pizza names for 3x1 display. */
+/** Remove XXL size label from flavor names (not from the 3x1 product title). */
 export function cleanPizza3x1DisplayName(name) {
   if (!name) return '';
   return String(name)
@@ -43,12 +43,9 @@ export function getPizza3x1FlavorOptions(products) {
 }
 
 export function buildPizza3x1ItemName(baseName, flavors) {
-  const names = (flavors || [])
-    .map((f) => cleanPizza3x1DisplayName(f.name))
-    .filter(Boolean);
-  const cleanedBase = cleanPizza3x1DisplayName(baseName) || baseName;
-  if (names.length === 0) return cleanedBase;
-  return `${cleanedBase} (${names.join(' / ')})`;
+  const names = buildPizza3x1FlavorNames(flavors);
+  if (names.length === 0) return baseName;
+  return `${baseName} (${names.join(' / ')})`;
 }
 
 export function buildPizza3x1FlavorNames(flavors) {
