@@ -70,18 +70,17 @@ const ModernHero = () => {
 
                     {/* Hero Image */}
                     <div
-                        className="col-lg-5 order-1 order-lg-2 hero-img"
+                        className="col-lg-6 order-1 order-lg-2 hero-img"
                         data-aos="zoom-out"
                     >
-                        <div style={{ width: '100%', maxWidth: '500px', aspectRatio: '1', margin: '0 auto', borderRadius: '50%', overflow: 'hidden' }}>
+                        <div className="hero-photo-frame">
                             <Image
-                                src="/images/dinner-3.jpg"
-                                alt="Цвински кралски котлет от ресторант Централ Добрич"
-                                width={500}
-                                height={500}
-                                //className="img-fluid animated"
-                                className="img-fluid"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                src="/images/osnovno1.png"
+                                alt="Основно ястие от ресторант Централ Добрич"
+                                width={1024}
+                                height={678}
+                                className="img-fluid hero-photo"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
                                 priority
                             />
                         </div>
@@ -202,6 +201,22 @@ const ModernHero = () => {
         .hero-trust {
           font-size: 0.85rem;
           color: #777;
+        }
+
+        .hero-photo-frame {
+          width: 100%;
+          max-width: 620px;
+          aspect-ratio: 1024 / 678;
+          margin: 0 auto;
+          border-radius: 28px;
+          overflow: hidden;
+          box-shadow:
+            0 20px 45px rgba(0, 0, 0, 0.18),
+            0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-photo {
+          display: block;
         }
 
         .hero-image-wrapper {
