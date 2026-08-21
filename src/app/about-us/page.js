@@ -12,10 +12,12 @@ const AboutUsPage = () => {
     <div>
       <AboutSection />
       <Gallery />
-      <ServicesSection />
-      <NewDishes />
-      
       <WhyUsSection />
+      <NewDishes />
+      <ServicesSection />
+      
+      
+      
       {/* <StatsSection /> */}
       
     </div>
