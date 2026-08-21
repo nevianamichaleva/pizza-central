@@ -11,10 +11,8 @@ import ModernHero from '@/components/ModernHero';
 // import MenuSection from '@/components/MenuSection';
 import MenuPreview from '@/components/MenuPreview';
 // import Chefs from '@/components/NewDishes';
-import ServicesSection from '@/components/ServicesSection';
 // import StatsSection from '@/components/StatsSection';
 // import Testimonials from '@/components/Testimonials';
-import WhyUsSection from '@/components/WhyUsSection';
 
 export default function Home() {
 
@@ -24,7 +22,8 @@ export default function Home() {
       <ModernHero />
       <MenuPreview />
       <CateringSection />
-      <ServicesSection />
+      <BlogSection />
+      {/* <ServicesSection /> */}
       {/* <MenuSection /> */}
       
       {/* <BookTableSection /> */}
@@ -32,13 +31,13 @@ export default function Home() {
       {/* <BlogSection />*/}
       
       {/* <StatsSection /> */}
-      <WhyUsSection /> 
+      {/* <WhyUsSection />  */}
       {/* <Testimonials /> */}
       {/* <EventsSection />
       <Chefs /> */}
       
       <Contact part={true}/>
-      <BlogSection />
+      
       <Gallery />
     </div>
   );

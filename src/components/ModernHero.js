@@ -1,95 +1,186 @@
+'use client';
+
 import Image from 'next/image';
+import { useEffect, useRef, useState } from 'react';
+
+const HERO_SLIDES = [
+  {
+    id: 'home',
+    kicker: 'Добрич · ул. „Независимост“ 4',
+    title: 'Вкус, който остава',
+    brand: 'Ресторант-пицария Централ',
+    lead: 'Съчетаваме италианските традиции с българските продукти - вкус, който усещаш още с първата хапка.',
+    image: '/images/osnovno1.png',
+    imageAlt: 'Основно ястие от ресторант Централ Добрич',
+    primaryCta: {
+      href: '/reservation',
+      label: 'Резервирай с отстъпка',
+      ariaLabel: 'Резервирай маса в ресторанта',
+    },
+    secondaryCta: {
+      href: '/for-home',
+      label: 'Поръчай за вкъщи',
+      ariaLabel: 'Поръчай за вкъщи',
+    },
+  },
+  {
+    id: 'pizza-3x1',
+    kicker: 'Нова оферта · за вкъщи и доставка',
+    title: 'Пица Централ 3х1',
+    brand: 'Три вкуса в една XL или XXL пица',
+    lead: 'Комбинирай до три любими вкуса в една голяма пица. Идеална за компания — или когато не можеш да избереш само една.',
+    image: '/images/pizza-central-3x1.png',
+    imageAlt: 'Пица Централ 3х1 – три вкуса в една XXL пица',
+    primaryCta: {
+      href: '/for-home',
+      label: 'Поръчай 3х1',
+      ariaLabel: 'Поръчай Пица Централ 3х1 за вкъщи',
+    },
+    secondaryCta: {
+      href: '/blog/pizza-central-3x1',
+      label: 'Виж повече',
+      ariaLabel: 'Прочети повече за Пица Централ 3х1',
+    },
+  },
+];
+
+const AUTO_MS = 6500;
 
 const ModernHero = () => {
-    return (
-        <section id="hero" className="hero section light-background hero-with-love">
-            {/* <FloatingHearts /> */}
-            <div className="container">
-                <div className="row gy-4 align-items-center justify-content-center justify-content-lg-between">
+  const [activeIndex, setActiveIndex] = useState(0);
+  const touchStartX = useRef(null);
+  const slideCount = HERO_SLIDES.length;
 
-                    {/* Left Content */}
-                    <div className="col-lg-5 order-2 order-lg-1 d-flex flex-column justify-content-center">
-                        <p className="hero-kicker editorial-kicker" data-aos="fade-up">
-                            Добрич · ул. „Независимост“ 4
-                        </p>
-                        <div className="editorial-rule hero-editorial-rule" data-aos="fade-up" data-aos-delay="50" aria-hidden="true" />
+  useEffect(() => {
+    if (slideCount <= 1) return undefined;
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % slideCount);
+    }, AUTO_MS);
+    return () => clearInterval(timer);
+  }, [slideCount, activeIndex]);
 
-                        <h1 data-aos="fade-up" data-aos-delay="80" className="hero-title">
-                            Вкус, който остава
-                            <span className="hero-brand"
-                                data-aos="fade-up"
-                                data-aos-delay="150">
-                                Ресторант-пицария Централ
-                            </span>
+  const goTo = (index) => {
+    setActiveIndex(index);
+  };
+
+  const onTouchStart = (event) => {
+    touchStartX.current = event.changedTouches[0].clientX;
+  };
+
+  const onTouchEnd = (event) => {
+    if (touchStartX.current == null || slideCount <= 1) return;
+    const delta = event.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(delta) < 40) return;
+    if (delta < 0) {
+      setActiveIndex((prev) => (prev + 1) % slideCount);
+    } else {
+      setActiveIndex((prev) => (prev - 1 + slideCount) % slideCount);
+    }
+  };
+
+  return (
+    <section id="hero" className="hero section light-background hero-with-love">
+      <div className="container">
+        <div
+          className="hero-slider"
+          aria-roledescription="carousel"
+          aria-label="Начални банери"
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
+          <div className="hero-viewport">
+            <div
+              className="hero-track"
+              style={{ transform: `translate3d(-${activeIndex * 100}%, 0, 0)` }}
+            >
+              {HERO_SLIDES.map((slide, index) => {
+                const isActive = index === activeIndex;
+                return (
+                  <div
+                    key={slide.id}
+                    className="hero-slide"
+                    role="group"
+                    aria-roledescription="slide"
+                    aria-label={`${index + 1} от ${slideCount}`}
+                    aria-hidden={!isActive}
+                  >
+                    <div className="row gy-4 align-items-center justify-content-center justify-content-lg-between">
+                      <div className="col-lg-5 order-2 order-lg-1 d-flex flex-column justify-content-center">
+                        <p className="hero-kicker editorial-kicker">{slide.kicker}</p>
+                        <div className="editorial-rule hero-editorial-rule" aria-hidden="true" />
+
+                        <h1 className="hero-title">
+                          {slide.title}
+                          <span className="hero-brand">{slide.brand}</span>
                         </h1>
 
-                        <p
-                            className="hero-lead editorial-lead"
-                            data-aos="fade-up"
-                            data-aos-delay="120"
-                        >
-                            Съчетаваме италианските традиции с българските продукти - вкус, който усещаш още с първата хапка.
-                        </p>
+                        <p className="hero-lead editorial-lead">{slide.lead}</p>
 
-                        {/* <p
-                            className="hero-subtitle"
-                            data-aos="fade-up"
-                            data-aos-delay="160"
-                        >
-                            Авторска кухня, подбрани продукти
-                            и уютна атмосфера в сърцето на града{' '}
-                            <span className="hero-heart" aria-hidden="true" title="С любов">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="heart-pulse">
-                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                                </svg>
-                            </span>
-                        </p> */}
-
-                        <div
-                            className="d-flex flex-wrap hero-actions"
-                            data-aos="fade-up"
-                            data-aos-delay="200"
-                        >
-                            <a
-                                href="/reservation"
-                                className="btn-primary-hero"
-                                aria-label="Резервирай маса в ресторанта"
-                            >
-                                Резервирай с отстъпка
-                            </a>
-
-                            <a
-                                href="/for-home"
-                                className="btn-secondary-hero"
-                                aria-label="Поръчай за вкъщи"
-                            >
-                                Поръчай за вкъщи
-                            </a>
+                        <div className="d-flex flex-wrap hero-actions">
+                          <a
+                            href={slide.primaryCta.href}
+                            className="btn-primary-hero"
+                            aria-label={slide.primaryCta.ariaLabel}
+                            tabIndex={isActive ? 0 : -1}
+                          >
+                            {slide.primaryCta.label}
+                          </a>
+                          <a
+                            href={slide.secondaryCta.href}
+                            className="btn-secondary-hero"
+                            aria-label={slide.secondaryCta.ariaLabel}
+                            tabIndex={isActive ? 0 : -1}
+                          >
+                            {slide.secondaryCta.label}
+                          </a>
                         </div>
-                    </div>
+                      </div>
 
-                    {/* Hero Image */}
-                    <div
-                        className="col-lg-6 order-1 order-lg-2 hero-img"
-                        data-aos="zoom-out"
-                    >
+                      <div className="col-lg-6 order-1 order-lg-2 hero-img">
                         <div className="hero-photo-frame">
-                            <Image
-                                src="/images/osnovno1.png"
-                                alt="Основно ястие от ресторант Централ Добрич"
-                                width={1024}
-                                height={678}
-                                className="img-fluid hero-photo"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
-                                priority
-                            />
+                          <Image
+                            src={slide.image}
+                            alt={slide.imageAlt}
+                            width={1024}
+                            height={678}
+                            className="img-fluid hero-photo"
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              objectPosition: 'center',
+                            }}
+                            priority={index === 0}
+                          />
                         </div>
+                      </div>
                     </div>
-
-                </div>
+                  </div>
+                );
+              })}
             </div>
+          </div>
 
-            <style jsx>{`
+          {slideCount > 1 && (
+            <div className="hero-dots" role="tablist" aria-label="Слайдове">
+              {HERO_SLIDES.map((slide, index) => (
+                <button
+                  key={slide.id}
+                  type="button"
+                  role="tab"
+                  className={`hero-dot${index === activeIndex ? ' is-active' : ''}`}
+                  aria-label={`Покажи слайд ${index + 1}`}
+                  aria-selected={index === activeIndex}
+                  onClick={() => goTo(index)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <style jsx>{`
         .hero-with-love {
           position: relative;
           background: linear-gradient(168deg, #f8f6f3 0%, #fdfcfb 42%, #ffffff 100%);
@@ -98,40 +189,30 @@ const ModernHero = () => {
           position: relative;
           z-index: 1;
         }
+        .hero-slider {
+          position: relative;
+        }
+        .hero-viewport {
+          overflow: hidden;
+          width: 100%;
+        }
+        .hero-track {
+          display: flex;
+          width: 100%;
+          transition: transform 0.65s cubic-bezier(0.22, 0.61, 0.36, 1);
+          will-change: transform;
+        }
+        .hero-slide {
+          flex: 0 0 100%;
+          width: 100%;
+          min-width: 100%;
+        }
         .hero-kicker {
           margin-top: 0;
           font-size: 1.3rem !important;
         }
         .hero-editorial-rule {
           margin-top: 0;
-        }
-        .hero-valentine-overlay {
-          display: block;
-          margin-top: 10px;
-          font-family: 'Dancing Script', cursive;
-          font-size: clamp(2.75rem, 8vw, 4.25rem) !important;
-          font-weight: 600;
-          color: #d41317 !important;
-          letter-spacing: 0.02em;
-          line-height: 1.2;
-          user-select: none;
-        }
-        .hero-heart {
-          display: inline-flex;
-          align-items: center;
-          vertical-align: middle;
-          color: #d41317;
-          margin-left: 2px;
-          animation: heartPulse 1.4s ease-in-out infinite;
-        }
-        .hero-heart .heart-pulse {
-          width: 18px;
-          height: 18px;
-          filter: drop-shadow(0 0 4px rgba(212, 19, 23, 0.3));
-        }
-        @keyframes heartPulse {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.15); opacity: 0.9; }
         }
         .hero-title {
           font-size: clamp(2.2rem, 4vw, 3.2rem);
@@ -140,35 +221,25 @@ const ModernHero = () => {
           margin-bottom: 20px;
         }
         .hero-title span {
-            display: block;
-            font-size: 0.55em;
-            font-weight: 500;
-            margin-top: 12px;
-            color: #666;
-            }
-
+          display: block;
+          font-size: 0.55em;
+          font-weight: 500;
+          margin-top: 12px;
+          color: #666;
+        }
         .hero-lead {
           margin-bottom: 14px;
         }
-        .hero-subtitle {
-          font-size: 1.05rem;
-          color: #555;
-          max-width: 460px;
-          margin-bottom: 12px;
-        }
-
         .hero-brand {
           display: block;
           font-size: 0.9rem;
           color: #999;
           margin-bottom: 28px;
         }
-
         .hero-actions {
           gap: 16px;
           margin-bottom: 20px;
         }
-
         .btn-primary-hero {
           background: #d41317;
           color: #fff;
@@ -177,13 +248,11 @@ const ModernHero = () => {
           font-weight: 600;
           transition: all 0.3s ease;
         }
-
         .btn-primary-hero:hover {
           background: #b50f13;
           box-shadow: 0 10px 30px rgba(212, 19, 23, 0.35);
           transform: translateY(-1px);
         }
-
         .btn-secondary-hero {
           border: 1px solid #d41317;
           color: #d41317;
@@ -192,17 +261,10 @@ const ModernHero = () => {
           font-weight: 500;
           transition: all 0.3s ease;
         }
-
         .btn-secondary-hero:hover {
           background: #d41317;
           color: #fff;
         }
-
-        .hero-trust {
-          font-size: 0.85rem;
-          color: #777;
-        }
-
         .hero-photo-frame {
           width: 100%;
           max-width: 620px;
@@ -214,106 +276,65 @@ const ModernHero = () => {
             0 20px 45px rgba(0, 0, 0, 0.18),
             0 8px 20px rgba(0, 0, 0, 0.1);
         }
-
         .hero-photo {
           display: block;
         }
-
-        .hero-image-wrapper {
-          position: relative;
-          width: 100%;
-          max-width: 480px;
-          aspect-ratio: 1;
-          margin: 0 auto;
+        .hero-dots {
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+          margin-top: 20px;
+        }
+        .hero-dot {
+          width: 10px;
+          height: 10px;
+          padding: 0;
+          border: none;
           border-radius: 50%;
-          overflow: hidden;
-          box-shadow:
-            0 25px 50px rgba(0, 0, 0, 0.2),
-            0 15px 35px rgba(0, 0, 0, 0.15),
-            0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-            inset 0 -25px 50px rgba(0, 0, 0, 0.25),
-            inset 0 1px 0 rgba(255, 255, 255, 0.15);
-          transform: perspective(800px) rotateY(-2deg) rotateX(2deg);
-          transition: transform 0.4s ease, box-shadow 0.4s ease;
+          background: #d41317;
+          opacity: 0.35;
+          cursor: pointer;
+          transition: opacity 0.25s ease, transform 0.25s ease;
         }
-
-        .hero-image-wrapper:hover {
-          transform: perspective(800px) rotateY(0) rotateX(0) scale(1.02);
-          box-shadow:
-            0 35px 70px rgba(0, 0, 0, 0.25),
-            0 20px 40px rgba(0, 0, 0, 0.18),
-            0 0 0 1px rgba(255, 255, 255, 0.12) inset,
-            inset 0 -30px 55px rgba(0, 0, 0, 0.28),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        .hero-dot.is-active {
+          opacity: 1;
+          transform: scale(1.15);
         }
-
-        .hero-image-wrapper::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background: radial-gradient(
-            circle at center,
-            rgba(0, 0, 0, 0) 40%,
-            rgba(0, 0, 0, 0.35) 100%
-          );
-          pointer-events: none;
+        .hero-dot:hover {
+          opacity: 0.7;
         }
-
-        .hero-image {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center;
-          transform: scale(1.25);
-          transition: transform 6s ease;
-        }
-
-        .hero-image-wrapper:hover .hero-image {
-          transform: scale(1.3);
-        }
-
         @media (max-width: 768px) {
           .hero {
             padding-top: 0 !important;
             padding-bottom: 40px !important;
           }
-
           .hero-title {
             text-align: center;
           }
-
           .hero-kicker {
             text-align: center;
           }
-
           .hero-editorial-rule {
             margin-left: auto;
             margin-right: auto;
           }
-
           .hero-lead {
             margin-left: auto;
             margin-right: auto;
             text-align: center;
           }
-
-          .hero-subtitle,
-          .hero-brand,
-          .hero-trust {
+          .hero-brand {
             text-align: center;
             margin-left: auto;
             margin-right: auto;
           }
-
           .hero-actions {
             justify-content: center;
           }
         }
       `}</style>
-        </section>
-    );
+    </section>
+  );
 };
 
 export default ModernHero;
