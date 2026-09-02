@@ -10,7 +10,8 @@ const HERO_SLIDES = [
     title: 'Вкус, който остава',
     brand: 'Ресторант-пицария Централ',
     lead: 'Съчетаваме италианските традиции с българските продукти - вкус, който усещаш още с първата хапка.',
-    image: '/images/osnovno1.png',
+    image: '/images/osnovno1.jpg',
+    aspectRatio: '1024 / 678',
     imageAlt: 'Основно ястие от ресторант Централ Добрич',
     primaryCta: {
       href: '/reservation',
@@ -29,7 +30,8 @@ const HERO_SLIDES = [
     title: 'Пица Централ 3х1',
     brand: 'Три вкуса в една XL или XXL пица',
     lead: 'Комбинирай до три любими вкуса в една голяма пица. Идеална за компания — или когато не можеш да избереш само една.',
-    image: '/images/pizza-central-3x1.png',
+    image: '/images/pizza-central-3x1.jpg',
+    aspectRatio: '1024 / 825',
     imageAlt: 'Пица Централ 3х1 – три вкуса в една XXL пица',
     primaryCta: {
       href: '/products/pizza-central',
@@ -138,16 +140,17 @@ const ModernHero = () => {
                       </div>
 
                       <div className="col-lg-6 order-1 order-lg-2 hero-img">
-                        <div className="hero-photo-frame">
+                        <div
+                          className="hero-photo-frame"
+                          style={{ aspectRatio: slide.aspectRatio }}
+                        >
                           <Image
                             src={slide.image}
                             alt={slide.imageAlt}
-                            width={1024}
-                            height={678}
-                            className="img-fluid hero-photo"
+                            fill
+                            sizes="(max-width: 991px) 100vw, 620px"
+                            className="hero-photo"
                             style={{
-                              width: '100%',
-                              height: '100%',
                               objectFit: 'cover',
                               objectPosition: 'center',
                             }}
@@ -266,9 +269,9 @@ const ModernHero = () => {
           color: #fff;
         }
         .hero-photo-frame {
+          position: relative;
           width: 100%;
           max-width: 620px;
-          aspect-ratio: 1024 / 678;
           margin: 0 auto;
           border-radius: 28px;
           overflow: hidden;
@@ -278,6 +281,9 @@ const ModernHero = () => {
         }
         .hero-photo {
           display: block;
+        }
+        .hero-img {
+          min-height: 0;
         }
         .hero-dots {
           display: flex;
