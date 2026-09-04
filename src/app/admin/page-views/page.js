@@ -32,13 +32,13 @@ const PageViewsPage = () => {
             if (!snapshot.exists()) return;
 
             const data = snapshot.val();
-            const sevenDaysAgo = moment().subtract(7, 'days');
+            const thirtyDaysAgo = moment().subtract(30, 'days');
             const datesToDelete = [];
             
             // Check each date
             Object.keys(data).forEach(dateStr => {
                 const date = moment(dateStr, 'YYYY-MM-DD');
-                if (date.isValid() && date.isBefore(sevenDaysAgo, 'day')) {
+                if (date.isValid() && date.isBefore(thirtyDaysAgo, 'day')) {
                     datesToDelete.push(dateStr);
                 }
             });
@@ -65,17 +65,17 @@ const PageViewsPage = () => {
                 const data = snapshot.val();
                 const details = [];
                 
-                // Get last 7 days
-                const last7Days = [];
-                for (let i = 6; i >= 0; i--) {
+                // Get last 30 days
+                const last30Days = [];
+                for (let i = 29; i >= 0; i--) {
                     const date = moment().subtract(i, 'days');
-                    last7Days.push(date.format('YYYY-MM-DD'));
+                    last30Days.push(date.format('YYYY-MM-DD'));
                 }
 
                 // Process each date
                 Object.keys(data).forEach(dateStr => {
-                    // Only include last 7 days
-                    if (!last7Days.includes(dateStr)) return;
+                    // Only include last 30 days
+                    if (!last30Days.includes(dateStr)) return;
                     
                     const dateData = data[dateStr];
                     
@@ -130,12 +130,12 @@ const PageViewsPage = () => {
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 
-                // Get last 7 days
-                const last7Days = [];
-                for (let i = 6; i >= 0; i--) {
+                // Get last 30 days
+                const last30Days = [];
+                for (let i = 29; i >= 0; i--) {
                     const date = moment().subtract(i, 'days');
                     const dateStr = date.format('YYYY-MM-DD');
-                    last7Days.push({
+                    last30Days.push({
                         date: date.format('DD.MM'),
                         fullDate: dateStr,
                         count: 0
@@ -152,14 +152,14 @@ const PageViewsPage = () => {
                         dayTotal += views;
                     });
                     
-                    // Find the day in last7Days and update count
-                    const dayIndex = last7Days.findIndex(day => day.fullDate === dateStr);
+                    // Find the day in last30Days and update count
+                    const dayIndex = last30Days.findIndex(day => day.fullDate === dateStr);
                     if (dayIndex !== -1) {
-                        last7Days[dayIndex].count = dayTotal;
+                        last30Days[dayIndex].count = dayTotal;
                     }
                 });
 
-                setPageViewsData(last7Days);
+                setPageViewsData(last30Days);
             } else {
                 setPageViewsData([]);
             }
@@ -226,7 +226,7 @@ const PageViewsPage = () => {
                     marginBottom: '20px'
                 }}>
                     <h3 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: '600' }}>
-                        Посещения на страници - Последна седмица
+                        Посещения на страници - Последен месец
                     </h3>
                     <ResponsiveContainer width="100%" height={300}>
                         <LineChart data={pageViewsData}>
@@ -356,7 +356,7 @@ const PageViewsPage = () => {
                     boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                 }}>
                     <h3 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: '600' }}>
-                        Детайлни посещения по страници - Последна седмица
+                        Детайлни посещения по страници - Последен месец
                     </h3>
                     
                     {loading ? (
@@ -466,7 +466,7 @@ const PageViewsPage = () => {
                         }}>
                             {searchDate || searchPage 
                                 ? 'Няма резултати за търсеното' 
-                                : 'Няма данни за последната седмица'}
+                                : 'Няма данни за последния месец'}
                         </div>
                     )}
                 </div>

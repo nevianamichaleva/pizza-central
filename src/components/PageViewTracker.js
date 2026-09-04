@@ -9,7 +9,7 @@ const PageViewTracker = () => {
   const hasIncremented = useRef(false);
   const pathname = usePathname();
 
-  // Cleanup function to remove data older than 7 days
+  // Cleanup function to remove data older than 30 days (1 month)
   const cleanupOldData = async () => {
     try {
       // Use localStorage to track last cleanup time to avoid running too frequently
@@ -32,8 +32,8 @@ const PageViewTracker = () => {
 
       const data = snapshot.val();
       const today = new Date();
-      const sevenDaysAgo = new Date(today);
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       
       const datesToDelete = [];
       
@@ -41,7 +41,7 @@ const PageViewTracker = () => {
       Object.keys(data).forEach(dateStr => {
         try {
           const date = new Date(dateStr + 'T00:00:00'); // Add time to avoid timezone issues
-          if (date < sevenDaysAgo) {
+          if (date < thirtyDaysAgo) {
             datesToDelete.push(dateStr);
           }
         } catch (e) {
@@ -113,7 +113,7 @@ const PageViewTracker = () => {
       return newCount;
     }).then((result) => {
       console.log('Page view tracked successfully:', result);
-      // Clean up old data (older than 7 days) - run this occasionally
+      // Clean up old data (older than 30 days) - run this occasionally
       cleanupOldData();
     }).catch((error) => {
       console.error("Error incrementing page view count:", error);
