@@ -20,20 +20,26 @@ export function getTodayLaunchMenuDateString() {
   return `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
 }
 
-/**
- * DD/MM/YYYY за „днес“ в Europe/Sofia — за SSR/OG и за страницата,
- * за да съвпада дневното меню с работния ден в Добрич.
- */
-export function getTodayLaunchMenuDateStringEuropeSofia() {
-  const formatted = new Intl.DateTimeFormat('en-GB', {
+/** YYYY-MM-DD за работния ден в Europe/Sofia (за посещения и меню). */
+export function getEuropeSofiaIsoDateString(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Europe/Sofia',
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-  }).format(new Date());
-  const parts = formatted.split('/');
-  if (parts.length !== 3) return getTodayLaunchMenuDateString();
-  const [day, month, year] = parts;
+  }).formatToParts(date);
+  const day = parts.find((p) => p.type === 'day')?.value;
+  const month = parts.find((p) => p.type === 'month')?.value;
+  const year = parts.find((p) => p.type === 'year')?.value;
+  if (!day || !month || !year) return '';
+  return `${year}-${month}-${day}`;
+}
+
+/** DD/MM/YYYY за „днес“ в Europe/Sofia — за SSR/OG и страницата обедно меню. */
+export function getTodayLaunchMenuDateStringEuropeSofia() {
+  const iso = getEuropeSofiaIsoDateString();
+  if (!iso) return getTodayLaunchMenuDateString();
+  const [year, month, day] = iso.split('-');
   return normalizeLaunchMenuDate(`${day}/${month}/${year}`);
 }
 

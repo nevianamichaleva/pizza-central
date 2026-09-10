@@ -1,7 +1,7 @@
 'use client'
 
 import { useUser } from '@/context/UserContext';
-import { get, ref, remove } from 'firebase/database';
+import { get, ref } from 'firebase/database';
 import moment from 'moment';
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -20,40 +20,8 @@ const PageViewsPage = () => {
         if (isAdmin) {
             fetchPageViewsDetails();
             fetchPageViewsChartData();
-            cleanupOldPageViews();
         }
     }, [isAdmin]);
-
-    const cleanupOldPageViews = async () => {
-        try {
-            const pageViewsRef = ref(rtdb, "page_views");
-            const snapshot = await get(pageViewsRef);
-            
-            if (!snapshot.exists()) return;
-
-            const data = snapshot.val();
-            const thirtyDaysAgo = moment().subtract(30, 'days');
-            const datesToDelete = [];
-            
-            // Check each date
-            Object.keys(data).forEach(dateStr => {
-                const date = moment(dateStr, 'YYYY-MM-DD');
-                if (date.isValid() && date.isBefore(thirtyDaysAgo, 'day')) {
-                    datesToDelete.push(dateStr);
-                }
-            });
-
-            // Delete old dates
-            if (datesToDelete.length > 0) {
-                for (const dateToDelete of datesToDelete) {
-                    const oldDateRef = ref(rtdb, `page_views/${dateToDelete}`);
-                    await remove(oldDateRef);
-                }
-            }
-        } catch (error) {
-            console.error("Грешка при почистване на стари данни за посещения:", error);
-        }
-    };
 
     const fetchPageViewsDetails = async () => {
         setLoading(true);

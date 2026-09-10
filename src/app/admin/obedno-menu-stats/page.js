@@ -66,8 +66,39 @@ function formatMenuText(menu) {
 /** Посещения на обедното меню за даден ден (и евентуални alias пътища) */
 function getObednoMenuViews(dayData) {
   if (!dayData || typeof dayData !== 'object') return 0;
-  const keys = ['obedno-menu', 'launch-menu', 'bg_obedno-menu', 'en_obedno-menu', 'de_obedno-menu'];
-  return keys.reduce((sum, key) => sum + (Number(dayData[key]) || 0), 0);
+  return Object.entries(dayData).reduce((sum, [key, value]) => {
+    const k = String(key).toLowerCase();
+    if (k.includes('obedno-menu') || k === 'launch-menu' || k.includes('launch-menu')) {
+      return sum + (Number(value) || 0);
+    }
+    return sum;
+  }, 0);
+}
+
+function findDayViews(pageViews, isoKey) {
+  if (!pageViews || !isoKey) return null;
+  if (pageViews[isoKey] != null) return pageViews[isoKey];
+
+  const [year, month, day] = isoKey.split('-');
+  if (!year || !month || !day) return null;
+
+  const alternatives = [
+    `${year}-${parseInt(month, 10)}-${parseInt(day, 10)}`,
+    `${day}/${month}/${year}`,
+    `${day}-${month}-${year}`,
+    `${day}.${month}.${year}`,
+  ];
+
+  for (const key of alternatives) {
+    if (pageViews[key] != null) return pageViews[key];
+  }
+  return null;
+}
+
+function isoToMenuDate(isoKey) {
+  const [year, month, day] = String(isoKey).split('-');
+  if (!year || !month || !day) return '';
+  return normalizeLaunchMenuDate(`${day}/${month}/${year}`);
 }
 
 const ObednoMenuStatsPage = () => {
@@ -100,7 +131,7 @@ const ObednoMenuStatsPage = () => {
         .map((menu) => {
           const dateNorm = normalizeLaunchMenuDate(menu.date);
           const isoKey = toIsoDateKey(menu.date);
-          const dayViews = isoKey ? pageViews[isoKey] : null;
+          const dayViews = findDayViews(pageViews, isoKey);
           const hasViewData = dayViews != null;
 
           return {
@@ -112,11 +143,33 @@ const ObednoMenuStatsPage = () => {
             menuText: formatMenuText(menu),
             views: hasViewData ? getObednoMenuViews(dayViews) : null,
           };
-        })
-        .sort((a, b) => {
-          if (a.isoKey && b.isoKey) return b.isoKey.localeCompare(a.isoKey);
-          return String(b.date).localeCompare(String(a.date));
         });
+
+      const menuIsoKeys = new Set(tableRows.map((row) => row.isoKey).filter(Boolean));
+
+      Object.entries(pageViews).forEach(([dateKey, dayData]) => {
+        const isoKey = /^\d{4}-\d{2}-\d{2}$/.test(dateKey) ? dateKey : toIsoDateKey(dateKey);
+        if (!isoKey || menuIsoKeys.has(isoKey)) return;
+        const views = getObednoMenuViews(dayData);
+        if (!views) return;
+
+        const dateNorm = isoToMenuDate(isoKey);
+        tableRows.push({
+          id: `views-${isoKey}`,
+          date: dateNorm,
+          dateDisplay: formatMenuDateForDisplay(dateNorm),
+          isoKey,
+          weekDay: weekdayFromDate(dateNorm),
+          menuText: '—',
+          views,
+        });
+        menuIsoKeys.add(isoKey);
+      });
+
+      tableRows.sort((a, b) => {
+        if (a.isoKey && b.isoKey) return b.isoKey.localeCompare(a.isoKey);
+        return String(b.date).localeCompare(String(a.date));
+      });
 
       setRows(tableRows);
     } catch (error) {
@@ -239,8 +292,7 @@ const ObednoMenuStatsPage = () => {
             Текст на обедно меню и посещения по ден
           </h3>
           <p style={{ marginBottom: '20px', color: '#666', fontSize: '13px' }}>
-            Посещенията са за страницата /obedno-menu. Данните за посещения се пазят около 7 дни —
-            за по-стари дати колоната може да е празна.
+            Посещенията са за страницата /obedno-menu. Записите се пазят и не се изтриват автоматично.
           </p>
 
           {loading ? (

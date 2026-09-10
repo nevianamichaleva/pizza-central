@@ -1,6 +1,7 @@
 'use client'
 
 import { useUser } from '@/context/UserContext';
+import { parseOrderDateTimestamp } from '@/utils/orderNumberUtils';
 import { get, ref } from 'firebase/database';
 import moment from 'moment';
 import Link from "next/link";
@@ -70,88 +71,16 @@ const AdministrationPage = () => {
                     });
                 }
 
-                // Count orders per day
                 ordersArray.forEach(order => {
-                    if (!order.order_date) return;
                     if (isWaitingOrder(order)) return;
-                    
-                    // Try to parse the date - handle different formats
-                    let orderDate = null;
-                    
-                    // Clean the date string - remove Bulgarian suffixes like "г." and "ч."
-                    let cleanedDate = order.order_date.toString().trim();
-                    cleanedDate = cleanedDate.replace(/ г\./g, '').replace(/ ч\./g, '').trim();
-                    
-                    // Extract date part (before comma if exists)
-                    let datePart = cleanedDate;
-                    if (cleanedDate.includes(',')) {
-                        datePart = cleanedDate.split(',')[0].trim();
-                    }
-                    
-                    // First try: Parse Bulgarian format with dots "D.M.YYYY" or "DD.MM.YYYY"
-                    if (datePart.includes('.')) {
-                        orderDate = moment(datePart, ['D.M.YYYY', 'DD.MM.YYYY', 'D.M.YY', 'DD.MM.YY'], true);
-                    }
-                    
-                    // Second try: Parse format with slashes "DD/MM/YYYY" or "D/M/YYYY"
-                    if ((!orderDate || !orderDate.isValid()) && datePart.includes('/')) {
-                        // Try DD/MM/YYYY format (European)
-                        orderDate = moment(datePart, ['DD/MM/YYYY', 'D/M/YYYY', 'DD/MM/YY', 'D/M/YY'], true);
-                    }
-                    
-                    // Third try: Parse as Date object (works with ISO strings and toLocaleString)
-                    if (!orderDate || !orderDate.isValid()) {
-                        try {
-                            const dateObj = new Date(order.order_date);
-                            if (!isNaN(dateObj.getTime())) {
-                                orderDate = moment(dateObj);
-                            }
-                        } catch (e) {
-                            // Ignore
-                        }
-                    }
-                    
-                    // Fourth try: Parse with moment using common formats (without strict mode first)
-                    if (!orderDate || !orderDate.isValid()) {
-                        orderDate = moment(datePart, [
-                            'DD.MM.YYYY', 
-                            'DD-MM-YYYY', 
-                            'YYYY-MM-DD', 
-                            'MM/DD/YYYY', 
-                            'DD/MM/YYYY',
-                            'D.M.YYYY',
-                            'D/M/YYYY'
-                        ], false); // false = lenient parsing
-                    }
-                    
-                    // Fifth try: Parse full string with time
-                    if (!orderDate || !orderDate.isValid()) {
-                        orderDate = moment(cleanedDate, [
-                            'DD.MM.YYYY HH:mm:ss', 
-                            'DD-MM-YYYY HH:mm:ss',
-                            'DD/MM/YYYY HH:mm:ss',
-                            'DD.MM.YYYY HH:mm',
-                            'D.M.YYYY HH:mm',
-                            'DD/MM/YYYY HH:mm',
-                            'D/M/YYYY HH:mm'
-                        ], true);
-                    }
-                    
-                    if (!orderDate || !orderDate.isValid()) {
-                        return;
-                    }
-                    
-                    // Check if order date is within last 7 days
-                    const daysDiff = moment().diff(orderDate, 'days');
-                    if (daysDiff < 0 || daysDiff > 6) {
-                        // Order is not in the last 7 days
-                        return;
-                    }
-                    
-                    const dayIndex = last7Days.findIndex(day => 
+
+                    const orderDate = parseOrderDate(order);
+                    if (!orderDate) return;
+
+                    const dayIndex = last7Days.findIndex(day =>
                         moment(day.fullDate).isSame(orderDate, 'day')
                     );
-                    
+
                     if (dayIndex !== -1) {
                         last7Days[dayIndex].count++;
                     }
@@ -253,7 +182,7 @@ const AdministrationPage = () => {
                 if (!orderDate) return;
                 if (isWaitingOrder(order)) return;
 
-                const monthKey = orderDate.startOf('month').format('YYYY-MM');
+                const monthKey = orderDate.format('YYYY-MM');
                 const monthIndex = last6Months.findIndex(month => month.monthKey === monthKey);
 
                 if (monthIndex !== -1) {
@@ -299,21 +228,10 @@ const AdministrationPage = () => {
     };
 
     const parseOrderDate = (order) => {
-        if (!order?.order_date) return null;
-        let cleanedDate = order.order_date.toString().trim().replace(/ г\./g, '').replace(/ ч\./g, '').trim();
-        let datePart = cleanedDate.includes(',') ? cleanedDate.split(',')[0].trim() : cleanedDate;
-        let orderDate = null;
-        if (datePart.includes('.')) orderDate = moment(datePart, ['D.M.YYYY', 'DD.MM.YYYY', 'D.M.YY', 'DD.MM.YY'], true);
-        if ((!orderDate || !orderDate.isValid()) && datePart.includes('/')) orderDate = moment(datePart, ['DD/MM/YYYY', 'D/M/YYYY', 'DD/MM/YY', 'D/M/YY'], true);
-        if (!orderDate || !orderDate.isValid()) {
-            try {
-                const dateObj = new Date(order.order_date);
-                if (!isNaN(dateObj.getTime())) orderDate = moment(dateObj);
-            } catch (e) {}
-        }
-        if (!orderDate || !orderDate.isValid()) orderDate = moment(datePart, ['DD.MM.YYYY', 'DD-MM-YYYY', 'YYYY-MM-DD', 'DD/MM/YYYY', 'D.M.YYYY', 'D/M/YYYY'], false);
-        if (!orderDate || !orderDate.isValid()) orderDate = moment(cleanedDate, ['DD.MM.YYYY HH:mm:ss', 'DD-MM-YYYY HH:mm:ss', 'DD/MM/YYYY HH:mm:ss', 'DD.MM.YYYY HH:mm', 'D.M.YYYY HH:mm', 'DD/MM/YYYY HH:mm', 'D/M/YYYY HH:mm'], true);
-        return (orderDate && orderDate.isValid()) ? orderDate : null;
+        const ts = parseOrderDateTimestamp(order);
+        if (!ts) return null;
+        const orderDate = moment(ts);
+        return orderDate.isValid() ? orderDate : null;
     };
 
     const isWaitingOrder = (order) => {
