@@ -1,12 +1,42 @@
 'use client'
 
 import { useUser } from '@/context/UserContext';
+import { getEuropeSofiaIsoDateString } from '@/lib/launchMenuToday';
 import { get, ref } from 'firebase/database';
 import moment from 'moment';
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { rtdb } from '../../../../lib/firebase';
+
+function normalizePageViewDateKey(raw) {
+    const s = String(raw || '').trim();
+    const iso = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (iso) {
+        const [, year, month, day] = iso;
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+    const dmy = s.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{2,4})$/);
+    if (dmy) {
+        let [, day, month, year] = dmy;
+        if (year.length === 2) year = `20${year}`;
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+    return '';
+}
+
+function buildDateRange(startIso, endIso) {
+    const days = [];
+    const start = moment(startIso, 'YYYY-MM-DD');
+    const end = moment(endIso, 'YYYY-MM-DD');
+    if (!start.isValid() || !end.isValid() || start.isAfter(end, 'day')) return days;
+    const cursor = start.clone();
+    while (cursor.isSameOrBefore(end, 'day')) {
+        days.push(cursor.format('YYYY-MM-DD'));
+        cursor.add(1, 'day');
+    }
+    return days;
+}
 
 const PageViewsPage = () => {
     const { isAdmin } = useUser();
@@ -18,128 +48,80 @@ const PageViewsPage = () => {
 
     useEffect(() => {
         if (isAdmin) {
-            fetchPageViewsDetails();
-            fetchPageViewsChartData();
+            fetchPageViews();
         }
     }, [isAdmin]);
 
-    const fetchPageViewsDetails = async () => {
+    const fetchPageViews = async () => {
         setLoading(true);
         try {
-            const pageViewsRef = ref(rtdb, "page_views");
-            const snapshot = await get(pageViewsRef);
+            const snapshot = await get(ref(rtdb, "page_views"));
 
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                const details = [];
-                
-                // Get last 30 days
-                const last30Days = [];
-                for (let i = 29; i >= 0; i--) {
-                    const date = moment().subtract(i, 'days');
-                    last30Days.push(date.format('YYYY-MM-DD'));
-                }
+            if (!snapshot.exists()) {
+                setPageViewsDetails([]);
+                setPageViewsData([]);
+                return;
+            }
 
-                // Process each date
-                Object.keys(data).forEach(dateStr => {
-                    // Only include last 30 days
-                    if (!last30Days.includes(dateStr)) return;
-                    
-                    const dateData = data[dateStr];
-                    
-                    Object.keys(dateData).forEach(pagePath => {
-                        const views = dateData[pagePath] || 0;
-                        if (views > 0) {
-                            // Convert normalized path back to URL format
-                            let urlPath = pagePath;
-                            if (pagePath === '_root_') {
-                                urlPath = '/';
-                            } else {
-                                // Convert underscores back to slashes and add leading slash
-                                urlPath = '/' + pagePath.replace(/_/g, '/');
-                            }
-                            
-                            details.push({
-                                date: dateStr,
-                                dateFormatted: moment(dateStr).format('DD.MM.YYYY'),
-                                page: urlPath === '/' ? 'Начална страница' : urlPath,
-                                pagePath: urlPath,
-                                views: views
-                            });
-                        }
+            const data = snapshot.val();
+            const details = [];
+            const totalsByDate = {};
+
+            Object.entries(data).forEach(([dateKey, dateData]) => {
+                const iso = normalizePageViewDateKey(dateKey);
+                if (!iso || !dateData || typeof dateData !== 'object') return;
+
+                Object.entries(dateData).forEach(([pagePath, viewsRaw]) => {
+                    const views = Number(viewsRaw) || 0;
+                    if (views <= 0) return;
+
+                    totalsByDate[iso] = (totalsByDate[iso] || 0) + views;
+
+                    let urlPath = pagePath;
+                    if (pagePath === '_root_') {
+                        urlPath = '/';
+                    } else {
+                        urlPath = '/' + String(pagePath).replace(/_/g, '/');
+                    }
+
+                    details.push({
+                        date: iso,
+                        dateFormatted: moment(iso, 'YYYY-MM-DD').format('DD.MM.YYYY'),
+                        page: urlPath === '/' ? 'Начална страница' : urlPath,
+                        pagePath: urlPath,
+                        views,
                     });
                 });
+            });
 
-                // Sort by date (newest first) and then by views (descending)
-                details.sort((a, b) => {
-                    if (a.date !== b.date) {
-                        return b.date.localeCompare(a.date);
-                    }
-                    return b.views - a.views;
-                });
+            details.sort((a, b) => {
+                if (a.date !== b.date) return b.date.localeCompare(a.date);
+                return b.views - a.views;
+            });
 
-                setPageViewsDetails(details);
-            } else {
-                setPageViewsDetails([]);
-            }
+            const todayIso = getEuropeSofiaIsoDateString() || moment().format('YYYY-MM-DD');
+            const startIso = moment(todayIso, 'YYYY-MM-DD').subtract(13, 'days').format('YYYY-MM-DD');
+
+            const chartDays = buildDateRange(startIso, todayIso).map((fullDate) => ({
+                date: moment(fullDate, 'YYYY-MM-DD').format('DD.MM'),
+                fullDate,
+                count: totalsByDate[fullDate] || 0,
+            }));
+
+            setPageViewsDetails(details);
+            setPageViewsData(chartDays);
         } catch (error) {
             console.error("Грешка при зареждане на посещения на страници:", error);
             setPageViewsDetails([]);
+            setPageViewsData([]);
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchPageViewsChartData = async () => {
-        try {
-            const pageViewsRef = ref(rtdb, "page_views");
-            const snapshot = await get(pageViewsRef);
-
-            if (snapshot.exists()) {
-                const data = snapshot.val();
-                
-                // Get last 30 days
-                const last30Days = [];
-                for (let i = 29; i >= 0; i--) {
-                    const date = moment().subtract(i, 'days');
-                    const dateStr = date.format('YYYY-MM-DD');
-                    last30Days.push({
-                        date: date.format('DD.MM'),
-                        fullDate: dateStr,
-                        count: 0
-                    });
-                }
-
-                // Aggregate page views by date
-                Object.keys(data).forEach(dateStr => {
-                    const dateData = data[dateStr];
-                    let dayTotal = 0;
-                    
-                    Object.keys(dateData).forEach(pagePath => {
-                        const views = dateData[pagePath] || 0;
-                        dayTotal += views;
-                    });
-                    
-                    // Find the day in last30Days and update count
-                    const dayIndex = last30Days.findIndex(day => day.fullDate === dateStr);
-                    if (dayIndex !== -1) {
-                        last30Days[dayIndex].count = dayTotal;
-                    }
-                });
-
-                setPageViewsData(last30Days);
-            } else {
-                setPageViewsData([]);
-            }
-        } catch (error) {
-            console.error("Грешка при зареждане на данни за графика:", error);
-            setPageViewsData([]);
-        }
-    };
-
     // Най-посещавани страници за днес (за графиката)
     const mostVisitedToday = useMemo(() => {
-        const todayStr = moment().format('YYYY-MM-DD');
+        const todayStr = getEuropeSofiaIsoDateString() || moment().format('YYYY-MM-DD');
         return pageViewsDetails
             .filter(item => item.date === todayStr)
             .sort((a, b) => b.views - a.views)
@@ -194,14 +176,21 @@ const PageViewsPage = () => {
                     marginBottom: '20px'
                 }}>
                     <h3 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: '600' }}>
-                        Посещения на страници - Последен месец
+                        Посещения на страници - Последни 14 дни
                     </h3>
                     <ResponsiveContainer width="100%" height={300}>
                         <LineChart data={pageViewsData}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" />
+                            <XAxis dataKey="date" interval={0} />
                             <YAxis allowDecimals={false} />
-                            <Tooltip />
+                            <Tooltip
+                                labelFormatter={(_, payload) => {
+                                    const full = payload?.[0]?.payload?.fullDate;
+                                    return full
+                                        ? moment(full, 'YYYY-MM-DD').format('DD.MM.YYYY')
+                                        : '';
+                                }}
+                            />
                             <Legend />
                             <Line 
                                 type="monotone"
@@ -324,7 +313,7 @@ const PageViewsPage = () => {
                     boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                 }}>
                     <h3 style={{ marginBottom: '20px', fontSize: '20px', fontWeight: '600' }}>
-                        Детайлни посещения по страници - Последен месец
+                        Детайлни посещения по страници
                     </h3>
                     
                     {loading ? (
@@ -434,7 +423,7 @@ const PageViewsPage = () => {
                         }}>
                             {searchDate || searchPage 
                                 ? 'Няма резултати за търсеното' 
-                                : 'Няма данни за последния месец'}
+                                : 'Няма данни за посещения'}
                         </div>
                     )}
                 </div>
