@@ -2,6 +2,7 @@
 
 import { useUser } from '@/context/UserContext';
 import { getEuropeSofiaIsoDateString } from '@/lib/launchMenuToday';
+import { formatPageViewLabel, pageViewPathToUrl } from '@/lib/trackPageView';
 import { get, ref } from 'firebase/database';
 import moment from 'moment';
 import Link from "next/link";
@@ -77,17 +78,11 @@ const PageViewsPage = () => {
 
                     totalsByDate[iso] = (totalsByDate[iso] || 0) + views;
 
-                    let urlPath = pagePath;
-                    if (pagePath === '_root_') {
-                        urlPath = '/';
-                    } else {
-                        urlPath = '/' + String(pagePath).replace(/_/g, '/');
-                    }
-
+                    const urlPath = pageViewPathToUrl(pagePath);
                     details.push({
                         date: iso,
                         dateFormatted: moment(iso, 'YYYY-MM-DD').format('DD.MM.YYYY'),
-                        page: urlPath === '/' ? 'Начална страница' : urlPath,
+                        page: formatPageViewLabel(urlPath),
                         pagePath: urlPath,
                         views,
                     });
