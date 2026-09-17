@@ -23,8 +23,14 @@
       },
       
       "page_views": {
-        ".read": true,  // Public read access for page views
-        ".write": true  // Public write access for page views (anyone can track page visits)
+        ".read": true,
+        "$date": {
+          ".validate": "$date.matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)",
+          "$page": {
+            ".write": "newData.exists()",
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          }
+        }
       },
 
       "blog_posts": {

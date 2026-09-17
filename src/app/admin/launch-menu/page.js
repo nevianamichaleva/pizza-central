@@ -3,6 +3,7 @@
 import { default as showAToast } from '@/components/common/showAToast';
 import CloudinaryUpload from '@/components/uploadForm';
 import { useUser } from '@/context/UserContext';
+import { normalizeLaunchMenuDate } from '@/lib/launchMenuToday';
 import { DeleteOutlined, EditOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, DatePicker, Drawer, Form, Image, Input, Select, Space, Table } from "antd";
 import dayjs from 'dayjs';
@@ -10,6 +11,20 @@ import { get, push, ref, remove, set } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { rtdb } from '../../../../lib/firebase';
+
+function menuDateSortKey(dateStr) {
+  const normalized = normalizeLaunchMenuDate(dateStr);
+  const parts = normalized.split('/');
+  if (parts.length !== 3) return '';
+  const [day, month, year] = parts;
+  return `${year}-${month}-${day}`;
+}
+
+function compareLaunchMenus(a, b) {
+  const dateCmp = menuDateSortKey(a.date).localeCompare(menuDateSortKey(b.date));
+  if (dateCmp !== 0) return dateCmp;
+  return String(a.id || '').localeCompare(String(b.id || ''));
+}
 
 const { Option } = Select;
 
@@ -49,6 +64,8 @@ const LaunchMenu = () => {
       title: "Дата",
       dataIndex: "date",
       key: "date",
+      defaultSortOrder: 'descend',
+      sorter: compareLaunchMenus,
     },
     {
       title: "Ден от седмицата",
@@ -97,7 +114,8 @@ const LaunchMenu = () => {
           .map(([key, value]) => ({
             id: key,
             ...value,
-          }));
+          }))
+          .sort((a, b) => compareLaunchMenus(b, a));
         setLaunchMenus(array);
       } else {
         showAToast('success', "Не са намерени менюта.")

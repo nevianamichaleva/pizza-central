@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   images: {
     remotePatterns: [
       {
@@ -165,6 +166,16 @@ const nextConfig = {
       {
         source: '/obedno',
         destination: '/obedno-menu',
+        permanent: true,
+      },
+      {
+        source: '/images/osnovno1.png',
+        destination: '/images/osnovno1.jpg',
+        permanent: true,
+      },
+      {
+        source: '/images/pizza-central-3x1.png',
+        destination: '/images/pizza-central-3x1.jpg',
         permanent: true,
       },
       // Пренасочване на грешен URL с многоточие към статията за пица каперси
