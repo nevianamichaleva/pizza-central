@@ -4,11 +4,11 @@ import { default as Message, default as showAToast } from '@/components/common/s
 import CloudinaryUpload from '@/components/uploadForm';
 import { useUser } from '@/context/UserContext';
 import { DeleteOutlined, EditOutlined, PrinterOutlined, SearchOutlined, ShopOutlined, StopOutlined, TruckOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Drawer, Image, Input, message, Select, Space, Switch, Table, Tabs, Tooltip } from "antd";
+import { Button, Checkbox, Drawer, Image, Input, message, Modal, Select, Space, Switch, Table, Tabs, Tooltip } from "antd";
 import { get, push, ref, remove, set, update } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { printRestaurantMenu } from '@/lib/printRestaurantMenu';
+import { buildRestaurantMenuPrint, printHtmlDocument } from '@/lib/printRestaurantMenu';
 import { rtdb } from '../../../../lib/firebase';
 
 const { Option } = Select;
@@ -44,6 +44,7 @@ const AddProduct = () => {
   const [packagingList, setPackagingList] = useState([]);
   const [selectedPackaging, setSelectedPackaging] = useState([]);
   const [selectedAllergens, setSelectedAllergens] = useState([]);
+  const [printPreview, setPrintPreview] = useState(null);
   
   // 14 основни алергена според ЕС регулациите
   const allergens = [
@@ -427,29 +428,41 @@ const AddProduct = () => {
 
   const handlePrintMenu = () => {
     if (activeTab === 'all') {
-      message.warning('Изберете конкретно меню (напр. Салати), за да го разпечатате.');
+      showAToast('warning', 'Изберете конкретно меню (напр. Салати), за да го разпечатате.');
       return;
     }
 
     const category = categories.find((cat) => cat.id === activeTab);
     if (!category) {
-      message.error('Избраното меню не е намерено.');
+      showAToast('error', 'Избраното меню не е намерено.');
       return;
     }
 
-    const result = printRestaurantMenu({ category, products });
+    const result = buildRestaurantMenuPrint({ category, products });
     if (!result.ok) {
       if (result.reason === 'empty') {
-        message.warning('Няма продукти за ресторант в това меню.');
-      } else if (result.reason === 'popup-blocked') {
-        message.error('Браузърът блокира прозореца за печат. Разрешете pop-up за сайта.');
+        showAToast('warning', 'Няма продукти за ресторант в това меню.');
       } else {
-        message.error('Неуспешно отваряне на менюто за печат.');
+        showAToast('error', 'Неуспешно генериране на менюто за печат.');
       }
       return;
     }
 
-    message.success(`Отворено меню с ${result.count} продукта. Натиснете „Печат / Запази като PDF“.`);
+    setPrintPreview({
+      html: result.html,
+      title: result.title,
+      count: result.count,
+    });
+  };
+
+  const handleConfirmPrint = () => {
+    if (!printPreview?.html) return;
+    const printed = printHtmlDocument(printPreview.html);
+    if (!printed) {
+      showAToast('error', 'Неуспешен печат. Опитайте отново.');
+      return;
+    }
+    showAToast('success', 'Отворен е диалогът за печат. Изберете „Запази като PDF“.');
   };
 
   const getRecord = async (recordId) => {
@@ -674,6 +687,42 @@ const AddProduct = () => {
               rowKey="id"
             />
           </div>
+
+          <Modal
+            title={printPreview ? `Преглед: ${printPreview.title}` : 'Преглед на меню'}
+            open={!!printPreview}
+            onCancel={() => setPrintPreview(null)}
+            width={900}
+            centered
+            destroyOnClose
+            footer={[
+              <Button key="close" onClick={() => setPrintPreview(null)}>
+                Затвори
+              </Button>,
+              <Button key="print" type="primary" icon={<PrinterOutlined />} onClick={handleConfirmPrint}>
+                Печат / Запази като PDF
+              </Button>,
+            ]}
+          >
+            {printPreview && (
+              <>
+                <p style={{ marginBottom: 12, color: '#666' }}>
+                  {printPreview.count} продукта за ресторант. В диалога за печат изберете „Запази като PDF“.
+                </p>
+                <iframe
+                  title="menu-print-preview"
+                  srcDoc={printPreview.html}
+                  style={{
+                    width: '100%',
+                    height: '70vh',
+                    border: '1px solid #ddd',
+                    borderRadius: 8,
+                    background: '#fff',
+                  }}
+                />
+              </>
+            )}
+          </Modal>
 
           <Drawer
             title={product ? `Редакция на ${name}` : "Добави продукт"}
