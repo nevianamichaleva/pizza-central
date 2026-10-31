@@ -41,7 +41,7 @@ export default function PrivacyPolicyPage() {
                   1. Общи положения
                 </h2>
                 <p style={{ marginBottom: '20px' }}>
-                  Настоящата Политика за личните данни има за цел да Ви информира как <strong>Нолина 2007 ЕООД</strong> обработва и защитава личните данни на потребителите на уебсайта <strong>https://www.pizza-central.bg</strong>.
+                  Настоящата Политика за личните данни има за цел да Ви информира как <strong>АКВАЛИС 79 ЕООД</strong> обработва и защитава личните данни на потребителите на уебсайта <strong>https://www.pizza-central.bg</strong>.
                 </p>
                 <p style={{ marginBottom: '20px' }}>
                   Ние обработваме личните Ви данни в съответствие с Регламент (ЕС) 2016/679 (GDPR) и приложимото българско законодателство.
@@ -60,9 +60,10 @@ export default function PrivacyPolicyPage() {
                   Администратор на личните данни е:
                 </p>
                 <ul style={{ marginBottom: '20px', paddingLeft: '20px' }}>
-                  <li style={{ marginBottom: '10px' }}><strong>Нолина 2007 ЕООД</strong></li>
-                  <li style={{ marginBottom: '10px' }}>ЕИК: 148104173</li>
-                  <li style={{ marginBottom: '10px' }}>Адрес: София, р-н Младост, бул. "Цариградско шосе" 145, ет.6, ап.26</li>
+                  <li style={{ marginBottom: '10px' }}><strong>АКВАЛИС 79 ЕООД</strong></li>
+                  <li style={{ marginBottom: '10px' }}>ЕИК / Булстат: 208807974</li>
+                  <li style={{ marginBottom: '10px' }}>Адрес: София, р-н Младост, бул. „Цариградско шосе“ 145</li>
+                  <li style={{ marginBottom: '10px' }}>Управител: Атанас Демирев</li>
                   <li style={{ marginBottom: '10px' }}>Имейл за контакт: <a href="mailto:pizzacentraldobrich@gmail.com" style={{ color: '#ce1212' }}>pizzacentraldobrich@gmail.com</a></li>
                   <li style={{ marginBottom: '10px' }}>Телефон: 0895 516401</li>
                 </ul>

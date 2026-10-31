@@ -3,11 +3,12 @@
 import { default as Message, default as showAToast } from '@/components/common/showAToast';
 import CloudinaryUpload from '@/components/uploadForm';
 import { useUser } from '@/context/UserContext';
-import { DeleteOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Drawer, Image, Input, message, Select, Space, Switch, Table, Tabs } from "antd";
+import { DeleteOutlined, EditOutlined, PrinterOutlined, SearchOutlined, ShopOutlined, StopOutlined, TruckOutlined } from '@ant-design/icons';
+import { Button, Checkbox, Drawer, Image, Input, message, Select, Space, Switch, Table, Tabs, Tooltip } from "antd";
 import { get, push, ref, remove, set, update } from 'firebase/database';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { printRestaurantMenu } from '@/lib/printRestaurantMenu';
 import { rtdb } from '../../../../lib/firebase';
 
 const { Option } = Select;
@@ -77,6 +78,37 @@ const AddProduct = () => {
       title: "Име",
       dataIndex: "name",
       key: "name",
+      render: (name, record) => {
+        const isDelivery = record.forDelivery !== false;
+        const isRestaurant = record.forRestaurant !== false;
+        const isInactive = !isDelivery && !isRestaurant;
+
+        return (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+              {isInactive ? (
+                <Tooltip title="Неактивен за доставка и ресторант">
+                  <StopOutlined style={{ color: "#cf1322", fontSize: "16px" }} />
+                </Tooltip>
+              ) : (
+                <>
+                  {isDelivery && (
+                    <Tooltip title="Активен за доставка">
+                      <TruckOutlined style={{ color: "#1677ff", fontSize: "16px" }} />
+                    </Tooltip>
+                  )}
+                  {isRestaurant && (
+                    <Tooltip title="Активен за ресторант">
+                      <ShopOutlined style={{ color: "#389e0d", fontSize: "16px" }} />
+                    </Tooltip>
+                  )}
+                </>
+              )}
+            </span>
+            <span>{name}</span>
+          </span>
+        );
+      },
     },
     {
       title: "Slug",
@@ -393,6 +425,33 @@ const AddProduct = () => {
     return categories.filter(cat => !cat.parent || cat.parent === '');
   };
 
+  const handlePrintMenu = () => {
+    if (activeTab === 'all') {
+      message.warning('Изберете конкретно меню (напр. Салати), за да го разпечатате.');
+      return;
+    }
+
+    const category = categories.find((cat) => cat.id === activeTab);
+    if (!category) {
+      message.error('Избраното меню не е намерено.');
+      return;
+    }
+
+    const result = printRestaurantMenu({ category, products });
+    if (!result.ok) {
+      if (result.reason === 'empty') {
+        message.warning('Няма продукти за ресторант в това меню.');
+      } else if (result.reason === 'popup-blocked') {
+        message.error('Браузърът блокира прозореца за печат. Разрешете pop-up за сайта.');
+      } else {
+        message.error('Неуспешно отваряне на менюто за печат.');
+      }
+      return;
+    }
+
+    message.success(`Отворено меню с ${result.count} продукта. Натиснете „Печат / Запази като PDF“.`);
+  };
+
   const getRecord = async (recordId) => {
     const recordRef = ref(rtdb, `products/${recordId}`);
     const snapshot = await get(recordRef);
@@ -566,15 +625,24 @@ const AddProduct = () => {
             </div>
           </div>
 
-          <div style={{ marginBottom: "20px" }}>
+          <div style={{ marginBottom: "20px", display: "flex", flexWrap: "wrap", gap: "12px", alignItems: "center" }}>
             <Input
               placeholder="Търси по име, описание, съставки или цена..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               allowClear
-              style={{ maxWidth: "500px" }}
+              style={{ maxWidth: "500px", flex: "1 1 280px" }}
               prefix={<SearchOutlined />}
             />
+            <Tooltip title={activeTab === 'all' ? 'Изберете конкретно меню от табовете' : 'PDF печат само с продукти за ресторант'}>
+              <Button
+                icon={<PrinterOutlined />}
+                onClick={handlePrintMenu}
+                disabled={activeTab === 'all'}
+              >
+                Разпечатай меню
+              </Button>
+            </Tooltip>
           </div>
 
           <Tabs

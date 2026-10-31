@@ -41,7 +41,7 @@ export default function TermsOfServicePage() {
                   1. Общи положения
                 </h2>
                 <p style={{ marginBottom: '20px' }}>
-                  Настоящите Общи условия уреждат правилата за използване на уебсайта <strong>https://www.pizza-central.bg</strong>, собственост на <strong>Нолина 2007 ЕООД</strong>, както и условията за извършване на онлайн поръчки и резервации за маси чрез сайта.
+                  Настоящите Общи условия уреждат правилата за използване на уебсайта <strong>https://www.pizza-central.bg</strong>, собственост на <strong>АКВАЛИС 79 ЕООД</strong>, както и условията за извършване на онлайн поръчки и резервации за маси чрез сайта.
                 </p>
                 <p style={{ marginBottom: '20px' }}>
                   С използването на сайта Вие се съгласявате с настоящите Общи условия.
@@ -57,9 +57,10 @@ export default function TermsOfServicePage() {
                   2. Данни за търговеца
                 </h2>
                 <ul style={{ marginBottom: '20px', paddingLeft: '20px' }}>
-                  <li style={{ marginBottom: '10px' }}><strong>Нолина 2007 ЕООД</strong></li>
-                  <li style={{ marginBottom: '10px' }}>ЕИК: 148104173</li>
-                  <li style={{ marginBottom: '10px' }}>Адрес: София, р-н Младост, бул. "Цариградско шосе" 145, ет.6, ап.26</li>
+                  <li style={{ marginBottom: '10px' }}><strong>АКВАЛИС 79 ЕООД</strong></li>
+                  <li style={{ marginBottom: '10px' }}>ЕИК / Булстат: 208807974</li>
+                  <li style={{ marginBottom: '10px' }}>Адрес: София, р-н Младост, бул. „Цариградско шосе“ 145</li>
+                  <li style={{ marginBottom: '10px' }}>Управител: Атанас Демирев</li>
                   <li style={{ marginBottom: '10px' }}>Телефон: 0895 516401</li>
                   <li style={{ marginBottom: '10px' }}>Имейл: <a href="mailto:pizzacentraldobrich@gmail.com" style={{ color: '#ce1212' }}>pizzacentraldobrich@gmail.com</a></li>
                 </ul>
@@ -238,7 +239,7 @@ export default function TermsOfServicePage() {
                   9. Интелектуална собственост
                 </h2>
                 <p style={{ marginBottom: '20px' }}>
-                  Всички текстове, изображения и съдържание в сайта са собственост на <strong>Нолина 2007 ЕООД</strong> и не могат да бъдат използвани без изрично разрешение.
+                  Всички текстове, изображения и съдържание в сайта са собственост на <strong>АКВАЛИС 79 ЕООД</strong> и не могат да бъдат използвани без изрично разрешение.
                 </p>
 
                 <h2 style={{
