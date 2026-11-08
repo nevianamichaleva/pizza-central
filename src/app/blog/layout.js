@@ -1,5 +1,10 @@
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
+
 export const metadata = {
-  title: 'Любопитно от Централ - Блог | Ресторант-пицария Централ Добрич',
+  title: 'Любопитно от Централ - Блог',
+  alternates: {
+    canonical: `${baseUrl}/blog`,
+  },
   description: 'Четете интересни статии от Ресторант-пицария Централ в Добрич. Рецепти, съвети за храна, новини и събития от ресторанта.',
   keywords: ['блог ресторант Добрич', 'статии за храна Добрич', 'ресторант Централ блог', 'новини ресторант Добрич'],
   openGraph: {

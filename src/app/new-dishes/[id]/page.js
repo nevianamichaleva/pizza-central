@@ -3,6 +3,7 @@ import { get, ref } from 'firebase/database';
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { documentTitle } from '../../../../lib/documentTitle';
 import { rtdb } from '../../../../lib/firebase';
 import styles from "./page.module.css";
 
@@ -93,7 +94,7 @@ export async function generateMetadata({ params }) {
   
   if (!slug) {
     return {
-      title: 'Ястие не намерено | Ресторант-пицария Централ Добрич',
+      title: 'Ястие не намерено',
     };
   }
 
@@ -101,11 +102,11 @@ export async function generateMetadata({ params }) {
 
   if (!dish) {
     return {
-      title: 'Ястие не намерено | Ресторант-пицария Централ Добрич',
+      title: 'Ястие не намерено',
     };
   }
 
-  const title = `${dish.name} | Ресторант-пицария Централ Добрич`;
+  const title = documentTitle(dish.name);
   const description = dish.description || dish.title || `${dish.name} - Ново предложение от Ресторант-пицария Централ в Добрич.`;
   const url = `${baseUrl}/new-dishes/${slug}`;
   const imageUrl = dish.img || `${baseUrl}/images/no-image.png`;

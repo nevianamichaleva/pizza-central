@@ -1,70 +1,15 @@
-'use client';
-
-import { get, ref } from 'firebase/database';
-import moment from 'moment';
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { rtdb } from '../../../lib/firebase';
+import { blogExcerpt, blogViewsLabel, formatPublishedDate, getPublishedBlogPosts } from '@/lib/publishedBlogPosts';
+import Image from 'next/image';
+import Link from 'next/link';
 import styles from './page.module.css';
 
-const BlogPage = () => {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+export const revalidate = 300;
 
-  useEffect(() => {
-  }, []);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const postsRef = ref(rtdb, "blog_posts");
-        const snapshot = await get(postsRef);
-
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          const array = Object.entries(data)
-            .map(([key, value]) => ({
-              id: key,
-              ...value,
-            }))
-            .filter(post => post.status === 'published') // Only show published posts
-            .sort((a, b) => {
-              // Sort by published_at date (newest first)
-              if (a.published_at && b.published_at) {
-                return moment(b.published_at).unix() - moment(a.published_at).unix();
-              }
-              // If no published_at, sort by id (newest first)
-              return b.id.localeCompare(a.id);
-            });
-          setPosts(array);
-        } else {
-          setPosts([]);
-        }
-      } catch (error) {
-        console.error("Error fetching blog posts:", error);
-        setPosts([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPosts();
-  }, []);
-
-  if (loading) {
-    return (
-      <section className="section">
-        <div className="container">
-          <p>Зареждане...</p>
-        </div>
-      </section>
-    );
-  }
+const BlogPage = async () => {
+  const posts = await getPublishedBlogPosts();
 
   return (
     <section id="blog" className="blog section">
-      {/* Section Title */}
       <div className="container section-title">
         <h2>Блог</h2>
         <p>
@@ -79,21 +24,19 @@ const BlogPage = () => {
           </div>
         ) : (
           <div className="row gy-4">
-            {posts.map((post, index) => (
+            {posts.map((post) => (
               <div
                 className="col-lg-4 col-md-6 d-flex align-items-stretch"
-               
-               
                 key={post.id}
               >
-                <Link 
-                  href={`/blog/${post.slug}`} 
-                  className="team-member" 
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="team-member"
                   style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}
                 >
                   <div className={`member-img ${styles.blogPostCardImage}`}>
                     <Image
-                      src={post.image || "/images/no-image.png"}
+                      src={post.image || '/images/no-image.png'}
                       alt={post.title}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -105,25 +48,26 @@ const BlogPage = () => {
                     <div style={{ display: 'flex', gap: '15px', marginBottom: '10px', color: '#666', fontSize: '14px', flexWrap: 'wrap' }}>
                       {post.published_at && (
                         <span>
-                          {moment(post.published_at).format('DD.MM.YYYY')}
+                          {formatPublishedDate(post.published_at)}
                         </span>
                       )}
-                      {post.views !== undefined && (
+                      {blogViewsLabel(post.views) && (
                         <span>
-                          👁️ {post.views} {post.views === 1 ? 'преглед' : 'прегледа'}
+                          👁️ {blogViewsLabel(post.views)}
                         </span>
                       )}
                     </div>
-                    <p style={{ 
-                      marginTop: '10px', 
+                    <p style={{
+                      marginTop: '10px',
                       lineHeight: '1.6',
                       color: '#666',
                       display: '-webkit-box',
                       WebkitLineClamp: 3,
                       WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}>
-                      {post.excerpt || (post.content ? post.content.substring(0, 150) + '...' : '')}
+                      overflow: 'hidden',
+                    }}
+                    >
+                      {blogExcerpt(post)}
                     </p>
                     <div style={{ marginTop: '15px', color: '#c41d7f', fontWeight: '500' }}>
                       Прочети повече →
@@ -140,4 +84,3 @@ const BlogPage = () => {
 };
 
 export default BlogPage;
-

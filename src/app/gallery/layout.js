@@ -1,5 +1,10 @@
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
+
 export const metadata = {
-  title: 'Галерия - Ресторант-пицария Централ Добрич',
+  title: 'Галерия',
+  alternates: {
+    canonical: `${baseUrl}/gallery`,
+  },
   description: 'Разгледайте галерията с снимки от Ресторант-пицария Централ в Добрич. Вижте нашата обстановка, ястия, детски кът и събития.',
   keywords: ['галерия ресторант Добрич', 'снимки ресторант Добрич', 'ресторант Централ галерия'],
   openGraph: {

@@ -1,7 +1,7 @@
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
 
 export const metadata = {
-  title: 'Заяви кетъринг | Ресторант-пицария Централ Добрич',
+  title: 'Заяви кетъринг',
   description: 'Попълнете формата за заявка за кетъринг. Ще се свържем с вас, за да уговорим час за консултация и уточняване на детайли и цени.',
   alternates: {
     canonical: `${baseUrl}/catering/zaiavka`,

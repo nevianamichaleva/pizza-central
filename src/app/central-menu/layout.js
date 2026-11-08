@@ -1,7 +1,9 @@
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
 
 export const metadata = {
-  title: 'Меню на Ресторант-пицария Централ град Добрич | Ресторант-пицария Централ Добрич',
+  title: {
+    absolute: 'Меню на Ресторант-пицария Централ град Добрич',
+  },
   description: 'Разгледайте нашето меню с вкусни пици, основни ястия, салати, гарнитури и десерти. Ресторант-пицария Централ в Добрич предлага автентична италианска пица и традиционна българска кухня.',
   keywords: [
     'меню ресторант Добрич',
@@ -15,9 +17,6 @@ export const metadata = {
     canonical: `${baseUrl}/central-menu`,
     languages: {
       'bg': `${baseUrl}/central-menu`,
-      'en': `${baseUrl}/en/central-menu`,
-      'ro': `${baseUrl}/ro/central-menu`,
-      'de': `${baseUrl}/de/central-menu`,
       'x-default': `${baseUrl}/central-menu`,
     },
   },

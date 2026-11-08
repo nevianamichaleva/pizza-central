@@ -1,5 +1,10 @@
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
+
 export const metadata = {
-  title: 'Резервация маса - Ресторант-пицария Централ Добрич',
+  title: 'Резервация маса',
+  alternates: {
+    canonical: `${baseUrl}/reservation`,
+  },
   description: 'Резервирайте маса в Ресторант-пицария Централ в Добрич. Запазете час за вкусна храна в уютна семейна обстановка. Онлайн резервация на маса.',
   keywords: ['резервация ресторант Добрич', 'запази маса Добрич', 'резервация маса Добрич', 'ресторант резервация Добрич'],
   openGraph: {

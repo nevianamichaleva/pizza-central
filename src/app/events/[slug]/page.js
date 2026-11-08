@@ -2,6 +2,7 @@ import { get, ref } from 'firebase/database';
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { documentTitle } from '../../../../lib/documentTitle';
 import { rtdb } from '../../../../lib/firebase';
 import styles from "./page.module.css";
 
@@ -45,7 +46,7 @@ export async function generateMetadata({ params }) {
   
   if (!slug) {
     return {
-      title: 'Събитие не намерено | Ресторант-пицария Централ Добрич',
+      title: 'Събитие не намерено',
     };
   }
 
@@ -53,11 +54,11 @@ export async function generateMetadata({ params }) {
 
   if (!event) {
     return {
-      title: 'Събитие не намерено | Ресторант-пицария Централ Добрич',
+      title: 'Събитие не намерено',
     };
   }
 
-  const title = `${event.title} | Ресторант-пицария Централ Добрич`;
+  const title = documentTitle(event.title);
   const description = event.description || `${event.title} - Събитие в Ресторант-пицария Централ в Добрич.`;
   const url = `${baseUrl}/events/${slug}`;
   const imageUrl = event.image || `${baseUrl}/images/pizza-central-delivery.png`;

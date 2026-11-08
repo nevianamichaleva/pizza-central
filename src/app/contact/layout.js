@@ -1,5 +1,10 @@
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
+
 export const metadata = {
-  title: 'Контакт - Ресторант-пицария Централ Добрич',
+  title: 'Контакт',
+  alternates: {
+    canonical: `${baseUrl}/contact`,
+  },
   description: 'Свържете се с Ресторант-пицария Централ в Добрич. Адрес: ул. Независимост 4, Добрич. Телефон: +359 895 516 401 / +359 893 315 201. Email: pizzacentraldobrich@gmail.com',
   keywords: ['контакт ресторант Добрич', 'адрес ресторант Добрич', 'телефон ресторант Добрич', 'ресторант Централ контакт'],
   openGraph: {

@@ -4,6 +4,7 @@ import moment from 'moment';
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { documentTitle } from '../../../../lib/documentTitle';
 import { rtdb } from '../../../../lib/firebase';
 import styles from "./page.module.css";
 
@@ -48,7 +49,7 @@ export async function generateMetadata({ params }) {
   
   if (!slug) {
     return {
-      title: 'Статия не намерена | Ресторант-пицария Централ Добрич',
+      title: 'Статия не намерена',
     };
   }
 
@@ -56,7 +57,7 @@ export async function generateMetadata({ params }) {
 
   if (!post) {
     return {
-      title: 'Статия не намерена | Ресторант-пицария Централ Добрич',
+      title: 'Статия не намерена',
     };
   }
 
@@ -68,7 +69,7 @@ export async function generateMetadata({ params }) {
   const imageUrl = post.image || `${baseUrl}/images/pizza-central-delivery.png`;
 
   return {
-    title: `${title} | Ресторант-пицария Централ Добрич`,
+    title: documentTitle(title),
     description,
     keywords: post.meta_keywords ? post.meta_keywords.split(',').map(k => k.trim()) : undefined,
     alternates: {

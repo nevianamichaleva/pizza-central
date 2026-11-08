@@ -1,3 +1,5 @@
+import { documentTitle } from '../../../../lib/documentTitle';
+
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
 
 // Valid language codes
@@ -47,20 +49,23 @@ export async function generateMetadata({ params }) {
   const meta = metadataTranslations[validLang] || metadataTranslations.bg;
   const locale = langToLocale[validLang] || 'bg_BG';
   
-  const title = `${meta.title} | Ресторант-пицария Централ Добрич`;
+  const title = documentTitle(meta.title);
   const url = `${baseUrl}/${validLang}/central-menu`;
-  
-  // Generate alternate languages (hreflang tags for SEO)
-  const languages = ['bg', 'en', 'ro', 'de'];
+
+  // EN/RO/DE са тънки дубликати: ястията идват след Firebase, а първият HTML е на български
+  // (selectedLanguage тръгва от 'bg'). Индексира се само българското меню.
+  const indexLanguageMenu = validLang === 'bg';
+
   const alternates = {
     canonical: url,
-    languages: {},
   };
-  
-  languages.forEach(l => {
-    alternates.languages[l] = `${baseUrl}/${l}/central-menu`;
-  });
-  alternates.languages['x-default'] = `${baseUrl}/central-menu`;
+
+  if (indexLanguageMenu) {
+    alternates.languages = {
+      bg: `${baseUrl}/bg/central-menu`,
+      'x-default': `${baseUrl}/central-menu`,
+    };
+  }
 
   return {
     title,
@@ -88,17 +93,26 @@ export async function generateMetadata({ params }) {
       description: meta.description,
       images: ['/images/pizza-central-delivery.png'],
     },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
-    },
+    robots: indexLanguageMenu
+      ? {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            'max-video-preview': -1,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+          },
+        }
+      : {
+          index: false,
+          follow: true,
+          googleBot: {
+            index: false,
+            follow: true,
+          },
+        },
   };
 }
 

@@ -149,7 +149,10 @@ const jsonLd = {
         name: 'Добрич',
       },
       hasMenu: `${baseUrl}/central-menu`,
-      sameAs: ['https://www.facebook.com/CentralDobrich'],
+      sameAs: [
+        'https://www.facebook.com/CentralDobrich',
+        'https://www.google.com/maps?cid=14317414988468753192',
+      ],
     },
   ],
 };

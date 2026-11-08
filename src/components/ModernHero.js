@@ -7,8 +7,9 @@ const HERO_SLIDES = [
   {
     id: 'home',
     kicker: 'Добрич · ул. „Независимост“ 4',
-    title: 'Вкус, който остава',
-    brand: 'Ресторант-пицария Централ',
+    title: 'Ресторант-пицария Централ Добрич',
+    brand: 'Вкус, който остава',
+    heading: 'h1',
     lead: 'Съчетаваме италианските традиции с българските продукти - вкус, който усещаш още с първата хапка.',
     image: '/images/osnovno1.jpg',
     aspectRatio: '1024 / 678',
@@ -29,6 +30,7 @@ const HERO_SLIDES = [
     kicker: 'Ново · в ресторанта',
     title: 'Пица — цяла или на парче',
     brand: 'Нов майстор · нова рецепта · нов стил',
+    heading: 'h2',
     lead: 'Пробвайте новите ни пици на място — вземете цяла или само парче. Свежи продукти, домашно тесто и автентичен италиански вкус.',
     image: '/images/pizza-cyala-ili-parche.png',
     aspectRatio: '900 / 503',
@@ -112,10 +114,17 @@ const ModernHero = () => {
                         <p className="hero-kicker editorial-kicker">{slide.kicker}</p>
                         <div className="editorial-rule hero-editorial-rule" aria-hidden="true" />
 
-                        <h1 className="hero-title">
-                          {slide.title}
-                          <span className="hero-brand">{slide.brand}</span>
-                        </h1>
+                        {slide.heading === 'h1' ? (
+                          <h1 className="hero-title">
+                            {slide.title}
+                            <span className="hero-brand">{slide.brand}</span>
+                          </h1>
+                        ) : (
+                          <h2 className="hero-title">
+                            {slide.title}
+                            <span className="hero-brand">{slide.brand}</span>
+                          </h2>
+                        )}
 
                         <p className="hero-lead editorial-lead">{slide.lead}</p>
 
@@ -221,6 +230,7 @@ const ModernHero = () => {
           font-size: clamp(2.2rem, 4vw, 3.2rem);
           font-weight: 700;
           line-height: 1.1;
+          margin-top: 0;
           margin-bottom: 20px;
         }
         .hero-title span {

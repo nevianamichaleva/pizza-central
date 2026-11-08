@@ -1,6 +1,7 @@
 import MenuSection from '@/components/MenuSection';
 import { get, ref } from 'firebase/database';
 import { notFound } from 'next/navigation';
+import { documentTitle } from '../../../../lib/documentTitle';
 import { rtdb } from '../../../../lib/firebase';
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg';
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }) {
   
   if (!slug) {
     return {
-      title: 'Категория не намерена | Ресторант-пицария Централ Добрич',
+      title: 'Категория не намерена',
     };
   }
 
@@ -45,25 +46,26 @@ export async function generateMetadata({ params }) {
 
   if (!category) {
     return {
-      title: 'Категория не намерена | Ресторант-пицария Централ Добрич',
+      title: 'Категория не намерена',
     };
   }
 
   const categoryName = category.name.charAt(0).toUpperCase() + category.name.slice(1);
   
   // Use custom SEO fields if available, otherwise generate defaults
-  const seoTitle = category.seoTitle || `${categoryName} | Ресторант-пицария Централ Добрич`;
+  const seoTitle = category.seoTitle || categoryName;
+  const socialTitle = category.seoTitle || `${categoryName} | Ресторант-пицария Централ Добрич`;
   const seoDescription = category.seoDescription || `Разгледайте нашите ${categoryName.toLowerCase()} за доставка. Вкусна храна от Ресторант-пицария Централ в Добрич. Поръчайте онлайн!`;
   const url = `${baseUrl}/for-home/${slug}`;
 
   return {
-    title: seoTitle,
+    title: documentTitle(seoTitle),
     description: seoDescription,
     alternates: {
       canonical: url,
     },
     openGraph: {
-      title: seoTitle,
+      title: socialTitle,
       description: seoDescription,
       url,
       siteName: 'Ресторант-пицария Централ Добрич',
@@ -80,7 +82,7 @@ export async function generateMetadata({ params }) {
     },
     twitter: {
       card: 'summary_large_image',
-      title: seoTitle,
+      title: socialTitle,
       description: seoDescription,
       images: [`${baseUrl}/images/pizza-central-delivery.png`],
     },

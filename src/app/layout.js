@@ -29,10 +29,7 @@ export const metadata = {
     telephone: false,
   },
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg'),
-  alternates: {
-    canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pizza-central.bg',
-  },
-    openGraph: {
+  openGraph: {
     type: 'website',
     locale: 'bg_BG',
     url: '/',

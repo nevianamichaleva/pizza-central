@@ -4,6 +4,7 @@ import { get, ref } from 'firebase/database';
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { documentTitle } from '../../../../lib/documentTitle';
 import { rtdb } from '../../../../lib/firebase';
 import styles from "./page.module.css";
 
@@ -103,7 +104,7 @@ export async function generateMetadata({ params }) {
   
   if (!slug) {
     return {
-      title: 'Продукт не намерен | Ресторант-пицария Централ Добрич',
+      title: 'Продукт не намерен',
     };
   }
 
@@ -111,11 +112,11 @@ export async function generateMetadata({ params }) {
 
   if (!product) {
     return {
-      title: 'Продукт не намерен | Ресторант-пицария Централ Добрич',
+      title: 'Продукт не намерен',
     };
   }
 
-  const title = `${product.name} | Ресторант-пицария Централ Добрич`;
+  const title = documentTitle(product.name);
   const description = product.description 
     ? product.description.replace(/<[^>]*>/g, '').substring(0, 160)
     : product.ingredients 
