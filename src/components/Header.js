@@ -319,9 +319,6 @@ const Header = () => {
           order: isMobile ? 3 : 'unset'
         }}>
           <ul>
-            <li>
-              <MenuLink href="/" className={pathname === '/' ? 'active' : ''}> Начало </MenuLink>
-            </li>
                    {/* <li
               className="dropdown"
               onMouseEnter={handleMouseEnter}

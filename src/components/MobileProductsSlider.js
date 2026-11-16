@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 const SCROLL_STEP = 0.75; // fraction of visible width to scroll per click
 
@@ -11,9 +11,27 @@ const SCROLL_STEP = 0.75; // fraction of visible width to scroll per click
 export default function MobileProductsSlider({ children, scrollClassName = 'menu-mobile-products-slider', wrapperClassName }) {
   const scrollRef = useRef(null);
   const trackRef = useRef(null);
+  const didPosition = useRef(false);
   const [thumbStyle, setThumbStyle] = useState({ width: '100%', left: 0 });
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const revealNeighbors = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el || didPosition.current) return;
+    const cards = el.children;
+    if (cards.length < 2) return;
+    const target = cards.length >= 3 ? cards[1] : cards[0];
+    const sliderRect = el.getBoundingClientRect();
+    const cardRect = target.getBoundingClientRect();
+    if (cardRect.width < 20 || sliderRect.width < 20) return;
+    const delta = cardRect.left - sliderRect.left - (el.clientWidth - cardRect.width) / 2;
+    const previousBehavior = el.style.scrollBehavior;
+    el.style.scrollBehavior = 'auto';
+    el.scrollLeft = Math.max(0, delta);
+    el.style.scrollBehavior = previousBehavior;
+    didPosition.current = true;
+  }, []);
 
   const updateThumb = useCallback(() => {
     const el = scrollRef.current;
@@ -34,18 +52,27 @@ export default function MobileProductsSlider({ children, scrollClassName = 'menu
     setThumbStyle({ width: `${thumbWidthPercent}%`, left: `${leftPercent}%` });
   }, []);
 
+  useLayoutEffect(() => {
+    revealNeighbors();
+    updateThumb();
+  }, [children, revealNeighbors, updateThumb]);
+
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    updateThumb();
-    const ro = new ResizeObserver(updateThumb);
+    const onResize = () => {
+      revealNeighbors();
+      updateThumb();
+    };
+    onResize();
+    const ro = new ResizeObserver(onResize);
     ro.observe(el);
     el.addEventListener('scroll', updateThumb, { passive: true });
     return () => {
       ro.disconnect();
       el.removeEventListener('scroll', updateThumb);
     };
-  }, [updateThumb, children]);
+  }, [updateThumb, revealNeighbors, children]);
 
   const handleTrackClick = (e) => {
     const track = trackRef.current;
