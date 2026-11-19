@@ -28,30 +28,6 @@ const nextConfig = {
         destination: 'https://www.pizza-central.bg/:path*',
         permanent: true, // 301
       },
-      // Пренасочване на всичко от mozzarella.bg към pizza-central.bg
-      {
-        source: '/:path*',
-        has: [
-          {
-            type: 'host',
-            value: 'mozzarella.bg',
-          },
-        ],
-        destination: 'https://www.pizza-central.bg/:path*',
-        permanent: true,
-      },
-      // Пренасочване на всичко от www.mozzarella.bg към pizza-central.bg
-      {
-        source: '/:path*',
-        has: [
-          {
-            type: 'host',
-            value: 'www.mozzarella.bg',
-          },
-        ],
-        destination: 'https://www.pizza-central.bg/:path*',
-        permanent: true,
-      },
       // Пренасочване на /shop към /for-home
       {
         source: '/shop',
